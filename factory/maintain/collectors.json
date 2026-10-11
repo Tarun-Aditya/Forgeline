@@ -1,0 +1,23 @@
+{
+  "collectors": {
+    "factory_cycle_seconds": { "kind": "factory", "metric": "factory_cycle_seconds" },
+    "main_commits_per_day": {
+      "kind": "git", "what": "commits_per_day", "days": 1, "metric": "main_commits_per_day",
+      "min_interval_seconds": 3600
+    },
+    "main_reverts_per_day": {
+      "kind": "git", "what": "reverts_per_day", "days": 7, "metric": "main_reverts_per_day",
+      "min_interval_seconds": 3600
+    },
+    "p95_latency_ms": {
+      "kind": "http_json", "disabled": true,
+      "url": "https://example.com/metrics/summary", "path": "latency.p95",
+      "headers_env": { "Authorization": "METRICS_AUTH_HEADER" },
+      "min_interval_seconds": 300
+    },
+    "api_error_rate": {
+      "kind": "log_rate", "disabled": true,
+      "file": "logs/app.log", "total": "request", "match": " 5\\d\\d ", "window_minutes": 15, "min_total": 20
+    }
+  }
+}

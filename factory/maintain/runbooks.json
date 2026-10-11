@@ -1,0 +1,7 @@
+{
+  "rollback-last-deploy": {
+    "description": "Roll the service back to the previous release. Replace the command with your real, rehearsed rollback.",
+    "command": ["echo", "replace with your rollback command"],
+    "pre_approved": false
+  }
+}

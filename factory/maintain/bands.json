@@ -1,0 +1,37 @@
+{
+  "window": 30,
+  "min_points": 10,
+  "cooldown_hours": 24,
+  "tiers": {
+    "log": 1.0,
+    "diagnose": 2.0,
+    "act": 3.0
+  },
+  "dismissal_bump": 0.25,
+  "max_bump": 1.0,
+  "metrics": {
+    "factory_cycle_seconds": {
+      "file": "metrics/factory_cycle_seconds.jsonl",
+      "direction": "high",
+      "description": "Time from a job's first stage to merge. Filled by collect_factory.py."
+    },
+    "api_error_rate": {
+      "file": "metrics/api_error_rate.jsonl",
+      "direction": "high",
+      "min_abs_delta": 0.001,
+      "runbook": "rollback-last-deploy",
+      "description": "Share of requests that fail. Export it from your monitoring as JSON lines {t, v}."
+    },
+    "p95_latency_ms": {
+      "file": "metrics/p95_latency_ms.jsonl",
+      "direction": "high",
+      "description": "95th percentile response time in milliseconds."
+    },
+    "main_reverts_per_day": {
+      "file": "metrics/main_reverts_per_day.jsonl",
+      "direction": "high",
+      "min_abs_delta": 0.05,
+      "description": "Reverts on main per day over the last week. A rising rate means changes are landing broken."
+    }
+  }
+}

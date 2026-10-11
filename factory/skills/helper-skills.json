@@ -1,0 +1,20 @@
+{
+  "source": "https://github.com/mattpocock/skills.git",
+  "ref": "49dd158d1076134a641b33efb035946536778336",
+  "license": "MIT, Copyright (c) 2026 Matt Pocock",
+  "note": "Pinned to one commit so an upstream change cannot alter your agents without a review. To update: read the diff upstream, change ref, run install_helper_skills.py --apply --force.",
+  "skills": {
+    "tdd": "skills/engineering/tdd",
+    "diagnosing-bugs": "skills/engineering/diagnosing-bugs",
+    "codebase-design": "skills/engineering/codebase-design",
+    "code-review": "skills/engineering/code-review",
+    "grilling": "skills/productivity/grilling"
+  },
+  "used_by": {
+    "builder": ["tdd", "diagnosing-bugs (bug fixes)", "codebase-design"],
+    "planner": ["codebase-design"],
+    "reviewer-code": ["code-review"],
+    "pr-reviewer": ["code-review"],
+    "orchestrator (/factory accept)": ["grilling"]
+  }
+}
