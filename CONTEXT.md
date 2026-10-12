@@ -79,7 +79,7 @@ dashboard that shows split jobs.
 ## What is proven, and what is not
 
 Proven:
-- Offline evals: 353 checks pass with no model (Python 3.12+).
+- Offline evals: 357 checks pass with no model (Python 3.12+).
 - Live agent evals on Sonnet 5.5: 17 cases. The first run passed 16 (the one failure,
   `pr-reviewer`, passed 2 of 2 on re-run, so a flake). After all later prompt changes a full re-run
   passed 17 of 17.

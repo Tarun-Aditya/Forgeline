@@ -1357,6 +1357,10 @@ def eval_activity():
               rec({"hook_event_name": "UserPromptSubmit", "session_id": "s1", "prompt": "<agent-message from=\"a\">x"}) is None
               and rec({"hook_event_name": "PreToolUse", "session_id": "s1", "tool_name": "SubagentHandback"}) is None)
         check("activity: unknown hook events are ignored", rec({"hook_event_name": "Whatever", "session_id": "s1"}) is None)
+        ts = activity.now_iso()
+        check("activity: timestamps have exactly three fractional digits", re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z", ts) is not None, ts)
+        check("activity: parse_ts reads 3, 4 and 6 fractional digits (older logs hold 4)",
+              all(activity.parse_ts(f"2026-10-12T13:25:49.{f}Z").microsecond == int(f.ljust(6, "0")) for f in ("607", "6079", "607912")))
         e = rec({"hook_event_name": "PostToolUse", "session_id": "s1", "tool_name": "Bash",
                  "tool_input": {"command": "ls"}, "tool_response": {"stdout": "SECRET OUTPUT"}, "duration_ms": 12})
         check("activity: tool output is never logged", "SECRET OUTPUT" not in json.dumps(e) and e["ms"] == 12, str(e))
