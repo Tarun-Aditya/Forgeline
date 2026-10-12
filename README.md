@@ -68,6 +68,7 @@ factory/
   managed/install.py           installs the hooks as managed settings (admin step)
   backlog.md  dashboard.html   queue and visual board
   jobs/                        runtime state, one folder per job (gitignored)
+  activity/                    shared activity log written by hooks (gitignored)
   audit/                       committed copy of each job's record (made on the job branch)
 .github/workflows/factory-evals.yml   runs the evals on any change to the factory
 .gitignore.factory             lines to add to your .gitignore
