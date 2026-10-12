@@ -18,7 +18,7 @@ export const RUN_STYLE: Record<Run["status"], string> = {
 };
 
 export function RunsView() {
-  const { data } = usePoll<{ runs: Run[] }>("/api/runs", 3000);
+  const { data } = usePoll<{ runs: Run[] }>("/api/runs", 3000, "runs");
   const [open, setOpen] = useState<Run | null>(null);
   const runs = data?.runs ?? [];
   return (

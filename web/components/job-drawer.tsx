@@ -105,12 +105,12 @@ export function WorkingBanner() {
 export function JobDrawer({ job, repo, busy, working, note, question, onClose, onCommand, onAnswer }: Props) {
   const id = job?.id;
   const q = encodeURIComponent(repo);
-  const { data: list } = usePoll<{ files: string[] }>(id ? `/api/jobs/${id}?repo=${q}` : null, 3000);
+  const { data: list } = usePoll<{ files: string[] }>(id ? `/api/jobs/${id}?repo=${q}` : null, 3000, "jobs");
   const files = [...(list?.files ?? [])].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
   const [picked, setPicked] = useState<string | null>(null);
   const file = picked && picked !== ACTIVITY && files.includes(picked) ? picked : (files.at(-1) ?? null);
   const showActivity = picked === ACTIVITY;
-  const { data: doc } = usePoll<{ text: string }>(id && file && !showActivity ? `/api/jobs/${id}?repo=${q}&file=${encodeURIComponent(file)}` : null, 3000);
+  const { data: doc } = usePoll<{ text: string }>(id && file && !showActivity ? `/api/jobs/${id}?repo=${q}&file=${encodeURIComponent(file)}` : null, 3000, "jobs");
 
   const { locked, mine, send, reset } = useJobCommand(job, busy, working, onCommand, () => setPicked(ACTIVITY)); // show what the agent is doing right away
   useEffect(() => { setPicked(null); reset(); }, [id]);

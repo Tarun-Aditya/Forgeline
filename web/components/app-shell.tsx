@@ -9,7 +9,7 @@ import type { Options } from "@/components/run-panel";
 import { RunsPanel } from "@/components/runs-panel";
 import { RunsView, type Run } from "@/components/runs-view";
 import { Button } from "@/components/ui/button";
-import { usePoll } from "@/components/use-poll";
+import { ChangesProvider, usePoll } from "@/components/use-poll";
 import type { Job } from "@/lib/jobs";
 import type { McpServer } from "@/lib/mcp";
 import type { Question } from "@/lib/questions";
@@ -21,12 +21,20 @@ export function AppShell() {
   const repos = repoData?.repos ?? [];
   const [picked, setPicked] = useState<string | null>(null);
   const repo = picked ?? repos.find((r) => r.ready)?.path ?? repos[0]?.path ?? null;
+  return (
+    <ChangesProvider repo={repo}>
+      <Shell repo={repo} repos={repos} onPick={setPicked} />
+    </ChangesProvider>
+  );
+}
+
+function Shell({ repo, repos, onPick }: { repo: string | null; repos: Repo[]; onPick: (path: string) => void }) {
   const q = repo ? encodeURIComponent(repo) : null;
 
-  const { data: jobData, error: jobError } = usePoll<{ jobs: Job[]; stages: { key: string; label: string; who: string }[]; active: { jobKey: string | null }[]; questions: Record<string, Question> }>(q && `/api/jobs?repo=${q}`);
+  const { data: jobData, error: jobError } = usePoll<{ jobs: Job[]; stages: { key: string; label: string; who: string }[]; active: { jobKey: string | null }[]; questions: Record<string, Question> }>(q && `/api/jobs?repo=${q}`, 2000, ["jobs", "runs"]);
   const { data: mcpData } = usePoll<{ servers: McpServer[] }>(q && `/api/mcp?repo=${q}`, 60000);
 
-  const { data: activity, error: activityError } = usePoll<ActivityData>(q && `/api/activity?repo=${q}`, 2000);
+  const { data: activity, error: activityError } = usePoll<ActivityData>(q && `/api/activity?repo=${q}`, 2000, "activity");
   const [tab, setTab] = useState<"board" | "agents" | "activity" | "runs" | "metrics">("board");
   const [open, setOpen] = useState<string | null>(null);
   const [options, setOptions] = useState<Options>({ type: "feature", ticket: "", mcpOff: [] });
@@ -42,7 +50,7 @@ export function AppShell() {
   const { data: checkData } = usePoll<{ warnings: Warning[] }>(q && `/api/repos/check?repo=${q}`, 10000);
 
   // Runs are independent processes, so any number can go at once. This panel just follows one of them.
-  const { data: runData } = usePoll<{ runs: Run[] }>("/api/runs", 2000);
+  const { data: runData } = usePoll<{ runs: Run[] }>("/api/runs", 2000, "runs");
   const [selectedRun, setSelectedRun] = useState<string | null>(null);
   const [fresh, setFresh] = useState<Run | null>(null); // a run just started, before the next poll lists it
   const [posting, setPosting] = useState(false);
@@ -111,7 +119,7 @@ export function AppShell() {
     <div className="flex h-screen flex-col">
       <header className="flex items-center gap-3 border-b px-4 py-2">
         <h1 className="text-sm font-semibold tracking-tight">Forgeline</h1>
-        <select className="rounded-md border bg-background px-2 py-1 text-sm" value={repo ?? ""} onChange={(e) => setPicked(e.target.value)} aria-label="Repository">
+        <select className="rounded-md border bg-background px-2 py-1 text-sm" value={repo ?? ""} onChange={(e) => onPick(e.target.value)} aria-label="Repository">
           {repos.map((r) => (
             <option key={r.path} value={r.path} disabled={!r.ready}>{r.name}{r.ready ? "" : " (no factory)"}</option>
           ))}

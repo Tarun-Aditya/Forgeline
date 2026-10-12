@@ -42,7 +42,7 @@ export function AgentsView({ notes, starting, repo, jobs, stages, busy, running,
   }, [jobKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const job = picked && jobs.some((j) => j.id === picked) ? picked : (jobs.at(-1)?.id ?? null);
   useEffect(() => setAgent(null), [job]);
-  const { data, error } = usePoll<{ events: ActivityEvent[]; sessions: SessionState[] }>(job ? `/api/activity?repo=${encodeURIComponent(repo)}&job=${encodeURIComponent(job)}&limit=1000` : null, 2000);
+  const { data, error } = usePoll<{ events: ActivityEvent[]; sessions: SessionState[] }>(job ? `/api/activity?repo=${encodeURIComponent(repo)}&job=${encodeURIComponent(job)}&limit=1000` : null, 2000, "activity");
   const current = jobs.find((j) => j.id === job);
   const { locked, mine, send, reset } = useJobCommand(current, busy, !!job && running.has(job), onCommand);
   useEffect(reset, [job]);

@@ -60,7 +60,7 @@ function Table({ title, rows }: { title: string; rows: [string, Bucket][] }) {
 }
 
 export function MetricsView({ repo }: { repo: string }) {
-  const { data, error } = usePoll<Data>(`/api/metrics?repo=${encodeURIComponent(repo)}`, 5000);
+  const { data, error } = usePoll<Data>(`/api/metrics?repo=${encodeURIComponent(repo)}`, 5000, "runs");
   if (error) return <p className="p-6 text-sm text-destructive">{error}</p>;
   if (!data) return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
   const { factory: f, usage: u } = data;
