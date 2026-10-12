@@ -296,7 +296,7 @@ whose dependencies have not merged. The parent closes when every child has merge
 ## 14. Verifying the factory itself
 
 ```bash
-python3 factory/evals/run_evals.py      # 326 offline checks, no model; needs Python 3.12+
+python3 factory/evals/run_evals.py      # 353 offline checks, no model; needs Python 3.12+
 python3 factory/evals/agent_evals.py    # 17 live agent cases; about 15 minutes of subscription use
 ```
 
