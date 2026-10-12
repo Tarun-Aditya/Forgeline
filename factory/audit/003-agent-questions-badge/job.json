@@ -5,7 +5,7 @@
   "ticket": null,
   "branch": "factory/003-agent-questions-badge",
   "worktree": "/Users/tarunaditya/workspace/software-factory-plus-factory/003-agent-questions-badge",
-  "stage": "review",
+  "stage": "approve",
   "round": 3,
   "reviews": {
     "security": "PASS",
@@ -65,8 +65,12 @@
     {
       "stage": "review",
       "at": "2026-10-12T16:18:29Z"
+    },
+    {
+      "stage": "approve",
+      "at": "2026-10-12T16:20:53Z"
     }
   ],
-  "reviewed_sha": "470101f4e2a8829919fbc1f9c19a6ed272b5a3a8",
-  "reviewed_at": "2026-10-12T16:01:18Z"
+  "reviewed_sha": "954edd8f618a6a3a5b1e14d473668914254b4fc6",
+  "reviewed_at": "2026-10-12T16:20:53Z"
 }

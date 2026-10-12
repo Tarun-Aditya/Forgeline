@@ -1,41 +1,37 @@
 ESCALATE
 
 ## Why
-`policy_check.py` printed `ESCALATE-TRIGGER large change: 444 changed lines, cap is 400`, so this job cannot be auto-approved. Apart from that trigger it looks mergeable. All four round-2 reviews pass, the merge is clean, and I re-ran `npm test` (39/39). The change also adds a new way to start `claude` processes from user text: the answer is passed with `--resume <session>` under `--permission-mode auto`. A person should look at that before it merges.
+`policy_check.py` printed `ESCALATE-TRIGGER large change: 464 changed lines, cap is 400`, so I cannot auto-approve this job. Apart from that trigger it looks mergeable. All four round-3 reviews pass, `git merge-tree` is clean, and I re-ran `cd web && npm test` (40/40 pass). The part most likely to be wrong is the answer path, which starts `claude -p --resume <session>` under `--permission-mode auto` with text the user typed. I read `web/lib/runner.ts` and `web/app/api/runs/route.ts` to check it. The answer must name a job that `pendingQuestions` returns (`Object.hasOwn`). The session id comes from server-side run records. The prompt is the last argv item, after `--`, and `spawn` uses no shell. I found no problem there. A human approved this after round 2 (`/factory approve`). Round 3 was the requested merge of main and pushed the line count from 444 to 464, so the trigger still applies.
 
 ## Acceptance criteria
-1. "Which repo?" at intent, history unchanged, gives a question: met. Test in `web/tests/questions.test.ts`, which passed when I re-ran `npm test`.
-2. History moved, so no question: met (test passes).
-3. Mid-loop stage gives a question. Paused, merged or needs-human gives none: met (test passes). `questions.ts` has `DONE` and `MID_LOOP` sets that match the spec.
+1. Question at intent when history is unchanged: met. The test passes in my `npm test` run.
+2. Moved history gives no question: met (test passes).
+3. Mid-loop stage gives a question. Paused, merged or needs-human gives none: met (test passes). The `DONE` and `MID_LOOP` sets in `questions.ts` match the spec.
 4. Lost or failed runs give no question: met (test passes). The code checks `rec.lost || !rec.ok`.
 5. No question while a run is alive: met (test passes).
 6. The newest run wins: met (test passes). `mine[0]` is the newest because `listMeta` returns newest first.
-7. An answer resumes the session with the prompt verbatim: met. The test asserts `--resume s1` and that `use repo X` is the only item after `--`. I read `runner.ts`: the prompt is the last argv item, after `--`, and `spawn` runs without a shell.
-8. Refusals with no question or an already-running job: met. The test passes, and the code checks `Object.hasOwn`.
-9. `finalText` comes from the last result event: met (tests in `runs.test.ts` and `stream.test.ts`).
-10. Typecheck and build: met per build.md. Build passes only with `env -u NODE_ENV`. I did not re-run it.
-11. Python evals 354/354: met per build.md. I did not re-run them.
-12. Manual browser check: met per build.md, which gives timestamps, argv and meta. I did not repeat it. The UX reviewer notes the send path was checked only in the builder's browser run.
-13. The grep finds "needs your answer" in `web/README.md` and `USAGE.md`: met per build.md, and both files are in the diff.
+7. An answer resumes the session: met. The test passes, and I read `runner.ts`: `--resume` comes before the other flags and the prompt comes after `--`.
+8. Refusals (no question, or a run already alive): met (test passes).
+9. `finalText` comes from the last result event: met (tests pass).
+10. Typecheck and build: met per build.md and the round-3 code review (typecheck re-run there). I did not re-run them.
+11. Python evals 354/354: met per build.md. I did not re-run them. The merge touched only `web/` and docs.
+12. Manual browser check: met per build.md (round-3 run on the merged code, with argv and meta read back). The UX reviewer saw the badge and reply box but did not send an answer. The spec says the answer "appears in the chat panel". After main's change it opens as a run in the Runs panel instead. build.md documents this deviation and the reviewers accepted it.
+13. `grep "needs your answer"` finds a line in README and USAGE: met per build.md (README lines 37 and 65, USAGE line 201).
 
 ## Plan adherence
-The diff matches plan.md. There is one documented deviation: the prompt moved to the end of argv, after `--`, for every run, not only answers. That was the round-1 security fix, and build.md explains it. Plain chat prompts keep their text and only change position. No file outside the plan changed. The audit trail in `factory/audit/003-agent-questions-badge/` has the spec, plan, build, intent, job.json and both review rounds.
+The diff matches plan steps 1-16. There are two deviations, both explained in build.md and both caused by main replacing `useChat` with `POST /api/runs`. First, `web/app/api/runs/route.ts` is not in the plan but now also passes `answer` through. Second, the answer appears in the Runs panel, not as a chat bubble. The rework asked for a rebase, and the builder merged main instead so the audit commits are not rewritten. The result is the same.
 
 ## Policy check
-```
-ESCALATE-TRIGGER large change: 444 changed lines, cap is 400
-```
-No VIOLATION and no weakened-bar lines.
+ESCALATE-TRIGGER large change: 464 changed lines, cap is 400
+
+There is no VIOLATION line and no weakened-bar line.
 
 ## Merge danger
-- Door: two-way. The new meta and record fields are optional and additive, and there is no migration. A revert undoes the change, and the extra fields in `web/.data` stay readable.
-- Blast radius: module. Everything is in `web/`: the run launcher (argv order for every run), `/api/jobs` and `/api/chat`, and the board, drawer and Agents components.
-- Evidence: I ran `npm test` in the worktree: 39 pass, 0 fail. `git merge-tree --write-tree main factory/003-agent-questions-badge` gave a clean tree (424b7ac), with no conflicts. Before writing this I tried to disprove the change by looking for option injection through the answer text. In `runner.ts`, `"--", prompt` is the last argument and `spawn` has no shell, so an answer like `--dangerously-skip-permissions` is only ever the prompt. A test covers that case.
+- Door: two-way. The new meta and record fields are optional, and a revert removes the feature cleanly.
+- Blast radius: local. Only the web app (`web/`) and one USAGE.md section change. It adds a new way to start `claude` runs, behind the existing localhost and same-origin guard.
+- Evidence: `npm test` 40/40 pass in the worktree. `git merge-tree --write-tree main factory/003-agent-questions-badge` returned a tree with no conflicts. The worktree is clean.
 
 ## For the human
-Decide whether to merge despite the size trigger. The change is 444 lines against a cap of 400, and build.md says nothing was cut to get under it. Please look at these:
-- `web/lib/runner.ts` (launchRun): all runs now pass the prompt after `--`, and answer runs add `--resume <sessionId>`. Confirm you are fine with an answer from the web UI resuming a stopped orchestrator session under `--permission-mode auto`.
-- `web/lib/questions.ts`: the rule that decides when a job "needs your answer". The spec's Assumptions ask a human to confirm one reading: when several questions are pending, only the latest stopped run's full message is shown, instead of "all, oldest first".
-- `web/components/board.tsx`: the card was restructured so the open button and the question box are siblings. Any card whose job is running now shows WorkingBanner (noted in build.md under Plan adherence, Step 9).
-- `intent.md` still starts with `INTENT: DRAFT`, which is what intent-writer always writes. Acceptance shows only in `job.json` history (intent, then spec at 15:19:28Z). Confirm you accepted the intent.
-- Optional before merging: run `cd web && env -u NODE_ENV npm run build` and `python3 factory/evals/run_evals.py`. I did not re-run either.
+- Decide whether to accept a 464-line change over the 400-line cap. You approved the 444-line version after round 2. The extra 20 lines come from resolving the merge with main (`web/components/app-shell.tsx`, `board.tsx`, `job-drawer.tsx`, `agents-view.tsx`, `web/app/api/runs/route.ts`).
+- Confirm you accept that an answer opens as a run in the Runs panel, not as a chat bubble (spec AC 12 wording). See the "Plan adherence" section of build.md.
+- Optional: send a real answer once in the browser. Reviewers checked the send path only in the builder's fake-CLI run. Files: `web/lib/runner.ts`, `web/lib/questions.ts`, `web/components/question-box.tsx`.
