@@ -6,15 +6,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { JobActivity } from "@/components/activity-view";
+import { QuestionBadge, QuestionBox } from "@/components/question-box";
 import { usePoll } from "@/components/use-poll";
 import { cn } from "@/lib/utils";
 import type { Job } from "@/lib/jobs";
+import type { Question } from "@/lib/questions";
 
 const ACTIVITY = "activity";
 const FIRST = ["intent.md", "spec.md", "plan.md", "build.md", "decision.md"];
 const rank = (f: string) => (FIRST.includes(f) ? FIRST.indexOf(f) : f.startsWith("round-") ? 10 : 20);
 
-type Props = { job: Job | undefined; repo: string; busy: boolean; working: boolean; note?: string; onClose: () => void; onCommand: (text: string) => void };
+type Props = {
+  job: Job | undefined; repo: string; busy: boolean; working: boolean; note?: string; question?: Question;
+  onClose: () => void; onCommand: (text: string) => void; onAnswer: (jobId: string, text: string) => void;
+};
 
 /** Buttons that map to the exact /factory commands for the job's stage. */
 /** Stages where an agent should be working; if none is, the job needs a nudge. */
@@ -64,11 +69,12 @@ export function useJobCommand(job: Job | undefined, busy: boolean, working: bool
   useEffect(() => { if (sent && job?.stage !== sent) setSent(null); }, [job?.stage, sent]);
   useEffect(() => { if (sent && !working) { const t = setTimeout(() => setSent(null), 4000); return () => clearTimeout(t); } }, [sent, working]);
   const locked = busy || working || sent !== null;
-  const send = (text: string) => {
+  // `via` sends the text some other way (an answer to the job's question) under the same lock.
+  const send = (text: string, via?: (text: string) => void) => {
     if (locked || !job) return;
     setSent(job.stage);
     onSent?.();
-    onCommand(text);
+    (via ?? onCommand)(text);
   };
   // `mine`: this job itself is being worked on; `locked` also covers any other run from this tab.
   return { locked, mine: working || sent !== null, send, reset: () => setSent(null) };
@@ -96,7 +102,7 @@ export function WorkingBanner() {
   );
 }
 
-export function JobDrawer({ job, repo, busy, working, note, onClose, onCommand }: Props) {
+export function JobDrawer({ job, repo, busy, working, note, question, onClose, onCommand, onAnswer }: Props) {
   const id = job?.id;
   const q = encodeURIComponent(repo);
   const { data: list } = usePoll<{ files: string[] }>(id ? `/api/jobs/${id}?repo=${q}` : null, 3000);
@@ -115,12 +121,14 @@ export function JobDrawer({ job, repo, busy, working, note, onClose, onCommand }
         {job && (
           <>
             <DialogHeader>
-              <DialogTitle className="font-mono text-base">{job.id}</DialogTitle>
+              <DialogTitle className="flex items-center gap-2 font-mono text-base">{job.id}{question && !working && <QuestionBadge />}</DialogTitle>
               <DialogDescription>{job.feature}</DialogDescription>
               <p className="font-mono text-xs text-muted-foreground">{job.branch} · {job.stage} · round {job.round}</p>
             </DialogHeader>
-            {mine ? <WorkingBanner /> : job.stage !== "merged" && <LastMessage text={note} />}
+            {/* A pending question shows its own text below, so the closing message is not repeated. */}
+            {mine ? <WorkingBanner /> : job.stage !== "merged" && !question && <LastMessage text={note} />}
             <Actions job={job} busy={locked} stuck={isStuck(job, working)} onCommand={send} />
+            {question && !working && !mine && <QuestionBox question={question} locked={locked} onSend={(t) => send(t, (x) => onAnswer(job.id, x))} />}
             <div className="flex min-h-0 flex-1 gap-3">
               <nav className="w-52 shrink-0 space-y-1 overflow-y-auto text-sm">
                 <button onClick={() => setPicked(ACTIVITY)} className={cn("block w-full truncate rounded px-2 py-1 text-left hover:bg-accent", showActivity && "bg-accent")}>

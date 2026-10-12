@@ -27,13 +27,14 @@ export function GET() {
 /** Start a run and return its id at once. Follow it with the stream route; any number can run together. */
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as { repo?: string; text?: string; type?: "feature" | "bugfix"; ticket?: string; mcp?: string[] };
+    const body = (await req.json()) as { repo?: string; text?: string; type?: "feature" | "bugfix"; ticket?: string; mcp?: string[]; answer?: string };
     const runId = launchRun({
       repo: resolveRepo(body.repo),
       text: body.text ?? "",
       type: body.type,
       ticket: body.ticket,
       mcp: Array.isArray(body.mcp) ? body.mcp : undefined,
+      answer: typeof body.answer === "string" ? body.answer : undefined,
     });
     return json({ runId });
   } catch (e) {

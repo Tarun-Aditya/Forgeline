@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AgentsView } from "@/components/agents-view";
 import { ActivityView, type ActivityData } from "@/components/activity-view";
 import { Board } from "@/components/board";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { usePoll } from "@/components/use-poll";
 import type { Job } from "@/lib/jobs";
 import type { McpServer } from "@/lib/mcp";
+import type { Question } from "@/lib/questions";
 import type { Repo } from "@/lib/repos";
 
 export function AppShell() {
@@ -21,7 +22,7 @@ export function AppShell() {
   const repo = picked ?? repos.find((r) => r.ready)?.path ?? repos[0]?.path ?? null;
   const q = repo ? encodeURIComponent(repo) : null;
 
-  const { data: jobData, error: jobError } = usePoll<{ jobs: Job[]; stages: { key: string; label: string; who: string }[]; active: { jobKey: string | null }[] }>(q && `/api/jobs?repo=${q}`);
+  const { data: jobData, error: jobError } = usePoll<{ jobs: Job[]; stages: { key: string; label: string; who: string }[]; active: { jobKey: string | null }[]; questions: Record<string, Question> }>(q && `/api/jobs?repo=${q}`);
   const { data: mcpData } = usePoll<{ servers: McpServer[] }>(q && `/api/mcp?repo=${q}`, 60000);
 
   const { data: activity, error: activityError } = usePoll<ActivityData>(q && `/api/activity?repo=${q}`, 2000);
@@ -30,7 +31,12 @@ export function AppShell() {
   const [options, setOptions] = useState<Options>({ type: "feature", ticket: "", mcpOff: [] });
 
   const servers = mcpData?.servers ?? [];
+  const mcp = useMemo(
+    () => (options.mcpOff.length ? servers.map((s) => s.name).filter((n) => !options.mcpOff.includes(n)) : undefined),
+    [options.mcpOff, servers],
+  );
   const jobs = jobData?.jobs ?? [];
+  const questions = jobData?.questions ?? {};
 
   // Runs are independent processes, so any number can go at once. This panel just follows one of them.
   const { data: runData } = usePoll<{ runs: Run[] }>("/api/runs", 2000);
@@ -42,21 +48,21 @@ export function AppShell() {
   const runs = fresh && !polled.some((r) => r.runId === fresh.runId) ? [fresh, ...polled] : polled;
   useEffect(() => { if (fresh && polled.some((r) => r.runId === fresh.runId)) setFresh(null); }, [fresh, polled]);
 
-  const submit = useCallback(
-    async (text: string) => {
+  // Starts a run and follows it in the panel. `prompt` and `jobIds` fill the panel's row until the next poll lists it.
+  const start = useCallback(
+    async (payload: { text: string; type?: Options["type"]; ticket?: string; answer?: string }, prompt: string, jobIds: string[]) => {
       if (!repo) return;
       setPosting(true);
       setSubmitError(null);
       try {
-        const mcp = options.mcpOff.length ? servers.map((s) => s.name).filter((n) => !options.mcpOff.includes(n)) : undefined;
         const res = await fetch("/api/runs", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ repo, text, type: options.type, ticket: options.ticket.trim() || undefined, mcp }),
+          body: JSON.stringify({ repo, ...payload, mcp }),
         });
         const body = await res.json();
         if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
-        setFresh({ runId: body.runId, repo, prompt: text.trim().startsWith("/factory") ? text.trim() : `/factory ${text.trim()}`, startedAt: new Date().toISOString(), status: "running", jobIds: [] });
+        setFresh({ runId: body.runId, repo, prompt, startedAt: new Date().toISOString(), status: "running", jobIds });
         setSelectedRun(body.runId);
       } catch (e) {
         setSubmitError(e instanceof Error ? e.message : "Could not start the run.");
@@ -64,8 +70,17 @@ export function AppShell() {
         setPosting(false);
       }
     },
-    [repo, options, servers],
+    [repo, mcp],
   );
+  const submit = useCallback(
+    (text: string) => {
+      const prompt = text.trim().startsWith("/factory") ? text.trim() : `/factory ${text.trim()}`;
+      return start({ text, type: options.type, ticket: options.ticket.trim() || undefined }, prompt, []);
+    },
+    [start, options],
+  );
+  // An answer continues the session that stopped on the job, so no new job card is expected.
+  const answer = useCallback((jobId: string, text: string) => start({ text, answer: jobId }, text.trim(), [jobId]), [start]);
   const stop = useCallback((id: string) => { fetch(`/api/runs/${id}/stop`, { method: "POST" }); }, []);
 
   // The latest finished run's closing message per job, so a refused merge or a question shows on the card.
@@ -85,7 +100,7 @@ export function AppShell() {
   const trouble = new Map<string, "stalled" | "crashed">(
     sessions.flatMap((s) => (s.job && (s.state === "stalled" || s.state === "crashed") ? [[s.job, s.state] as [string, "stalled" | "crashed"]] : [])),
   );
-  const needMe = jobs.filter((j) => j.stage === "spec-approval" || j.stage === "needs-human").length;
+  const needMe = jobs.filter((j) => j.stage === "spec-approval" || j.stage === "needs-human" || (questions[j.id] && !running.has(j.id))).length;
 
   return (
     <div className="flex h-screen flex-col">
@@ -114,9 +129,9 @@ export function AppShell() {
           {!repo ? (
             <p className="text-sm text-muted-foreground">No repository with the factory installed. Set FORGELINE_REPOS to a path list.</p>
           ) : tab === "board" ? (
-            <Board starting={starting} jobs={jobs} stages={jobData?.stages ?? []} running={running} trouble={trouble} onOpen={setOpen} />
+            <Board starting={starting} jobs={jobs} stages={jobData?.stages ?? []} running={running} trouble={trouble} questions={questions} busy={posting} onOpen={setOpen} onAnswer={answer} />
           ) : tab === "agents" ? (
-            <AgentsView notes={notes} starting={starting} repo={repo} jobs={jobs} stages={jobData?.stages ?? []} busy={posting} running={running} trouble={trouble} onCommand={submit} onOpen={setOpen} />
+            <AgentsView notes={notes} starting={starting} repo={repo} jobs={jobs} stages={jobData?.stages ?? []} busy={posting} running={running} trouble={trouble} questions={questions} onCommand={submit} onOpen={setOpen} onAnswer={answer} />
           ) : tab === "activity" ? (
             <ActivityView data={activity} error={activityError} />
           ) : tab === "runs" ? (
@@ -129,7 +144,7 @@ export function AppShell() {
           <RunsPanel runs={runs} selected={selectedRun} onSelect={setSelectedRun} error={submitError} posting={posting} servers={servers} options={options} onOptions={setOptions} onSubmit={submit} onStop={stop} />
         </aside>
       </div>
-      {repo && <JobDrawer job={jobs.find((j) => j.id === open)} repo={repo} busy={posting} working={!!open && running.has(open)} note={open ? notes.get(open) : undefined} onClose={() => setOpen(null)} onCommand={submit} />}
+      {repo && <JobDrawer job={jobs.find((j) => j.id === open)} repo={repo} busy={posting} working={!!open && running.has(open)} note={open ? notes.get(open) : undefined} question={open ? questions[open] : undefined} onClose={() => setOpen(null)} onCommand={submit} onAnswer={answer} />}
     </div>
   );
 }

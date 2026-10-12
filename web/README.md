@@ -33,7 +33,10 @@ Needs Node 22+ and the `claude` CLI logged in. It binds to `127.0.0.1` only.
   it is still running. This works after a page refresh or a web server restart.
 - **Board**: the factory's stages as columns, read from `factory/jobs/*/job.json` every 2s.
   Click a card to read its markdown files. At the human gates the dialog has the buttons
-  for `approve-spec`, `respec`, `approve`, `rework`, `accept` and `resume`.
+  for `approve-spec`, `respec`, `approve`, `rework`, `accept` and `resume`. A card whose
+  agent stopped to ask something shows a "needs your answer" badge, the agent's last message
+  and a reply box (also in the job dialog and the Agents view); the answer resumes that same
+  session with `claude -p "<answer>" --resume <session-id>` and opens in the Runs panel.
 - **Repo picker**: repos listed in `FORGELINE_REPOS` (path-separated), or `web/.data/repos.json`,
   or this repo by default. A repo needs `factory/policy.json` and `.claude/agents/`.
 - **MCP servers**: names from your existing Claude config (`~/.claude.json`, `.mcp.json`)
@@ -59,6 +62,10 @@ Needs Node 22+ and the `claude` CLI logged in. It binds to `127.0.0.1` only.
   next request the server settles runs that ended meanwhile. A process that vanished without
   a result is recorded as **lost**; continue its job with `/factory resume <job-id>`.
 - One run per job at a time; a second command for the same job is refused.
+- A job "needs your answer" when the latest web run on it ended with a result and either left
+  the job mid-loop (`spec`, `plan`, `build`, `review`, `approve`) or was a job command that did
+  not move it. Only runs started here are covered. There is no dismiss; a newer run on the job
+  clears it. An answer run's prompt in Runs is the answer text.
 - The streamed run log and cost exist only for runs started here. Jobs driven from a terminal,
   the desktop app or VS Code still appear on the board and in Activity, through their files
   and the hook-written log (see USAGE.md 7a).

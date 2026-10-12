@@ -197,6 +197,9 @@ Limits: it shows what agents do, not the model's streamed text, and each hook ca
 reads the activity log (7a) and reports cost and token usage. Runs are detached processes, so
 closing the browser or crashing the web server does not stop a job. It launches the same `claude -p "/factory ..."` commands;
 see `web/README.md`. It is not copied into other repos.
+When a web-started run stops to ask something (it ends with the job mid-loop, or a job command
+did not move the job), the job card shows a "needs your answer" badge and a reply box that
+resumes the same session; runs started in a terminal, the desktop app or VS Code are not covered.
 
 ## 8. Policy: `factory/policy.json`
 
