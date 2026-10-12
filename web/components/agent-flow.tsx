@@ -49,7 +49,7 @@ const edgePath = (a: Role, b: Role) => {
 };
 
 /** Agents as role icons. The one working glows and shows its current action; hand-offs travel along the lines. */
-export function AgentFlow({ view, events, jobKey, selected, onSelect }: { view: Lanes; events: AgentEvent[]; jobKey: string; selected: string | null; onSelect: (a: string) => void }) {
+export function AgentFlow({ view, events, jobKey, selected, onSelect, handoffs = {} }: { view: Lanes; events: AgentEvent[]; jobKey: string; selected: string | null; onSelect: (a: string) => void; handoffs?: Record<string, string> }) {
   const live = view.lanes.some((l) => l.spans.some((s) => s.open));
   const [t, setT] = useState<number>(view.t1);
   const [playing, setPlaying] = useState(true);
@@ -95,6 +95,26 @@ export function AgentFlow({ view, events, jobKey, selected, onSelect }: { view: 
   const roles = new Map(present.map((a) => [a, place(a, Math.max(extras.indexOf(a), 0))]));
   const orch = roles.get("orchestrator");
   const startedAt = (a: string) => view.lanes.find((l) => l.agent === a)?.spans[0]?.start ?? Infinity;
+
+  const REVIEWERS = ["reviewer-security", "reviewer-ux", "reviewer-ui", "reviewer-code"];
+  /** Where each hand-off label goes: the middle of its line, or just right of the builder for the review fan. */
+  function labelSpots() {
+    const spots: { key: string; text: string; x: number; y: number }[] = [];
+    for (const [key, text] of Object.entries(handoffs)) {
+      if (key === "builder>reviewers") {
+        const first = REVIEWERS.filter((a) => roles.has(a)).map(startedAt);
+        const b = roles.get("builder");
+        if (b && first.length && at >= Math.min(...first)) spots.push({ key, text, x: b.x, y: b.y - 66 });
+        continue;
+      }
+      const [from, to] = key.split(">");
+      const a = roles.get(from);
+      const b = roles.get(to);
+      if (!a || !b || at < startedAt(to)) continue;
+      spots.push({ key, text, x: from.startsWith("reviewer") ? a.x + (b.x - a.x) * 0.5 : (a.x + b.x) / 2, y: from.startsWith("reviewer") ? a.y + (b.y - a.y) * 0.5 : a.y - 44 });
+    }
+    return spots;
+  }
 
   return (
     <div className="space-y-3">
@@ -143,6 +163,18 @@ export function AgentFlow({ view, events, jobKey, selected, onSelect }: { view: 
             })}
           </svg>
 
+          {/* what each agent passed on, shown once the next agent has started */}
+          {labelSpots().map(({ key, text, x, y }) => (
+            <span
+              key={key}
+              className="pointer-events-none absolute z-10 max-w-[150px] -translate-x-1/2 -translate-y-1/2 truncate rounded-full border bg-card px-2 py-0.5 text-[10px] text-muted-foreground shadow-sm"
+              style={{ left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%` }}
+              title={text}
+            >
+              {text}
+            </span>
+          ))}
+
           {present.map((a) => {
             const r = roles.get(a)!;
             const s = now.get(a)!;
@@ -170,6 +202,7 @@ export function AgentFlow({ view, events, jobKey, selected, onSelect }: { view: 
                   {s.status === "done" && <span className="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full bg-ok text-background"><Check className="size-3" /></span>}
                 </span>
                 <span className={cn("text-xs font-medium", s.status === "idle" && !big && "text-muted-foreground")}>{r.label}</span>
+                {s.status !== "active" && handoffs[a] && at >= startedAt(a) && <span className="max-w-full truncate text-[10px] text-muted-foreground">{handoffs[a]}</span>}
                 {s.status === "active" && s.doing && (
                   <span className="max-w-full truncate rounded-full border border-claude/40 bg-claude/10 px-2 py-0.5 text-[10px] text-claude" title={s.doing}>{short(s.doing)}</span>
                 )}
