@@ -7,9 +7,11 @@ import { JobDrawer } from "@/components/job-drawer";
 import { MetricsView } from "@/components/metrics-view";
 import type { Options } from "@/components/run-panel";
 import { RunsPanel } from "@/components/runs-panel";
+import { NotifyButton, useAttention } from "@/components/notify";
 import { RunsView, type Run } from "@/components/runs-view";
+import { ShortcutsHelp, useHelp, useShortcuts, type Tab } from "@/components/shortcuts";
 import { Button } from "@/components/ui/button";
-import { ChangesProvider, usePoll } from "@/components/use-poll";
+import { ChangesProvider, usePoll, usePushConnected } from "@/components/use-poll";
 import type { Job } from "@/lib/jobs";
 import type { McpServer } from "@/lib/mcp";
 import type { Question } from "@/lib/questions";
@@ -35,7 +37,9 @@ function Shell({ repo, repos, onPick }: { repo: string | null; repos: Repo[]; on
   const { data: mcpData } = usePoll<{ servers: McpServer[] }>(q && `/api/mcp?repo=${q}`, 60000);
 
   const { data: activity, error: activityError } = usePoll<ActivityData>(q && `/api/activity?repo=${q}`, 2000, "activity");
-  const [tab, setTab] = useState<"board" | "agents" | "activity" | "runs" | "metrics">("board");
+  const [tab, setTab] = useState<Tab>("board");
+  const help = useHelp();
+  useShortcuts(setTab, help.show);
   const [open, setOpen] = useState<string | null>(null);
   const [options, setOptions] = useState<Options>({ type: "feature", ticket: "", mcpOff: [] });
 
@@ -114,6 +118,8 @@ function Shell({ repo, repos, onPick }: { repo: string | null; repos: Repo[]; on
     sessions.flatMap((s) => (s.job && (s.state === "stalled" || s.state === "crashed") ? [[s.job, s.state] as [string, "stalled" | "crashed"]] : [])),
   );
   const needMe = jobs.filter((j) => j.stage === "spec-approval" || j.stage === "needs-human" || (questions[j.id] && !running.has(j.id))).length;
+  const pushed = usePushConnected();
+  const alerts = useAttention(repo, jobs, trouble, new Set(Object.keys(questions).filter((id) => !running.has(id))), needMe);
 
   return (
     <div className="flex h-screen flex-col">
@@ -135,7 +141,7 @@ function Shell({ repo, repos, onPick }: { repo: string | null; repos: Repo[]; on
           <Button size="sm" variant={tab === "runs" ? "secondary" : "ghost"} onClick={() => setTab("runs")}>Runs</Button>
           <Button size="sm" variant={tab === "metrics" ? "secondary" : "ghost"} onClick={() => setTab("metrics")}>Metrics</Button>
         </nav>
-        <span className="ml-auto text-xs text-muted-foreground">{jobError ? <span className="text-destructive">{jobError}</span> : "live · 2s"}</span>
+        <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground"><NotifyButton {...alerts} /><Button size="sm" variant="ghost" onClick={help.show} aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">?</Button>{jobError ? <span className="text-destructive">{jobError}</span> : pushed ? "● live" : "polling"}</span>
       </header>
       <div className="flex min-h-0 flex-1">
         <main className="min-w-0 flex-1 overflow-auto p-4">
@@ -157,6 +163,7 @@ function Shell({ repo, repos, onPick }: { repo: string | null; repos: Repo[]; on
           <RunsPanel warnings={checkData?.warnings ?? []} runs={runs} selected={selectedRun} onSelect={setSelectedRun} error={submitError} posting={posting} servers={servers} options={options} onOptions={setOptions} onSubmit={submit} onStop={stop} />
         </aside>
       </div>
+      <ShortcutsHelp open={help.open} onClose={help.hide} />
       {repo && <JobDrawer job={jobs.find((j) => j.id === open)} repo={repo} busy={posting} working={!!open && running.has(open)} note={open ? notes.get(open) : undefined} question={open ? questions[open] : undefined} onClose={() => setOpen(null)} onCommand={submit} onAnswer={answer} />}
     </div>
   );

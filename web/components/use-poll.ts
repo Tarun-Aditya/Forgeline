@@ -70,3 +70,6 @@ export function usePoll<T>(url: string | null, ms = 2000, topic?: Topic | Topic[
 
   return { data, error };
 }
+
+/** True while the push connection is up. */
+export const usePushConnected = () => useContext(Ctx).connected;
