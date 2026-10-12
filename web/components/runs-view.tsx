@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 export type Run = {
   runId: string; repo: string; prompt: string; startedAt: string; status: "running" | "ok" | "failed" | "lost";
-  jobIds: string[]; costUsd?: number; durationMs?: number; sessionId?: string;
+  jobIds: string[]; costUsd?: number; durationMs?: number; sessionId?: string; message?: string;
 };
 
 export const RUN_STYLE: Record<Run["status"], string> = {

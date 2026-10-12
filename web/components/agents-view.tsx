@@ -3,7 +3,7 @@ import { Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AgentFlow } from "@/components/agent-flow";
 import { ReviewChips } from "@/components/board";
-import { Actions, isStuck, useJobCommand, WorkingBanner } from "@/components/job-drawer";
+import { Actions, isStuck, LastMessage, useJobCommand, WorkingBanner } from "@/components/job-drawer";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,11 +18,11 @@ const LABEL = 150;
 
 /** How each agent worked on one job: who ran when, who ran together, and what each one did. */
 type Props = {
-  starting: string[]; repo: string; jobs: Job[]; stages: { key: string; label: string }[]; busy: boolean; running: Set<string>;
+  notes: Map<string, string>; starting: string[]; repo: string; jobs: Job[]; stages: { key: string; label: string }[]; busy: boolean; running: Set<string>;
   trouble: Map<string, "stalled" | "crashed">; onCommand: (text: string) => void; onOpen: (id: string) => void;
 };
 
-export function AgentsView({ starting, repo, jobs, stages, busy, running, trouble, onCommand, onOpen }: Props) {
+export function AgentsView({ notes, starting, repo, jobs, stages, busy, running, trouble, onCommand, onOpen }: Props) {
   const [picked, setPicked] = useState<string | null>(null);
   const [agent, setAgent] = useState<string | null>(null);
   const [mode, setMode] = useState<"flow" | "timeline">("flow");
@@ -82,7 +82,7 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
             <Button size="sm" variant="ghost" onClick={() => onOpen(current.id)}>Open files</Button>
           </div>
           <p className="text-sm">{current.feature}</p>
-          {mine && <WorkingBanner />}
+          {mine ? <WorkingBanner /> : current.stage !== "merged" && <LastMessage text={notes.get(current.id)} />}
           <Actions job={current} busy={locked} stuck={isStuck(current, running.has(current.id))} onCommand={send} />
         </section>
       )}

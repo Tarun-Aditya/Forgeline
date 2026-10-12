@@ -14,7 +14,7 @@ const ACTIVITY = "activity";
 const FIRST = ["intent.md", "spec.md", "plan.md", "build.md", "decision.md"];
 const rank = (f: string) => (FIRST.includes(f) ? FIRST.indexOf(f) : f.startsWith("round-") ? 10 : 20);
 
-type Props = { job: Job | undefined; repo: string; busy: boolean; working: boolean; onClose: () => void; onCommand: (text: string) => void };
+type Props = { job: Job | undefined; repo: string; busy: boolean; working: boolean; note?: string; onClose: () => void; onCommand: (text: string) => void };
 
 /** Buttons that map to the exact /factory commands for the job's stage. */
 /** Stages where an agent should be working; if none is, the job needs a nudge. */
@@ -45,6 +45,7 @@ export function Actions({ job, busy, stuck, onCommand }: Pick<Props, "busy" | "o
         <Button disabled={busy} onClick={() => run("approve")}>Approve merge</Button>
         <Input className="min-w-48 flex-1" placeholder="Note for the builder" value={note} onChange={(e) => setNote(e.target.value)} />
         <Button variant="secondary" disabled={busy || !noteOk} onClick={() => run("rework", true)}>Send back</Button>
+        <Button variant="outline" disabled={busy} title="Sends the job back to the builder to merge main into its branch, fix conflicts and run the reviews again" onClick={() => onCommand(`/factory rework ${job.id} rebase onto current main, resolve any conflicts, and run the review again`)}>Rebase onto main</Button>
       </div>
     );
   if (job.paused || stuck)
@@ -73,6 +74,20 @@ export function useJobCommand(job: Job | undefined, busy: boolean, working: bool
   return { locked, mine: working || sent !== null, send, reset: () => setSent(null) };
 }
 
+/** The orchestrator's closing message from the latest finished run on this job: why a merge was refused, a question, a summary. */
+export function LastMessage({ text }: { text?: string }) {
+  const [more, setMore] = useState(false);
+  if (!text) return null;
+  const long = text.length > 280 || text.split("\n").length > 4;
+  return (
+    <div className="rounded-md border bg-muted/50 px-3 py-2 text-sm">
+      <div className="mb-1 text-xs text-muted-foreground">Latest from the orchestrator</div>
+      <p className={cn("whitespace-pre-wrap", !more && "line-clamp-4")}>{text}</p>
+      {long && <button className="mt-1 text-xs text-muted-foreground underline" onClick={() => setMore((m) => !m)}>{more ? "Show less" : "Show more"}</button>}
+    </div>
+  );
+}
+
 export function WorkingBanner() {
   return (
     <p role="status" className="flex items-center gap-2 rounded-md border bg-muted px-3 py-2 text-sm">
@@ -81,7 +96,7 @@ export function WorkingBanner() {
   );
 }
 
-export function JobDrawer({ job, repo, busy, working, onClose, onCommand }: Props) {
+export function JobDrawer({ job, repo, busy, working, note, onClose, onCommand }: Props) {
   const id = job?.id;
   const q = encodeURIComponent(repo);
   const { data: list } = usePoll<{ files: string[] }>(id ? `/api/jobs/${id}?repo=${q}` : null, 3000);
@@ -104,7 +119,7 @@ export function JobDrawer({ job, repo, busy, working, onClose, onCommand }: Prop
               <DialogDescription>{job.feature}</DialogDescription>
               <p className="font-mono text-xs text-muted-foreground">{job.branch} · {job.stage} · round {job.round}</p>
             </DialogHeader>
-            {mine && <WorkingBanner />}
+            {mine ? <WorkingBanner /> : job.stage !== "merged" && <LastMessage text={note} />}
             <Actions job={job} busy={locked} stuck={isStuck(job, working)} onCommand={send} />
             <div className="flex min-h-0 flex-1 gap-3">
               <nav className="w-52 shrink-0 space-y-1 overflow-y-auto text-sm">

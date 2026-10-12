@@ -68,6 +68,10 @@ export function AppShell() {
   );
   const stop = useCallback((id: string) => { fetch(`/api/runs/${id}/stop`, { method: "POST" }); }, []);
 
+  // The latest finished run's closing message per job, so a refused merge or a question shows on the card.
+  const notes = new Map<string, string>();
+  for (const r of runs) if (r.status !== "running" && r.message) for (const id of r.jobIds) if (!notes.has(id)) notes.set(id, r.message);
+
   // A new task has no job card until its agent creates one; each such run shows a "starting" card.
   const NOT_A_NEW_JOB = /^\/factory\s+(accept|approve|approve-spec|respec|rework|resume|stop|next|metrics|review|doctor|init)\b/i;
   const starting = runs.filter((r) => r.status === "running" && r.jobIds.length === 0 && !NOT_A_NEW_JOB.test(r.prompt)).map((r) => r.prompt.replace(/^\/factory\s+/, ""));
@@ -112,7 +116,7 @@ export function AppShell() {
           ) : tab === "board" ? (
             <Board starting={starting} jobs={jobs} stages={jobData?.stages ?? []} running={running} trouble={trouble} onOpen={setOpen} />
           ) : tab === "agents" ? (
-            <AgentsView starting={starting} repo={repo} jobs={jobs} stages={jobData?.stages ?? []} busy={posting} running={running} trouble={trouble} onCommand={submit} onOpen={setOpen} />
+            <AgentsView notes={notes} starting={starting} repo={repo} jobs={jobs} stages={jobData?.stages ?? []} busy={posting} running={running} trouble={trouble} onCommand={submit} onOpen={setOpen} />
           ) : tab === "activity" ? (
             <ActivityView data={activity} error={activityError} />
           ) : tab === "runs" ? (
@@ -125,7 +129,7 @@ export function AppShell() {
           <RunsPanel runs={runs} selected={selectedRun} onSelect={setSelectedRun} error={submitError} posting={posting} servers={servers} options={options} onOptions={setOptions} onSubmit={submit} onStop={stop} />
         </aside>
       </div>
-      {repo && <JobDrawer job={jobs.find((j) => j.id === open)} repo={repo} busy={posting} working={!!open && running.has(open)} onClose={() => setOpen(null)} onCommand={submit} />}
+      {repo && <JobDrawer job={jobs.find((j) => j.id === open)} repo={repo} busy={posting} working={!!open && running.has(open)} note={open ? notes.get(open) : undefined} onClose={() => setOpen(null)} onCommand={submit} />}
     </div>
   );
 }

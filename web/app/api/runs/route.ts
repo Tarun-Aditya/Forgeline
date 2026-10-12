@@ -2,7 +2,7 @@ import { fail, json } from "@/lib/http";
 import { listJobs } from "@/lib/jobs";
 import { resolveRepo } from "@/lib/repos";
 import { launchRun } from "@/lib/runner";
-import { listMeta, statusOf } from "@/lib/runs";
+import { lastMessage, listMeta, statusOf } from "@/lib/runs";
 import { parseLog } from "@/lib/runs";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +18,7 @@ export function GET() {
       runId: m.runId, repo: m.repo, prompt: m.prompt, startedAt: m.startedAt, status,
       jobIds: record?.jobIds ?? [...new Set([...(m.key ? [m.key] : []), ...created])],
       costUsd: record?.costUsd, durationMs: record?.durationMs, sessionId,
+      message: status === "running" ? undefined : lastMessage(m.runId),
     };
   });
   return json({ runs });
