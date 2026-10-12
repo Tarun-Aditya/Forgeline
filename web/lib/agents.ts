@@ -8,6 +8,9 @@ export type Lanes = { t0: number; t1: number; lanes: Lane[] };
 /** Pipeline order; agents not listed go after these, in order of first appearance. */
 export const ORDER = ["orchestrator", "intent-writer", "spec-writer", "planner", "builder", "reviewer-security", "reviewer-ux", "reviewer-ui", "reviewer-code", "approver"];
 
+/** An agent with a start but no stop is "running" only while the log keeps moving; after this it is treated as dead. */
+export const STALE_MS = 120_000;
+
 export function buildLanes(events: AgentEvent[], now = Date.now()): Lanes {
   const evs = events.map((e) => ({ ...e, t: Date.parse(e.ts) })).filter((e) => !Number.isNaN(e.t)).sort((a, b) => a.t - b.t);
   const byAgent = new Map<string, Lane>();
@@ -28,7 +31,8 @@ export function buildLanes(events: AgentEvent[], now = Date.now()): Lanes {
     }
   }
   const last = evs.at(-1)?.t ?? now;
-  for (const [agent, starts] of openStart) for (const start of starts) byAgent.get(agent)!.spans.push({ start, end: Math.max(last, start), open: true });
+  const stale = now - last > STALE_MS; // nothing logged for a while: the agent was killed, not still working
+  for (const [agent, starts] of openStart) for (const start of starts) byAgent.get(agent)!.spans.push({ start, end: Math.max(last, start), open: !stale });
   for (const l of byAgent.values()) {
     // The orchestrator (and anything with no start/stop pair) is shown from its first to last event.
     if (l.spans.length === 0) l.spans.push({ start: l.first, end: l.last, open: false });

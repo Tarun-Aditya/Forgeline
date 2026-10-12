@@ -87,6 +87,9 @@ export function launchRun(input: StartInput): string {
   const target = key ? jobs.find((j) => j.id === key) : undefined; // the job this run acts on
   const env = { ...process.env };
   if (process.env.FORGELINE_ALLOW_API_KEY !== "1") delete env.ANTHROPIC_API_KEY; // use the subscription
+  // `claude -p` stops background agents 10 minutes after its last turn, which kills a long build.
+  // 0 waits for them; Stop in the UI still ends the run.
+  env.CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS ??= "0";
 
   const out = fs.openSync(eventLogPath(runId), "w");
   const err = fs.openSync(errLogPath(runId), "w");

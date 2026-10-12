@@ -1,40 +1,21 @@
 "use client";
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
-import { useMemo, useState } from "react";
-import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
-import { Messages } from "@/components/run-panel";
+import { useState } from "react";
+import { RunViewer } from "@/components/run-viewer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { usePoll } from "@/components/use-poll";
 import { cn } from "@/lib/utils";
 
-type Run = {
+export type Run = {
   runId: string; repo: string; prompt: string; startedAt: string; status: "running" | "ok" | "failed" | "lost";
-  jobIds: string[]; costUsd?: number; durationMs?: number; sessionId?: string;
+  jobIds: string[]; costUsd?: number; durationMs?: number; sessionId?: string; message?: string;
 };
 
-const STYLE: Record<Run["status"], string> = {
+export const RUN_STYLE: Record<Run["status"], string> = {
   running: "bg-ok/20 text-ok", ok: "bg-secondary text-secondary-foreground",
   failed: "bg-destructive/20 text-destructive", lost: "bg-destructive/20 text-destructive",
 };
-
-/** Replays a run's saved log and keeps following it while the process is alive. */
-function RunViewer({ runId }: { runId: string }) {
-  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
-  const { messages, status, error } = useChat({ id: runId, transport, resume: true });
-  return (
-    <Conversation className="min-h-0 flex-1 rounded-md border">
-      <ConversationContent>
-        <Messages messages={messages} busy={status === "streaming"} />
-        {error && <p className="text-sm text-destructive">{error.message}</p>}
-        {messages.length === 0 && !error && <p className="text-sm text-muted-foreground">Loading log…</p>}
-      </ConversationContent>
-      <ConversationScrollButton />
-    </Conversation>
-  );
-}
 
 export function RunsView() {
   const { data } = usePoll<{ runs: Run[] }>("/api/runs", 3000);
@@ -46,7 +27,7 @@ export function RunsView() {
       {runs.length === 0 && <p className="text-sm text-muted-foreground">No runs started from this app yet.</p>}
       {runs.map((r) => (
         <button key={r.runId} onClick={() => setOpen(r)} className="flex w-full items-center gap-3 rounded-lg border bg-card p-3 text-left text-sm hover:bg-accent">
-          <Badge className={cn("rounded-full", STYLE[r.status])}>{r.status}</Badge>
+          <Badge className={cn("rounded-full", RUN_STYLE[r.status])}>{r.status}</Badge>
           <span className="min-w-0 flex-1 truncate">{r.prompt}</span>
           <span className="font-mono text-xs text-muted-foreground">{r.jobIds.join(", ")}</span>
           <span className="text-xs text-muted-foreground">{r.costUsd != null ? `$${r.costUsd.toFixed(2)}` : ""}</span>

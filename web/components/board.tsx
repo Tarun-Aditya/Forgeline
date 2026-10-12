@@ -75,11 +75,11 @@ function JobCard({ job, running, busy, trouble, question, onOpen, onAnswer }: Ca
 }
 
 type BoardProps = {
-  starting?: string | null; jobs: Job[]; stages: Stage[]; running: Set<string>; trouble: Map<string, "stalled" | "crashed">;
+  starting?: string[]; jobs: Job[]; stages: Stage[]; running: Set<string>; trouble: Map<string, "stalled" | "crashed">;
   questions: Record<string, Question>; busy: boolean; onOpen: (id: string) => void; onAnswer: (jobId: string, text: string) => void;
 };
 
-export function Board({ starting, jobs, stages, running, trouble, questions, busy, onOpen, onAnswer }: BoardProps) {
+export function Board({ starting = [], jobs, stages, running, trouble, questions, busy, onOpen, onAnswer }: BoardProps) {
   const shown = stages.filter((s) => s.key !== "split" || jobs.some((j) => j.stage === "split"));
   const known = new Set(stages.map((s) => s.key));
   const unknown = jobs.filter((j) => !known.has(j.stage));
@@ -88,12 +88,12 @@ export function Board({ starting, jobs, stages, running, trouble, questions, bus
       {unknown.map((j) => (
         <div key={j.id} className="mb-2 rounded border border-destructive p-2 text-sm text-destructive">Job {j.id} has unknown stage “{j.stage}”.</div>
       ))}
-      {jobs.length === 0 && !starting && <p className="p-8 text-center text-sm text-muted-foreground">No jobs yet. Describe a task in the panel on the right to start one.</p>}
+      {jobs.length === 0 && starting.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No jobs yet. Describe a task in the panel on the right to start one.</p>}
       {/* Empty stages stay narrow so every stage, including Merged, fits on screen. */}
-      <div className="grid gap-3" style={{ gridTemplateColumns: shown.map((s) => (jobs.some((j) => j.stage === s.key) || (starting && s.key === shown[0]?.key) ? "minmax(210px, 2fr)" : "minmax(70px, 1fr)")).join(" ") }}>
+      <div className="grid gap-3" style={{ gridTemplateColumns: shown.map((s) => (jobs.some((j) => j.stage === s.key) || (starting.length > 0 && s.key === shown[0]?.key) ? "minmax(210px, 2fr)" : "minmax(70px, 1fr)")).join(" ") }}>
         {shown.map((s) => {
           const here = jobs.filter((j) => j.stage === s.key).reverse();
-          const empty = here.length === 0 && !(starting && s.key === shown[0]?.key);
+          const empty = here.length === 0 && !(starting.length > 0 && s.key === shown[0]?.key);
           return (
             <section key={s.key} className="min-w-0 space-y-2">
               <header className="flex items-baseline gap-2 px-1">
@@ -101,12 +101,12 @@ export function Board({ starting, jobs, stages, running, trouble, questions, bus
                 {!empty && <span className="truncate text-[11px] text-muted-foreground">{s.who}</span>}
                 <span className="ml-auto text-xs text-muted-foreground">{here.length || ""}</span>
               </header>
-              {starting && s.key === shown[0]?.key && (
-                <div role="status" className="space-y-1 rounded-lg border border-dashed border-claude/60 bg-claude/5 p-3 text-sm">
+              {s.key === shown[0]?.key && starting.map((text, i) => (
+                <div key={`starting-${i}`} role="status" className="space-y-1 rounded-lg border border-dashed border-claude/60 bg-claude/5 p-3 text-sm">
                   <div className="flex items-center gap-2 text-xs text-claude"><Spinner className="size-3.5" /> Starting a new job…</div>
-                  <p className="line-clamp-3">{starting}</p>
+                  <p className="line-clamp-3">{text}</p>
                 </div>
-              )}
+              ))}
               {here.map((j) => (
                 <JobCard key={j.id} job={j} running={running.has(j.id)} busy={busy} trouble={trouble.get(j.id)} question={questions[j.id]} onOpen={() => onOpen(j.id)} onAnswer={onAnswer} />
               ))}

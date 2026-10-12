@@ -102,6 +102,35 @@ export function parseLog(id: string) {
   return mapper;
 }
 
+const messageCache = new Map<string, { size: number; text: string }>();
+
+/** What the orchestrator said at the end of a run (the gate's reason, a question, the summary). Cached by file size. */
+export function lastMessage(id: string, max = 1500): string {
+  let size = 0;
+  try {
+    size = fs.statSync(eventLogPath(id)).size;
+  } catch {
+    return "";
+  }
+  const hit = messageCache.get(id);
+  if (hit && hit.size === size) return hit.text;
+  let text = "";
+  for (const line of fs.readFileSync(eventLogPath(id), "utf8").split("\n")) {
+    if (!line.includes('"result"') && !line.includes('"assistant"')) continue;
+    try {
+      const ev = JSON.parse(line);
+      if (ev.type === "result" && typeof ev.result === "string" && ev.result.trim()) text = ev.result;
+      else if (ev.type === "assistant")
+        for (const c of ev.message?.content ?? []) if (c.type === "text" && c.text?.trim()) text = c.text;
+    } catch {
+      /* a partial line while the run is still writing */
+    }
+  }
+  text = text.trim().slice(0, max);
+  messageCache.set(id, { size, text });
+  return text;
+}
+
 export const errorTail = (id: string) => {
   try {
     return fs.readFileSync(errLogPath(id), "utf8").slice(-4000).trim();

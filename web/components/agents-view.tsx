@@ -3,7 +3,7 @@ import { Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AgentFlow } from "@/components/agent-flow";
 import { ReviewChips } from "@/components/board";
-import { Actions, useJobCommand, WorkingBanner } from "@/components/job-drawer";
+import { Actions, isStuck, LastMessage, useJobCommand, WorkingBanner } from "@/components/job-drawer";
 import { QuestionBadge, QuestionBox } from "@/components/question-box";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
@@ -20,12 +20,12 @@ const LABEL = 150;
 
 /** How each agent worked on one job: who ran when, who ran together, and what each one did. */
 type Props = {
-  starting: string | null; repo: string; jobs: Job[]; stages: { key: string; label: string }[]; busy: boolean; running: Set<string>;
+  notes: Map<string, string>; starting: string[]; repo: string; jobs: Job[]; stages: { key: string; label: string }[]; busy: boolean; running: Set<string>;
   trouble: Map<string, "stalled" | "crashed">; questions: Record<string, Question>; onCommand: (text: string) => void; onOpen: (id: string) => void;
   onAnswer: (jobId: string, text: string) => void;
 };
 
-export function AgentsView({ starting, repo, jobs, stages, busy, running, trouble, questions, onCommand, onOpen, onAnswer }: Props) {
+export function AgentsView({ notes, starting, repo, jobs, stages, busy, running, trouble, questions, onCommand, onOpen, onAnswer }: Props) {
   const [picked, setPicked] = useState<string | null>(null);
   const [agent, setAgent] = useState<string | null>(null);
   const [mode, setMode] = useState<"flow" | "timeline">("flow");
@@ -49,7 +49,7 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
   const question = current && !running.has(current.id) ? questions[current.id] : undefined; // hidden while the job runs
   const view = useMemo(() => (data ? buildLanes(data.events) : null), [data]);
 
-  if (starting && jobs.length === 0) return <Starting text={starting} />;
+  if (starting.length > 0 && jobs.length === 0) return <div className="space-y-2">{starting.map((t, i) => <Starting key={i} text={t} />)}</div>;
   if (jobs.length === 0) return <p className="p-8 text-center text-sm text-muted-foreground">No jobs yet. Start one from the panel on the right and its agents will show up here.</p>;
   const span = view ? view.t1 - view.t0 : 1;
   const pct = (t: number) => `${((t - (view?.t0 ?? 0)) / span) * 100}%`;
@@ -59,7 +59,7 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
 
   return (
     <div className="space-y-4">
-      {starting && <Starting text={starting} />}
+      {starting.map((t, i) => <Starting key={i} text={t} />)}
       <div className="flex flex-wrap items-center gap-3">
         <select className="rounded-md border bg-background px-2 py-1 text-sm" value={job ?? ""} onChange={(e) => setPicked(e.target.value)} aria-label="Job">
           {[...jobs].reverse().map((j) => <option key={j.id} value={j.id}>{j.id} · {j.stage}</option>)}
@@ -87,8 +87,8 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
             <Button size="sm" variant="ghost" onClick={() => onOpen(current.id)}>Open files</Button>
           </div>
           <p className="text-sm">{current.feature}</p>
-          {mine && <WorkingBanner />}
-          <Actions job={current} busy={locked} onCommand={send} />
+          {mine ? <WorkingBanner /> : current.stage !== "merged" && !question && <LastMessage text={notes.get(current.id)} />}
+          <Actions job={current} busy={locked} stuck={isStuck(current, running.has(current.id))} onCommand={send} />
           {question && !mine && <QuestionBox question={question} locked={locked} onSend={(t) => send(t, (x) => onAnswer(current.id, x))} />}
         </section>
       )}
