@@ -8,16 +8,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { McpServer } from "@/lib/mcp";
+import type { Warning } from "@/lib/repocheck";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  runs: Run[]; selected: string | null; onSelect: (id: string) => void; error: string | null; posting: boolean;
+  warnings: Warning[]; runs: Run[]; selected: string | null; onSelect: (id: string) => void; error: string | null; posting: boolean;
   servers: McpServer[]; options: Options; onOptions: (o: Options) => void;
   onSubmit: (text: string) => void; onStop: (runId: string) => void;
 };
 
 /** The right-hand panel. Any number of runs can go at once: pick one to follow, type to start another. */
-export function RunsPanel({ runs, selected, onSelect, error, posting, servers, options, onOptions, onSubmit, onStop }: Props) {
+export function RunsPanel({ warnings, runs, selected, onSelect, error, posting, servers, options, onOptions, onSubmit, onStop }: Props) {
   const [text, setText] = useState("");
   const current = runs.find((r) => r.runId === selected);
   const running = runs.filter((r) => r.status === "running").length;
@@ -72,6 +73,15 @@ export function RunsPanel({ runs, selected, onSelect, error, posting, servers, o
 
       <div className="space-y-2 border-t p-3">
         {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+        {warnings.length > 0 && (
+          <ul className="space-y-1" aria-label="Repository notes">
+            {warnings.map((w) => (
+              <li key={w.code} className={cn("flex gap-1.5 text-[11px] leading-snug", w.level === "warn" ? "text-warn" : "text-muted-foreground")}>
+                <span aria-hidden>{w.level === "warn" ? "⚠" : "ℹ"}</span><span>{w.text}</span>
+              </li>
+            ))}
+          </ul>
+        )}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <Button size="sm" variant={options.type === "bugfix" ? "default" : "secondary"} onClick={() => onOptions({ ...options, type: options.type === "bugfix" ? "feature" : "bugfix" })}>
             {options.type === "bugfix" ? "Bug fix" : "Feature"}

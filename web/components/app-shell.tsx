@@ -14,6 +14,7 @@ import type { Job } from "@/lib/jobs";
 import type { McpServer } from "@/lib/mcp";
 import type { Question } from "@/lib/questions";
 import type { Repo } from "@/lib/repos";
+import type { Warning } from "@/lib/repocheck";
 
 export function AppShell() {
   const { data: repoData } = usePoll<{ repos: Repo[] }>("/api/repos", 30000);
@@ -37,6 +38,8 @@ export function AppShell() {
   );
   const jobs = jobData?.jobs ?? [];
   const questions = jobData?.questions ?? {};
+
+  const { data: checkData } = usePoll<{ warnings: Warning[] }>(q && `/api/repos/check?repo=${q}`, 10000);
 
   // Runs are independent processes, so any number can go at once. This panel just follows one of them.
   const { data: runData } = usePoll<{ runs: Run[] }>("/api/runs", 2000);
@@ -143,7 +146,7 @@ export function AppShell() {
           )}
         </main>
         <aside className="hidden w-[400px] shrink-0 border-l md:block">
-          <RunsPanel runs={runs} selected={selectedRun} onSelect={setSelectedRun} error={submitError} posting={posting} servers={servers} options={options} onOptions={setOptions} onSubmit={submit} onStop={stop} />
+          <RunsPanel warnings={checkData?.warnings ?? []} runs={runs} selected={selectedRun} onSelect={setSelectedRun} error={submitError} posting={posting} servers={servers} options={options} onOptions={setOptions} onSubmit={submit} onStop={stop} />
         </aside>
       </div>
       {repo && <JobDrawer job={jobs.find((j) => j.id === open)} repo={repo} busy={posting} working={!!open && running.has(open)} note={open ? notes.get(open) : undefined} question={open ? questions[open] : undefined} onClose={() => setOpen(null)} onCommand={submit} onAnswer={answer} />}
