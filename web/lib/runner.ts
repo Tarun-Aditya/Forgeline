@@ -10,6 +10,7 @@ import { createUIMessageStream, type UIMessageChunk } from "ai";
 import { listJobs } from "./jobs.ts";
 import { mcpArgs } from "./mcp.ts";
 import { DATA_DIR, ensureDir } from "./paths.ts";
+import { pendingQuestions } from "./questions.ts";
 import { alive, errorTail, errLogPath, eventLogPath, finalize, listMeta, readMeta, reconcile, writeMeta } from "./runs.ts";
 import { EventMapper, LineParser } from "./stream.ts";
 
@@ -19,6 +20,7 @@ export type StartInput = {
   type?: "feature" | "bugfix";
   ticket?: string;
   mcp?: string[];
+  answer?: string; // a job id: resume the session that stopped on it, with `text` as the reply
 };
 
 const VERBS = "accept|approve-spec|respec|approve|rework|resume|stop|next|metrics|review";
@@ -57,20 +59,30 @@ export function stopRun(runId: string): boolean {
 }
 
 export function launchRun(input: StartInput): string {
-  const prompt = buildPrompt(input);
-  const key = jobKey(prompt);
+  const prompt = input.answer ? input.text.trim() : buildPrompt(input);
+  if (!prompt) throw new Error("Nothing to run.");
+  const key = input.answer ?? jobKey(prompt);
   if (key && activeRuns().some((r) => r.jobKey === key && r.repo === input.repo)) {
     throw new Error(`Job ${key} already has a run in progress.`);
+  }
+  const jobs = listJobs(input.repo);
+  const resume: string[] = [];
+  if (input.answer) {
+    const questions = pendingQuestions(input.repo, jobs);
+    if (!Object.hasOwn(questions, input.answer)) throw new Error(`Job ${input.answer} is not waiting on an answer.`);
+    resume.push("--resume", questions[input.answer].sessionId);
   }
   const runId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
   const mcpFile = path.join(ensureDir(path.join(DATA_DIR, "tmp")), `mcp-${runId}.json`);
   const args = [
     "-p", prompt,
+    ...resume,
     "--output-format", "stream-json",
     "--verbose",
     "--permission-mode", process.env.FORGELINE_PERMISSION_MODE ?? "auto",
     ...mcpArgs(input.repo, input.mcp, mcpFile),
   ];
+  const target = key ? jobs.find((j) => j.id === key) : undefined; // the job this run acts on
   const env = { ...process.env };
   if (process.env.FORGELINE_ALLOW_API_KEY !== "1") delete env.ANTHROPIC_API_KEY; // use the subscription
 
@@ -90,8 +102,10 @@ export function launchRun(input: StartInput): string {
   writeMeta({
     runId, repo: input.repo, prompt, key, pid: child.pid,
     startedAt: new Date().toISOString(),
-    before: listJobs(input.repo).map((j) => j.id),
+    before: jobs.map((j) => j.id),
     mcpFile: fs.existsSync(mcpFile) ? mcpFile : undefined,
+    answers: input.answer,
+    at: target && { job: target.id, stage: target.stage, history: target.history?.length ?? 0 },
   });
   return runId;
 }

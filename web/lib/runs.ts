@@ -16,6 +16,8 @@ export type RunMeta = {
   startedAt: string;
   before: string[];
   mcpFile?: string;
+  answers?: string; // the job whose question this run answers
+  at?: { job: string; stage: string; history: number }; // that job when the run started
 };
 
 export type RunStatus = "running" | "ok" | "failed" | "lost";
@@ -29,6 +31,7 @@ export type RunRecord = {
   endedAt: string;
   ok: boolean;
   lost?: boolean;
+  finalText?: string;
 } & Partial<RunResult>;
 
 const dir = () => ensureDir(path.join(DATA_DIR, "runs"));
@@ -114,7 +117,7 @@ export function finalize(id: string): RunRecord | null {
   if (existing) return existing;
   const meta = readMeta(id);
   if (!meta || alive(meta.pid)) return null;
-  const { result } = parseLog(id);
+  const { result, finalText } = parseLog(id);
   const created = listJobs(meta.repo).map((j) => j.id).filter((j) => !meta.before.includes(j));
   const rec: RunRecord = {
     runId: id,
@@ -126,6 +129,7 @@ export function finalize(id: string): RunRecord | null {
     ok: !!result && !result.isError,
     lost: !result,
     ...result,
+    finalText: finalText?.slice(0, 8000),
   };
   saveRun(rec);
   if (meta.mcpFile) fs.rmSync(meta.mcpFile, { force: true });
