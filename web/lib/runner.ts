@@ -75,12 +75,14 @@ export function launchRun(input: StartInput): string {
   const runId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
   const mcpFile = path.join(ensureDir(path.join(DATA_DIR, "tmp")), `mcp-${runId}.json`);
   const args = [
-    "-p", prompt,
+    "-p",
     ...resume,
     "--output-format", "stream-json",
     "--verbose",
     "--permission-mode", process.env.FORGELINE_PERMISSION_MODE ?? "auto",
     ...mcpArgs(input.repo, input.mcp, mcpFile),
+    // The prompt goes last, after `--`, so text that starts with `-` is never read as an option.
+    "--", prompt,
   ];
   const target = key ? jobs.find((j) => j.id === key) : undefined; // the job this run acts on
   const env = { ...process.env };

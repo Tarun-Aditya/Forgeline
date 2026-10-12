@@ -123,13 +123,29 @@ test("an answer resumes the stopped session with the answer text as the prompt",
   process.env.CLAUDE_BIN = script("answer.sh", `printf '%s\\n' "$@" > '${argv}'; echo '{"type":"result","session_id":"s1","result":"ok"}'`);
   const id = runner.launchRun({ repo, text: "use repo X", answer: J });
   await drain(runner.followRun(id));
-  const args = fs.readFileSync(argv, "utf8").split("\n");
-  assert.equal(args[args.indexOf("-p") + 1], "use repo X");
+  const args = fs.readFileSync(argv, "utf8").trimEnd().split("\n");
+  assert.ok(args.includes("-p"));
+  assert.deepEqual(args.slice(args.indexOf("--") + 1), ["use repo X"]); // the prompt comes last, after --
   assert.equal(args[args.indexOf("--resume") + 1], "s1");
   assert.ok(!args.includes("/factory use repo X"));
   const m = runs.readMeta(id)!;
   assert.equal(m.key, J);
   assert.equal(m.answers, J);
+});
+
+test("an answer that looks like an option reaches the CLI only as the prompt, after --", async () => {
+  const repo = newRepo();
+  job(repo, "intent", 1);
+  run(repo, { history: 1 });
+  const argv = path.join(tmp, "argv-opt.txt");
+  process.env.CLAUDE_BIN = script("answer-opt.sh", `printf '%s\\n' "$@" > '${argv}'; echo '{"type":"result","session_id":"s1","result":"ok"}'`);
+  const id = runner.launchRun({ repo, text: "--dangerously-skip-permissions", answer: J });
+  await drain(runner.followRun(id));
+  const args = fs.readFileSync(argv, "utf8").trimEnd().split("\n");
+  const sep = args.indexOf("--");
+  assert.ok(sep > 0);
+  assert.equal(args.indexOf("--dangerously-skip-permissions"), sep + 1);
+  assert.equal(args.length, sep + 2);
 });
 
 test("an answer is refused when the job has no question or already has a run", () => {
