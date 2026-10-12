@@ -5,7 +5,7 @@
   "ticket": null,
   "branch": "factory/003-agent-questions-badge",
   "worktree": "/Users/tarunaditya/workspace/software-factory-plus-factory/003-agent-questions-badge",
-  "stage": "plan",
+  "stage": "build",
   "round": 0,
   "reviews": {
     "security": "pending",
@@ -33,6 +33,10 @@
     {
       "stage": "plan",
       "at": "2026-10-12T15:24:20Z"
+    },
+    {
+      "stage": "build",
+      "at": "2026-10-12T15:27:42Z"
     }
   ]
 }
