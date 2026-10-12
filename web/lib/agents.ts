@@ -1,5 +1,7 @@
 // Turns the shared activity log into lanes: one per agent, with the spans it was active.
 // Pure (no node imports) so the browser and the tests can both use it.
+import { describeAction } from "./tools.ts";
+
 export type AgentEvent = { ts: string; sid?: string; ev: string; agent: string; tool: string; text: string; job: string | null };
 export type Span = { start: number; end: number; open: boolean };
 export type Lane = { agent: string; spans: Span[]; tools: number; first: number; last: number };
@@ -59,7 +61,7 @@ export type AgentNow = { status: Status; doing: string | null; since: number | n
 export function stateAt(view: Lanes, events: AgentEvent[], t: number): Map<string, AgentNow> {
   const doing = new Map<string, string>(); // latest tool call per agent up to t
   for (const e of [...events].sort((a, b) => Date.parse(a.ts) - Date.parse(b.ts))) {
-    if (e.ev === "tool" && Date.parse(e.ts) <= t) doing.set(e.agent, e.text || e.tool);
+    if (e.ev === "tool" && Date.parse(e.ts) <= t) doing.set(e.agent, describeAction(e.tool, e.text));
   }
   const out = new Map<string, AgentNow>();
   for (const l of view.lanes) {

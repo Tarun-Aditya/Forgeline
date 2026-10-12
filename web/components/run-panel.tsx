@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { McpServer } from "@/lib/mcp";
 import type { RunResult } from "@/lib/stream";
+import { isRetry, retryNote } from "@/lib/tools";
 
 export type Options = { type: "feature" | "bugfix"; ticket: string; mcpOff: string[] };
 
@@ -36,6 +37,8 @@ function Part({ part, streaming }: { part: UIMessage["parts"][number]; streaming
         <ReasoningContent>{part.text}</ReasoningContent>
       </Reasoning>
     );
+  if (part.type === "dynamic-tool" && part.state === "output-error" && isRetry(part.errorText))
+    return <p className="text-xs text-muted-foreground">↻ {retryNote(part.errorText ?? "")}</p>; // the agent recovered by itself
   if (part.type === "dynamic-tool")
     return (
       <Tool>
