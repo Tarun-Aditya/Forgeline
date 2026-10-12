@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { usePoll } from "@/components/use-poll";
 import type { Job } from "@/lib/jobs";
 import type { McpServer } from "@/lib/mcp";
+import type { Question } from "@/lib/questions";
 import type { Repo } from "@/lib/repos";
 
 export function AppShell() {
@@ -22,7 +23,7 @@ export function AppShell() {
   const repo = picked ?? repos.find((r) => r.ready)?.path ?? repos[0]?.path ?? null;
   const q = repo ? encodeURIComponent(repo) : null;
 
-  const { data: jobData, error: jobError } = usePoll<{ jobs: Job[]; stages: { key: string; label: string; who: string }[]; active: { jobKey: string | null }[] }>(q && `/api/jobs?repo=${q}`);
+  const { data: jobData, error: jobError } = usePoll<{ jobs: Job[]; stages: { key: string; label: string; who: string }[]; active: { jobKey: string | null }[]; questions: Record<string, Question> }>(q && `/api/jobs?repo=${q}`);
   const { data: mcpData } = usePoll<{ servers: McpServer[] }>(q && `/api/mcp?repo=${q}`, 60000);
 
   const { data: activity, error: activityError } = usePoll<ActivityData>(q && `/api/activity?repo=${q}`, 2000);
@@ -32,6 +33,10 @@ export function AppShell() {
   const runId = useRef<string | null>(null);
 
   const servers = mcpData?.servers ?? [];
+  const mcp = useMemo(
+    () => (options.mcpOff.length ? servers.map((s) => s.name).filter((n) => !options.mcpOff.includes(n)) : undefined),
+    [options.mcpOff, servers],
+  );
   const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
   const { messages, sendMessage, status, error } = useChat({
     transport,
@@ -55,16 +60,24 @@ export function AppShell() {
         sawBusy.current = false;
         setStarting(text.trim());
       }
-      const mcp = options.mcpOff.length ? servers.map((s) => s.name).filter((n) => !options.mcpOff.includes(n)) : undefined;
       sendMessage({ text }, { body: { repo, type: options.type, ticket: options.ticket.trim() || undefined, mcp } });
     },
-    [repo, options, servers, sendMessage],
+    [repo, options, mcp, sendMessage],
+  );
+  // An answer continues the session that stopped on the job, so no new job card is expected.
+  const answer = useCallback(
+    (jobId: string, text: string) => {
+      if (!repo) return;
+      sendMessage({ text }, { body: { repo, answer: jobId, mcp } });
+    },
+    [repo, mcp, sendMessage],
   );
   const stop = useCallback(() => {
     if (runId.current) fetch(`/api/runs/${runId.current}/stop`, { method: "POST" });
   }, []);
 
   const jobs = jobData?.jobs ?? [];
+  const questions = jobData?.questions ?? {};
   jobCount.current = jobs.length;
   useEffect(() => {
     if (!starting) return;
@@ -81,7 +94,7 @@ export function AppShell() {
   const trouble = new Map<string, "stalled" | "crashed">(
     sessions.flatMap((s) => (s.job && (s.state === "stalled" || s.state === "crashed") ? [[s.job, s.state] as [string, "stalled" | "crashed"]] : [])),
   );
-  const needMe = jobs.filter((j) => j.stage === "spec-approval" || j.stage === "needs-human").length;
+  const needMe = jobs.filter((j) => j.stage === "spec-approval" || j.stage === "needs-human" || (questions[j.id] && !running.has(j.id))).length;
 
   return (
     <div className="flex h-screen flex-col">
@@ -110,9 +123,9 @@ export function AppShell() {
           {!repo ? (
             <p className="text-sm text-muted-foreground">No repository with the factory installed. Set FORGELINE_REPOS to a path list.</p>
           ) : tab === "board" ? (
-            <Board starting={starting} jobs={jobs} stages={jobData?.stages ?? []} running={running} trouble={trouble} onOpen={setOpen} />
+            <Board starting={starting} jobs={jobs} stages={jobData?.stages ?? []} running={running} trouble={trouble} questions={questions} busy={busy} onOpen={setOpen} onAnswer={answer} />
           ) : tab === "agents" ? (
-            <AgentsView starting={starting} repo={repo} jobs={jobs} stages={jobData?.stages ?? []} busy={busy} running={running} trouble={trouble} onCommand={submit} onOpen={setOpen} />
+            <AgentsView starting={starting} repo={repo} jobs={jobs} stages={jobData?.stages ?? []} busy={busy} running={running} trouble={trouble} questions={questions} onCommand={submit} onOpen={setOpen} onAnswer={answer} />
           ) : tab === "activity" ? (
             <ActivityView data={activity} error={activityError} />
           ) : tab === "runs" ? (
@@ -125,7 +138,7 @@ export function AppShell() {
           <RunPanel messages={messages} status={status} error={error} servers={servers} options={options} onOptions={setOptions} onSubmit={submit} onStop={stop} />
         </aside>
       </div>
-      {repo && <JobDrawer job={jobs.find((j) => j.id === open)} repo={repo} busy={busy} working={!!open && running.has(open)} onClose={() => setOpen(null)} onCommand={submit} />}
+      {repo && <JobDrawer job={jobs.find((j) => j.id === open)} repo={repo} busy={busy} working={!!open && running.has(open)} question={open ? questions[open] : undefined} onClose={() => setOpen(null)} onCommand={submit} onAnswer={answer} />}
     </div>
   );
 }

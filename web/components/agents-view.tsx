@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AgentFlow } from "@/components/agent-flow";
 import { ReviewChips } from "@/components/board";
 import { Actions, useJobCommand, WorkingBanner } from "@/components/job-drawer";
+import { QuestionBadge, QuestionBox } from "@/components/question-box";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { usePoll } from "@/components/use-poll";
 import { buildLanes, fmtDur } from "@/lib/agents";
 import type { ActivityEvent } from "@/lib/activity";
 import type { Job } from "@/lib/jobs";
+import type { Question } from "@/lib/questions";
 import { cn } from "@/lib/utils";
 
 const ROW = 44;
@@ -19,10 +21,11 @@ const LABEL = 150;
 /** How each agent worked on one job: who ran when, who ran together, and what each one did. */
 type Props = {
   starting: string | null; repo: string; jobs: Job[]; stages: { key: string; label: string }[]; busy: boolean; running: Set<string>;
-  trouble: Map<string, "stalled" | "crashed">; onCommand: (text: string) => void; onOpen: (id: string) => void;
+  trouble: Map<string, "stalled" | "crashed">; questions: Record<string, Question>; onCommand: (text: string) => void; onOpen: (id: string) => void;
+  onAnswer: (jobId: string, text: string) => void;
 };
 
-export function AgentsView({ starting, repo, jobs, stages, busy, running, trouble, onCommand, onOpen }: Props) {
+export function AgentsView({ starting, repo, jobs, stages, busy, running, trouble, questions, onCommand, onOpen, onAnswer }: Props) {
   const [picked, setPicked] = useState<string | null>(null);
   const [agent, setAgent] = useState<string | null>(null);
   const [mode, setMode] = useState<"flow" | "timeline">("flow");
@@ -43,6 +46,7 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
   const current = jobs.find((j) => j.id === job);
   const { locked, mine, send, reset } = useJobCommand(current, busy, !!job && running.has(job), onCommand);
   useEffect(reset, [job]);
+  const question = current && !running.has(current.id) ? questions[current.id] : undefined; // hidden while the job runs
   const view = useMemo(() => (data ? buildLanes(data.events) : null), [data]);
 
   if (starting && jobs.length === 0) return <Starting text={starting} />;
@@ -68,12 +72,13 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
         {view && view.lanes.length > 0 && <span className="text-xs text-muted-foreground">{view.lanes.length} agents · {fmtDur(span)}</span>}
       </div>
       {current && (
-        <section className={cn("space-y-2 rounded-lg border bg-card p-3", (current.stage === "spec-approval" || current.stage === "needs-human") && "border-call/60")}>
+        <section className={cn("space-y-2 rounded-lg border bg-card p-3", (current.stage === "spec-approval" || current.stage === "needs-human" || question) && "border-call/60")}>
           <div className="flex flex-wrap items-center gap-2 text-xs">
             {(mine || running.has(current.id)) && <span className="size-2 animate-pulse rounded-full bg-ok" aria-label="agent running" />}
             <span className="font-mono text-muted-foreground">{current.id}</span>
             <Badge variant="secondary">{stages.find((s) => s.key === current.stage)?.label ?? current.stage}</Badge>
             {(current.stage === "spec-approval" || current.stage === "needs-human") && <Badge className="bg-call text-white">your call</Badge>}
+            {question && <QuestionBadge />}
             {trouble.get(current.id) && <Badge className="bg-destructive text-white">{trouble.get(current.id)}</Badge>}
             <Badge variant="secondary">{current.type}</Badge>
             {current.ticket && <Badge variant="secondary">{current.ticket}</Badge>}
@@ -84,6 +89,7 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
           <p className="text-sm">{current.feature}</p>
           {mine && <WorkingBanner />}
           <Actions job={current} busy={locked} onCommand={send} />
+          {question && !mine && <QuestionBox question={question} locked={locked} onSend={(t) => send(t, (x) => onAnswer(current.id, x))} />}
         </section>
       )}
       {error && <p className="text-sm text-destructive">{error}</p>}
