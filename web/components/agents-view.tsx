@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { usePoll } from "@/components/use-poll";
 import { buildLanes, fmtDur } from "@/lib/agents";
-import type { ActivityEvent } from "@/lib/activity";
+import type { ActivityEvent, SessionState } from "@/lib/activity";
 import type { Job } from "@/lib/jobs";
 import type { Question } from "@/lib/questions";
 import { cn } from "@/lib/utils";
@@ -42,12 +42,18 @@ export function AgentsView({ notes, starting, repo, jobs, stages, busy, running,
   }, [jobKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const job = picked && jobs.some((j) => j.id === picked) ? picked : (jobs.at(-1)?.id ?? null);
   useEffect(() => setAgent(null), [job]);
-  const { data, error } = usePoll<{ events: ActivityEvent[] }>(job ? `/api/activity?repo=${encodeURIComponent(repo)}&job=${encodeURIComponent(job)}&limit=1000` : null, 2000);
+  const { data, error } = usePoll<{ events: ActivityEvent[]; sessions: SessionState[] }>(job ? `/api/activity?repo=${encodeURIComponent(repo)}&job=${encodeURIComponent(job)}&limit=1000` : null, 2000);
   const current = jobs.find((j) => j.id === job);
   const { locked, mine, send, reset } = useJobCommand(current, busy, !!job && running.has(job), onCommand);
   useEffect(reset, [job]);
   const question = current && !running.has(current.id) ? questions[current.id] : undefined; // hidden while the job runs
-  const view = useMemo(() => (data ? buildLanes(data.events) : null), [data]);
+  // Only agents in a session that is still running can be live; a merged job has nothing running.
+  const merged = current?.stage === "merged";
+  const view = useMemo(() => {
+    if (!data) return null;
+    const alive = new Set(merged ? [] : data.sessions.filter((s) => s.state === "running").map((s) => s.session));
+    return buildLanes(data.events, Date.now(), alive);
+  }, [data, merged]);
 
   if (starting.length > 0 && jobs.length === 0) return <div className="space-y-2">{starting.map((t, i) => <Starting key={i} text={t} />)}</div>;
   if (jobs.length === 0) return <p className="p-8 text-center text-sm text-muted-foreground">No jobs yet. Start one from the panel on the right and its agents will show up here.</p>;

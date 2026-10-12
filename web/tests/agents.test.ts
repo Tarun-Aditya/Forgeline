@@ -73,3 +73,23 @@ test("an agent that never stopped and went quiet is treated as dead, not live", 
   assert.equal(l.lanes[0].spans[0].open, false);
   assert.equal(stateAt(l, events, Date.parse("2026-01-01T00:09:00.000Z")).get("builder")?.status, "done");
 });
+
+test("an agent whose session is no longer running is not live even while others keep logging", () => {
+  const events = [
+    { ...ev("00.000", "subagent_start", "builder"), sid: "dead" },
+    { ...ev("02.000", "tool_done", "builder"), sid: "dead" },
+    { ...ev("09.000", "tool_done", "orchestrator"), sid: "other" },
+  ];
+  const now = Date.parse("2026-01-01T00:00:10.000Z");
+  assert.equal(buildLanes(events, now, new Set(["other"])).lanes.find((l) => l.agent === "builder")!.spans[0].open, false);
+  assert.equal(buildLanes(events, now, new Set(["dead"])).lanes.find((l) => l.agent === "builder")!.spans[0].open, true);
+  assert.equal(buildLanes(events, now, new Set()).lanes.find((l) => l.agent === "builder")!.spans[0].open, false);
+});
+
+test("handoffsAt returns one hand-off per agent even when it started many times", () => {
+  const events = ["01", "02", "03"].flatMap((n) => [ev(`${n}.000`, "subagent_start", "builder"), ev(`${n}.200`, "subagent_stop", "builder")]);
+  const view = buildLanes(events);
+  const h = handoffsAt(view, Date.parse("2026-01-01T00:00:03.500Z"), 5000);
+  assert.equal(h.length, 1);
+  assert.ok(Math.abs(h[0].progress - 0.1) < 0.01);
+});
