@@ -1,7 +1,8 @@
 "use client";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AgentsView } from "@/components/agents-view";
 import { ActivityView, type ActivityData } from "@/components/activity-view";
 import { Board } from "@/components/board";
 import { JobDrawer } from "@/components/job-drawer";
@@ -25,7 +26,7 @@ export function AppShell() {
   const { data: mcpData } = usePoll<{ servers: McpServer[] }>(q && `/api/mcp?repo=${q}`, 60000);
 
   const { data: activity, error: activityError } = usePoll<ActivityData>(q && `/api/activity?repo=${q}`, 2000);
-  const [tab, setTab] = useState<"board" | "activity" | "runs" | "metrics">("board");
+  const [tab, setTab] = useState<"board" | "agents" | "activity" | "runs" | "metrics">("board");
   const [open, setOpen] = useState<string | null>(null);
   const [options, setOptions] = useState<Options>({ type: "feature", ticket: "", mcpOff: [] });
   const runId = useRef<string | null>(null);
@@ -40,9 +41,20 @@ export function AppShell() {
   });
   const busy = status === "submitted" || status === "streaming";
 
+  // A new task has no job card until the agent creates one; show "starting" in the meantime.
+  const [starting, setStarting] = useState<string | null>(null);
+  const jobCount = useRef(0);
+  const before = useRef(0);
+  const sawBusy = useRef(false);
+
   const submit = useCallback(
     (text: string) => {
       if (!repo) return;
+      if (!/^\/factory\s+(accept|approve|approve-spec|respec|rework|resume|next|metrics|doctor|init)\b/i.test(text.trim())) {
+        before.current = jobCount.current;
+        sawBusy.current = false;
+        setStarting(text.trim());
+      }
       const mcp = options.mcpOff.length ? servers.map((s) => s.name).filter((n) => !options.mcpOff.includes(n)) : undefined;
       sendMessage({ text }, { body: { repo, type: options.type, ticket: options.ticket.trim() || undefined, mcp } });
     },
@@ -53,6 +65,13 @@ export function AppShell() {
   }, []);
 
   const jobs = jobData?.jobs ?? [];
+  jobCount.current = jobs.length;
+  useEffect(() => {
+    if (!starting) return;
+    if (jobs.length > before.current) setStarting(null); // the job card exists now
+    else if (busy) sawBusy.current = true;
+    else if (sawBusy.current) setStarting(null); // the run ended without creating a job
+  }, [starting, jobs.length, busy]);
   // "Running" comes from the shared activity log, so it is true for jobs driven from any surface.
   const sessions = activity?.sessions ?? [];
   const running = new Set([
@@ -77,6 +96,7 @@ export function AppShell() {
           <Button size="sm" variant={tab === "board" ? "secondary" : "ghost"} onClick={() => setTab("board")}>
             Board{needMe > 0 && <span className="ml-1.5 rounded-full bg-call px-1.5 text-[10px] text-white">{needMe}</span>}
           </Button>
+          <Button size="sm" variant={tab === "agents" ? "secondary" : "ghost"} onClick={() => setTab("agents")}>Agents</Button>
           <Button size="sm" variant={tab === "activity" ? "secondary" : "ghost"} onClick={() => setTab("activity")}>
             Activity{trouble.size > 0 && <span className="ml-1.5 rounded-full bg-destructive px-1.5 text-[10px] text-white">{trouble.size}</span>}
           </Button>
@@ -90,7 +110,9 @@ export function AppShell() {
           {!repo ? (
             <p className="text-sm text-muted-foreground">No repository with the factory installed. Set FORGELINE_REPOS to a path list.</p>
           ) : tab === "board" ? (
-            <Board jobs={jobs} stages={jobData?.stages ?? []} running={running} trouble={trouble} onOpen={setOpen} />
+            <Board starting={starting} jobs={jobs} stages={jobData?.stages ?? []} running={running} trouble={trouble} onOpen={setOpen} />
+          ) : tab === "agents" ? (
+            <AgentsView starting={starting} repo={repo} jobs={jobs} stages={jobData?.stages ?? []} busy={busy} running={running} trouble={trouble} onCommand={submit} onOpen={setOpen} />
           ) : tab === "activity" ? (
             <ActivityView data={activity} error={activityError} />
           ) : tab === "runs" ? (
@@ -99,11 +121,11 @@ export function AppShell() {
             <MetricsView repo={repo} />
           )}
         </main>
-        <aside className="hidden w-[480px] shrink-0 border-l md:block">
+        <aside className="hidden w-[400px] shrink-0 border-l md:block">
           <RunPanel messages={messages} status={status} error={error} servers={servers} options={options} onOptions={setOptions} onSubmit={submit} onStop={stop} />
         </aside>
       </div>
-      {repo && <JobDrawer job={jobs.find((j) => j.id === open)} repo={repo} busy={busy} onClose={() => setOpen(null)} onCommand={submit} />}
+      {repo && <JobDrawer job={jobs.find((j) => j.id === open)} repo={repo} busy={busy} working={!!open && running.has(open)} onClose={() => setOpen(null)} onCommand={submit} />}
     </div>
   );
 }

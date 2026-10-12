@@ -6,6 +6,8 @@ export function usePoll<T>(url: string | null, ms = 2000) {
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
+    setData(null); // never show the previous url's response while the new one loads
+    setError(null);
     if (!url) return;
     let stop = false;
     const tick = async () => {

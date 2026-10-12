@@ -3,3 +3,7 @@ node_modules/
 .data/
 next-env.d.ts
 tsconfig.tsbuildinfo
+/e2e/results/
+/e2e/report/
+.next-*/
+.DS_Store

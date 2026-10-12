@@ -52,11 +52,13 @@ EVENTS = {
 
 
 def now_iso():
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")[:-3] + "Z"
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
 
 def parse_ts(ts):
-    return datetime.fromisoformat(ts.replace("Z", "+00:00"))
+    # Older Pythons only accept 3 or 6 fractional digits, and older logs hold 4.
+    ts = re.sub(r"\.(\d+)", lambda m: "." + m.group(1)[:6].ljust(6, "0"), ts.replace("Z", "+00:00"), count=1)
+    return datetime.fromisoformat(ts)
 
 
 def redact(text):

@@ -26,6 +26,7 @@
   --ok: oklch(0.62 0.15 150);
   --warn: oklch(0.72 0.15 75);
   --call: oklch(0.65 0.2 350);
+  --claude: oklch(0.72 0.15 50);
 }
 
 .dark {
@@ -71,6 +72,7 @@
   --color-ok: var(--ok);
   --color-warn: var(--warn);
   --color-call: var(--call);
+  --color-claude: var(--claude);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -80,4 +82,13 @@
 @layer base {
   * { @apply border-border outline-ring/50; }
   body { @apply bg-background text-foreground antialiased; }
+}
+
+@keyframes agent-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--claude) 55%, transparent); }
+  100% { box-shadow: 0 0 0 16px transparent; }
+}
+@keyframes edge-flow { to { stroke-dashoffset: -24; } }
+@media (prefers-reduced-motion: reduce) {
+  .agent-active, .edge-live { animation: none !important; }
 }
