@@ -21,6 +21,9 @@ idea / ticket / incident → intent-writer → HUMAN accepts the intent
 
 Agents never merge, push or deploy. `merge_gate.py` is the only way to `main`.
 
+The interactive map (`diagrams/forgeline-map.html`, see `diagrams/README.md`) shows how every part fits and
+where each command, agent, file and guard sits; open it first if you are new.
+
 ## 2. What you need
 
 - Claude Code, logged in. Forgeline runs on your Claude **subscription**; unset

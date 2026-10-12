@@ -1,0 +1,6751 @@
+{
+ "title": "Forgeline map",
+ "root": "root",
+ "pack": "software-factory-plus",
+ "branch": "main",
+ "sourcesBase": "",
+ "version": "0.1",
+ "kinds": {
+  "public": "a command you type, or a session you start",
+  "lane": "a stage or agent the factory runs on its own",
+  "external": "a skill or tool from outside this repo (the origin says where)",
+  "script": "plain code, no model",
+  "hook": "a guard that fires on its own",
+  "board": "state: files, policy and worktrees"
+ },
+ "authors": {
+  "mattpocock": {
+   "name": "Matt Pocock",
+   "url": "https://github.com/mattpocock"
+  },
+  "vercel-labs": {
+   "name": "Vercel Labs",
+   "url": "https://github.com/vercel-labs"
+  }
+ },
+ "notes": [
+  "Written from USAGE.md and the factory skill. Source paths are repo-root-relative."
+ ],
+ "nodes": [
+  {
+   "id": "cmd-intent",
+   "label": "/factory intent",
+   "kind": "public",
+   "what": "Writes intent.md from a raw idea, ticket or incident, then stops.",
+   "when": "You have an idea. /factory <feature> does the same, because intent is required by default.",
+   "how": "Creates the job at stage intent and spawns the intent-writer. Only a person's --skip-intent \"reason\" skips it; the approver then always escalates.",
+   "source": ".claude/skills/factory/SKILL.md",
+   "sublabel": "idea → intent.md"
+  },
+  {
+   "id": "cmd-accept",
+   "label": "/factory accept",
+   "kind": "public",
+   "what": "Accepts the intent and starts the spec.",
+   "when": "You have read intent.md and answered its open questions.",
+   "how": "Rewrites the intent with your answers, creates the branch and worktree, then spawns the spec-writer.",
+   "source": ".claude/skills/factory/SKILL.md",
+   "sublabel": "<job-id>"
+  },
+  {
+   "id": "cmd-approve-spec",
+   "label": "/factory approve-spec",
+   "kind": "public",
+   "what": "Approves the spec and starts planning.",
+   "when": "You have read spec.md and its Risk and Assumptions.",
+   "how": "Writes your words and the time to spec-approval.md. A spec with a Split section goes to the split step instead of the planner.",
+   "source": ".claude/skills/factory/SKILL.md",
+   "sublabel": "<job-id>"
+  },
+  {
+   "id": "cmd-respec",
+   "label": "/factory respec",
+   "kind": "public",
+   "what": "Sends the spec back with a note.",
+   "when": "The spec is not right yet.",
+   "how": "Saves your note verbatim as spec-feedback-N.md and re-spawns the spec-writer.",
+   "source": ".claude/skills/factory/SKILL.md",
+   "sublabel": "<job-id> <note>"
+  },
+  {
+   "id": "cmd-approve",
+   "label": "/factory approve",
+   "kind": "public",
+   "what": "Merges a needs-human job.",
+   "when": "The approver escalated and you decided it is fine.",
+   "how": "Writes human-approval.md and runs the merge gate with the human-approved flag. Never used without this command.",
+   "source": ".claude/skills/factory/SKILL.md",
+   "sublabel": "<job-id>"
+  },
+  {
+   "id": "cmd-rework",
+   "label": "/factory rework",
+   "kind": "public",
+   "what": "Sends a needs-human job back to the builder.",
+   "when": "You want a change before it merges.",
+   "how": "Saves your note as rework-N.md and starts a fresh builder with a fresh resume budget.",
+   "source": ".claude/skills/factory/SKILL.md",
+   "sublabel": "<job-id> <note>"
+  },
+  {
+   "id": "cmd-ready",
+   "label": "/factory ready",
+   "kind": "public",
+   "what": "Starts split children whose dependencies have merged.",
+   "when": "A split parent exists, or a child just merged.",
+   "how": "Runs jobctl ready --close-parents, creates a worktree and spec for each ready child, and closes a parent whose children all merged.",
+   "source": ".claude/skills/factory/SKILL.md"
+  },
+  {
+   "id": "cmd-next",
+   "label": "/factory next",
+   "kind": "public",
+   "what": "Runs the first unchecked backlog item.",
+   "when": "You want the next queued job.",
+   "how": "Claims the line in factory/backlog.md with one edit so two sessions never take the same item.",
+   "source": ".claude/skills/factory/SKILL.md"
+  },
+  {
+   "id": "cmd-stop",
+   "label": "/factory stop | resume",
+   "kind": "public",
+   "what": "Pauses unfinished jobs and picks them up again.",
+   "when": "You are stopping work, or a session limit cut a run off.",
+   "how": "Pause stops the next stage from starting; a subagent already running can only be stopped by interrupting the session. Resume continues from the job files.",
+   "source": ".claude/skills/factory/SKILL.md"
+  },
+  {
+   "id": "cmd-metrics",
+   "label": "/factory metrics",
+   "kind": "public",
+   "what": "Cycle time, first-pass rate, review rounds, escalation rate.",
+   "when": "You want to see how the factory is doing.",
+   "how": "Runs metrics.py over the job.json files; nothing is stored separately.",
+   "source": "factory/scripts/metrics.py"
+  },
+  {
+   "id": "cmd-lessons",
+   "label": "/factory lessons",
+   "kind": "public",
+   "what": "Groups review findings that recur across jobs and suggests a fix for each.",
+   "when": "You have several jobs of history.",
+   "how": "Reads every CHANGES review, groups near-identical findings seen in at least two jobs, and suggests architecture, types, lint, test or rule, strongest first. You decide; nothing is changed for you.",
+   "source": "factory/scripts/lessons.py"
+  },
+  {
+   "id": "cmd-doctor",
+   "label": "/factory doctor",
+   "kind": "public",
+   "what": "Checks that a repo is ready for the factory.",
+   "when": "Before the first job, and after any setup change.",
+   "how": "Checks AGENTS.md covers setup, tests, build, dev server, layout, conventions and what not to touch, and that policy, hooks, gitignore, helper skills and verify-app are in place.",
+   "source": "factory/scripts/doctor.py"
+  },
+  {
+   "id": "cmd-init",
+   "label": "/factory init",
+   "kind": "public",
+   "what": "Drafts AGENTS.md (and VERIFY.proposed.md for an app) for a new repo.",
+   "when": "The repo has no project doc yet.",
+   "how": "Spawns the onboarder. If AGENTS.md exists it writes AGENTS.proposed.md instead; you merge it.",
+   "source": ".claude/skills/factory/SKILL.md"
+  },
+  {
+   "id": "cmd-review",
+   "label": "/factory review",
+   "kind": "public",
+   "what": "Reviews any branch or pull request.",
+   "when": "You want a second opinion outside a factory job.",
+   "how": "Runs review_branch.py; a read-only agent reviews against REVIEW.md and a script drops comments not on a real diff line. Nothing is posted.",
+   "source": "factory/scripts/review_branch.py",
+   "sublabel": "<branch | --pr N>"
+  },
+  {
+   "id": "cmd-maintain",
+   "label": "/factory maintain",
+   "kind": "public",
+   "what": "Runs the maintain loop: collect, run, scan, triage, schedule.",
+   "when": "You want to watch the product, not just build features.",
+   "how": "Detection is plain statistics; the model only diagnoses and writes. A serious breach becomes an intent that waits for you.",
+   "source": ".claude/skills/factory/SKILL.md"
+  },
+  {
+   "id": "install",
+   "label": "Install",
+   "kind": "lane",
+   "what": "How to put Forgeline in a repository.",
+   "when": "Once per repo.",
+   "how": "Copy .claude/ and factory/, ignore the runtime files, run doctor, set your verify commands, and run the evals.",
+   "sublabel": "copy, doctor, policy",
+   "opensView": "install"
+  },
+  {
+   "id": "agents",
+   "label": "All 14 agents",
+   "kind": "lane",
+   "what": "Who writes what.",
+   "when": "Whenever you want to know which agent owns a file.",
+   "how": "Nine agents run the job loop; five sit beside it. Each writes exactly one file and never merges, pushes or deploys.",
+   "source": ".claude/agents/",
+   "sublabel": "who writes what",
+   "opensView": "agents"
+  },
+  {
+   "id": "guardrails",
+   "label": "Guardrails",
+   "kind": "lane",
+   "what": "What stops an agent.",
+   "when": "Always on.",
+   "how": "Hooks, the policy file, the weakened-bar scan, secrets checks, the audit trail and the merge gate.",
+   "source": "factory/policy.json",
+   "sublabel": "hooks, policy, scans",
+   "opensView": "guardrails"
+  },
+  {
+   "id": "split",
+   "label": "Split jobs",
+   "kind": "lane",
+   "what": "Big work becomes dependent child jobs.",
+   "when": "The spec-writer adds a Split section.",
+   "how": "Children inherit the accepted intent, wait on their dependencies, and are specced only after those have merged.",
+   "source": "factory/scripts/jobctl.py",
+   "sublabel": "big work → child jobs",
+   "opensView": "split"
+  },
+  {
+   "id": "parallel",
+   "label": "Parallel + worktrees",
+   "kind": "lane",
+   "what": "One session per job.",
+   "when": "You run several jobs at once.",
+   "how": "Each job has its own branch, worktree, ports and browser session, so jobs never touch each other.",
+   "sublabel": "one session per job",
+   "opensView": "parallel"
+  },
+  {
+   "id": "maintain",
+   "label": "Maintain loop",
+   "kind": "lane",
+   "what": "Watches the running product and the repo.",
+   "when": "On a schedule, or when you run /factory maintain.",
+   "how": "Collects metrics, detects breaches, diagnoses read-only, and scans four lenses. It never merges, deploys or pushes.",
+   "source": "factory/maintain/",
+   "sublabel": "watch, diagnose, scan",
+   "opensView": "maintain"
+  },
+  {
+   "id": "dashboard",
+   "label": "Dashboard + metrics",
+   "kind": "lane",
+   "what": "A live board over factory/jobs.",
+   "when": "While jobs run.",
+   "how": "dashboard.html polls every two seconds; metrics and lessons read the same job files.",
+   "source": "factory/dashboard.html",
+   "sublabel": "live board, cycle time",
+   "opensView": "dashboard"
+  },
+  {
+   "id": "evals",
+   "label": "Evals + CI",
+   "kind": "lane",
+   "what": "Proof that the factory itself still works.",
+   "when": "After any change to .claude/ or factory/.",
+   "how": "326 offline checks with no model, 17 live agent cases on fixture repos, and a CI workflow.",
+   "source": "factory/evals/",
+   "sublabel": "326 offline, 17 live",
+   "opensView": "evals"
+  },
+  {
+   "id": "intent-writer",
+   "label": "intent-writer",
+   "kind": "lane",
+   "what": "Writes intent.md in the originator's own words.",
+   "when": "At /factory intent.",
+   "how": "Quotes your words verbatim, marks guesses, lists open questions with suggested defaults, and never designs the solution. Model: sonnet.",
+   "source": ".claude/agents/intent-writer.md",
+   "sublabel": "sonnet · intent.md"
+  },
+  {
+   "id": "spec-writer",
+   "label": "spec-writer",
+   "kind": "lane",
+   "what": "Writes spec.md: risk, design, criteria, and a Split when needed.",
+   "when": "After the intent is accepted.",
+   "how": "Reads AGENTS.md, the code, the intent, out-of-scope.md, the glossary and ADRs. Rates Risk high for CI, deploy, money or access. Model: opus.",
+   "source": ".claude/agents/spec-writer.md",
+   "sublabel": "opus · spec.md"
+  },
+  {
+   "id": "planner",
+   "label": "planner",
+   "kind": "lane",
+   "what": "Writes plan.md. Never edits code.",
+   "when": "After the spec is approved.",
+   "how": "Cites real source and pinned versions for any API it relies on, labels each safety claim by how far it was checked, and writes PLAN: BLOCKED if the spec needs a frozen path. Model: opus.",
+   "source": ".claude/agents/planner.md",
+   "sublabel": "opus · plan.md"
+  },
+  {
+   "id": "builder",
+   "label": "builder",
+   "kind": "lane",
+   "what": "Implements the plan and writes build.md.",
+   "when": "After PLAN: READY, and again after each CHANGES round.",
+   "how": "Named builder-<job-id> so it can be resumed. Works only in the worktree, runs tdd, uses verify-app for UI, ticks the Definition of Done. Model: opus.",
+   "source": ".claude/agents/builder.md",
+   "sublabel": "opus · build.md + commits"
+  },
+  {
+   "id": "reviewer-security",
+   "label": "reviewer-security",
+   "kind": "lane",
+   "what": "Security lens.",
+   "when": "Every review round.",
+   "how": "Applies factory/checklists/security.md to the diff: access control, input handling, data exposure, secrets, dependencies, workflow files. Model: opus.",
+   "source": ".claude/agents/reviewer-security.md",
+   "sublabel": "opus · review file"
+  },
+  {
+   "id": "reviewer-ux",
+   "label": "reviewer-ux",
+   "kind": "lane",
+   "what": "Experience lens.",
+   "when": "Every review round.",
+   "how": "Applies the accessibility checklist (flow) and must open the page in agent-browser when the diff changes what it renders. Has the Skill tool for verify-app. Model: sonnet.",
+   "source": ".claude/agents/reviewer-ux.md",
+   "sublabel": "sonnet · review file"
+  },
+  {
+   "id": "reviewer-ui",
+   "label": "reviewer-ui",
+   "kind": "lane",
+   "what": "Visual lens.",
+   "when": "Every review round.",
+   "how": "Checks tokens, spacing, contrast and responsive behaviour against the repo's own styles, and opens the page. Model: sonnet.",
+   "source": ".claude/agents/reviewer-ui.md",
+   "sublabel": "sonnet · review file"
+  },
+  {
+   "id": "reviewer-code",
+   "label": "reviewer-code",
+   "kind": "lane",
+   "what": "Correctness lens.",
+   "when": "Every review round.",
+   "how": "Checks the diff against the spec and plan, the weakened bar, the Definition of Done ticks, and the performance, observability and testing checklists. Model: sonnet.",
+   "source": ".claude/agents/reviewer-code.md",
+   "sublabel": "sonnet · review file"
+  },
+  {
+   "id": "approver",
+   "label": "approver",
+   "kind": "lane",
+   "what": "The final gate: APPROVE or ESCALATE.",
+   "when": "After all four reviews PASS.",
+   "how": "Re-runs a command from build.md, checks the one claim most likely wrong, runs policy_check.py, and ends decision.md with Door, Blast radius and Evidence. Model: opus.",
+   "source": ".claude/agents/approver.md",
+   "sublabel": "opus · decision.md"
+  },
+  {
+   "id": "onboarder",
+   "label": "onboarder",
+   "kind": "lane",
+   "what": "Drafts AGENTS.md for an unfamiliar repo.",
+   "when": "At /factory init.",
+   "how": "Reads manifests and config and runs only read commands. Writes UNKNOWN: ask the owner for anything it cannot find. For an app it also drafts VERIFY.proposed.md. Model: sonnet.",
+   "source": ".claude/agents/onboarder.md",
+   "sublabel": "sonnet · AGENTS.md"
+  },
+  {
+   "id": "pr-reviewer",
+   "label": "pr-reviewer",
+   "kind": "lane",
+   "what": "Reviews any branch or pull request.",
+   "when": "At /factory review.",
+   "how": "Read-only. A script drops any comment whose file, line or quoted code is not in the diff, so an invented comment cannot reach a PR. Model: opus.",
+   "source": ".claude/agents/pr-reviewer.md",
+   "sublabel": "opus · review.json"
+  },
+  {
+   "id": "diagnoser",
+   "label": "diagnoser",
+   "kind": "lane",
+   "what": "Explains a metric breach, read-only.",
+   "when": "A metric leaves its band.",
+   "how": "Checks that the metric measures what the band assumes, then lists competing hypotheses and the evidence that separates them. Model: opus.",
+   "source": ".claude/agents/diagnoser.md",
+   "sublabel": "opus · diagnosis.md"
+  },
+  {
+   "id": "scanner-security",
+   "label": "scanner-security",
+   "kind": "lane",
+   "what": "Security scan lens.",
+   "when": "At /factory maintain scan.",
+   "how": "Tries to disprove each candidate; a script then checks every finding against a real file, line and quoted text. Model: opus.",
+   "source": ".claude/agents/scanner-security.md",
+   "sublabel": "opus · findings.json"
+  },
+  {
+   "id": "scanner-quality",
+   "label": "scanner-quality",
+   "kind": "lane",
+   "what": "Maintainability scan lens.",
+   "when": "At /factory maintain scan.",
+   "how": "Looks for swallowed errors, dead code, duplicated logic and untested risky code. Model: opus.",
+   "source": ".claude/agents/scanner-quality.md",
+   "sublabel": "opus · findings.json"
+  },
+  {
+   "id": "tdd",
+   "label": "tdd",
+   "kind": "external",
+   "what": "Red-green-refactor, one vertical slice at a time.",
+   "when": "Every build.",
+   "how": "Pinned to one commit and installed by install_helper_skills.py. The builder must call it before its first edit when it is installed.",
+   "source": "factory/skills/helper-skills.json",
+   "author": "mattpocock",
+   "origin": "mattpocock-skills",
+   "external": true
+  },
+  {
+   "id": "diagnosing-bugs",
+   "label": "diagnosing-bugs",
+   "kind": "external",
+   "what": "Reproduce, minimise, hypothesise, instrument, fix, regress.",
+   "when": "A bugfix job.",
+   "how": "Used by the builder for Type: bugfix to build the failing-test feedback loop.",
+   "source": "factory/skills/helper-skills.json",
+   "author": "mattpocock",
+   "origin": "mattpocock-skills",
+   "external": true
+  },
+  {
+   "id": "codebase-design",
+   "label": "codebase-design",
+   "kind": "external",
+   "what": "Deep modules with small interfaces.",
+   "when": "The plan's interface or module shape is unclear.",
+   "how": "Vocabulary for the planner and builder: module, interface, depth, seam.",
+   "source": "factory/skills/helper-skills.json",
+   "author": "mattpocock",
+   "origin": "mattpocock-skills",
+   "external": true
+  },
+  {
+   "id": "code-review",
+   "label": "code-review",
+   "kind": "external",
+   "what": "Standards and Spec axes for a review.",
+   "when": "reviewer-code and pr-reviewer.",
+   "how": "Applied inside one review; no sub-agents.",
+   "source": "factory/skills/helper-skills.json",
+   "author": "mattpocock",
+   "origin": "mattpocock-skills",
+   "external": true
+  },
+  {
+   "id": "grilling",
+   "label": "grilling",
+   "kind": "external",
+   "what": "Interview method for open questions.",
+   "when": "At /factory accept with unanswered questions.",
+   "how": "Used by the orchestrator, never inside a subagent: nobody is there to answer.",
+   "source": "factory/skills/helper-skills.json",
+   "author": "mattpocock",
+   "origin": "mattpocock-skills",
+   "external": true
+  },
+  {
+   "id": "agent-browser",
+   "label": "agent-browser",
+   "kind": "external",
+   "what": "Browser automation CLI used with your installed Chrome.",
+   "when": "The builder and the UX and UI reviewers look at a page.",
+   "how": "Every call passes --session <job-id>-<role> so jobs never share a browser. Install it yourself; pin a version.",
+   "author": "vercel-labs",
+   "origin": "vercel-labs/agent-browser",
+   "external": true
+  },
+  {
+   "id": "verify-app",
+   "label": "verify-app",
+   "kind": "board",
+   "what": "Your repo's own account of how to start the app and what each area should show.",
+   "when": "Builder and UI reviewers, when it is installed.",
+   "how": "Drafted by the onboarder as VERIFY.proposed.md; a person reads it and installs it as .claude/skills/verify-app/SKILL.md. Doctor warns until it exists.",
+   "source": "factory/templates/verify-app.md",
+   "sublabel": "per-repo skill"
+  },
+  {
+   "id": "jobctl",
+   "label": "jobctl.py",
+   "kind": "script",
+   "what": "The only writer of job state.",
+   "when": "Every stage change.",
+   "how": "create, set, bump, pause, resume, active, ready, show. Claims the next job number with a plain mkdir so two sessions never clash.",
+   "source": "factory/scripts/jobctl.py",
+   "sublabel": "job state"
+  },
+  {
+   "id": "snapshot-audit",
+   "label": "snapshot_audit.py",
+   "kind": "script",
+   "what": "Commits the job folder to the job branch.",
+   "when": "After each artifact.",
+   "how": "Copies factory/jobs/<id>/ to factory/audit/<id>/ in the worktree and commits it, so the whole record merges with the change.",
+   "source": "factory/scripts/snapshot_audit.py"
+  },
+  {
+   "id": "policy-check",
+   "label": "policy_check.py",
+   "kind": "script",
+   "what": "Matches changed files against policy.json.",
+   "when": "The approver and the merge gate.",
+   "how": "Prints VIOLATION for a frozen path, ESCALATE-TRIGGER for escalate paths, dependency files, size and a weakened bar (suppressions, skipped or deleted tests, stripped assertions).",
+   "source": "factory/scripts/policy_check.py"
+  },
+  {
+   "id": "merge-gate",
+   "label": "merge_gate.py",
+   "kind": "script",
+   "what": "The only route to main.",
+   "when": "After APPROVE or /factory approve.",
+   "how": "One lock, ordered checks, a throwaway trial merge, verify and ratchets, then the real merge. Exit codes 0 merged, 3 human, 4 refused, 5 verify failed, 6 lock held, 7 merge failed.",
+   "source": "factory/scripts/merge_gate.py",
+   "opensView": "gate"
+  },
+  {
+   "id": "constraints-py",
+   "label": "constraints.py",
+   "kind": "script",
+   "what": "Ratchets: a measured number must not fall.",
+   "when": "Inside the merge gate.",
+   "how": "Runs each merge_policy.constraints command on the merged result and compares with the baseline read from the base checkout, so a branch cannot lower it. Exceptions need an owner and an expiry within a year.",
+   "source": "factory/scripts/constraints.py"
+  },
+  {
+   "id": "adr-py",
+   "label": "adr.py",
+   "kind": "script",
+   "what": "Records a merged Design section as an ADR.",
+   "when": "After a merge.",
+   "how": "Commits docs/adr/NNNN-slug.md when the spec has a real Design section. Turn it off with policy.adr.dir set to an empty string.",
+   "source": "factory/scripts/adr.py"
+  },
+  {
+   "id": "doctor-py",
+   "label": "doctor.py",
+   "kind": "script",
+   "what": "Readiness checks.",
+   "when": "/factory doctor.",
+   "how": "PASS, WARN or FAIL per check; exit 1 on any FAIL.",
+   "source": "factory/scripts/doctor.py"
+  },
+  {
+   "id": "lessons-py",
+   "label": "lessons.py",
+   "kind": "script",
+   "what": "Groups repeated review findings.",
+   "when": "/factory lessons.",
+   "how": "Word-overlap grouping across CHANGES reviews in jobs and audit copies; suggestions come from a small hint table. Read the groups yourself.",
+   "source": "factory/scripts/lessons.py"
+  },
+  {
+   "id": "metrics-py",
+   "label": "metrics.py",
+   "kind": "script",
+   "what": "Cycle time and rates.",
+   "when": "/factory metrics.",
+   "how": "Computed from job.json history; nothing else is stored.",
+   "source": "factory/scripts/metrics.py"
+  },
+  {
+   "id": "review-branch",
+   "label": "review_branch.py",
+   "kind": "script",
+   "what": "Reviews any branch or PR.",
+   "when": "/factory review.",
+   "how": "Runs the pr-reviewer, validates every comment against the diff, and writes gh-review.sh for you to run. It never posts.",
+   "source": "factory/scripts/review_branch.py"
+  },
+  {
+   "id": "install-helpers",
+   "label": "install_helper_skills.py",
+   "kind": "script",
+   "what": "Installs five pinned MIT skills.",
+   "when": "At setup.",
+   "how": "Clones at the commit pinned in helper-skills.json. Read the skills first: they become instructions your agents follow.",
+   "source": "factory/scripts/install_helper_skills.py"
+  },
+  {
+   "id": "managed-install",
+   "label": "managed/install.py",
+   "kind": "script",
+   "what": "Installs the hooks as managed settings.",
+   "when": "An admin step.",
+   "how": "Dry run by default, --apply to write. Makes the hooks impossible for a repo writer to disable.",
+   "source": "factory/managed/install.py"
+  },
+  {
+   "id": "collect-py",
+   "label": "collect.py",
+   "kind": "script",
+   "what": "Gathers real metric values.",
+   "when": "On a schedule.",
+   "how": "Collectors: a command that prints a number, an HTTP JSON endpoint, a log's error rate, git, or the factory's own cycle time.",
+   "source": "factory/maintain/collect.py"
+  },
+  {
+   "id": "detect-py",
+   "label": "detect.py",
+   "kind": "script",
+   "what": "Tests each metric against its own baseline.",
+   "when": "After collect.",
+   "how": "1 sigma logs, 2 sigma diagnoses, 3 sigma acts. Plain statistics; no model.",
+   "source": "factory/maintain/detect.py"
+  },
+  {
+   "id": "scan-py",
+   "label": "scan.py",
+   "kind": "script",
+   "what": "Runs the four scan lenses.",
+   "when": "Weekly, or /factory maintain scan.",
+   "how": "Security and quality use agents; secrets and dependencies need no model. Every finding is verified against the repo and marked new, recurring or dismissed.",
+   "source": "factory/maintain/scan.py",
+   "opensView": "scan-py"
+  },
+  {
+   "id": "dismiss-py",
+   "label": "dismiss.py",
+   "kind": "script",
+   "what": "Dismisses a breach with a reason.",
+   "when": "A metric cries wolf.",
+   "how": "Needs a reason and widens that metric's band.",
+   "source": "factory/maintain/dismiss.py"
+  },
+  {
+   "id": "schedule-py",
+   "label": "schedule.py",
+   "kind": "script",
+   "what": "Prints or installs the cron block.",
+   "when": "Once, at setup.",
+   "how": "Runs collect and run hourly, scans weekly and the evals weekly. Tested against a crontab file, not installed.",
+   "source": "factory/maintain/schedule.py"
+  },
+  {
+   "id": "run-evals",
+   "label": "run_evals.py",
+   "kind": "script",
+   "what": "326 offline checks, no model.",
+   "when": "After every change.",
+   "how": "Covers config, hooks, managed settings, maintain, scan, the merge gate, scripts and artifact formats. Needs Python 3.12 or newer.",
+   "source": "factory/evals/run_evals.py"
+  },
+  {
+   "id": "agent-evals",
+   "label": "agent_evals.py",
+   "kind": "script",
+   "what": "17 live agent cases.",
+   "when": "After a prompt change.",
+   "how": "Runs each agent on a fixture repo and checks its output file. About 15 minutes of subscription use; one failure can be a flake, so re-run it once.",
+   "source": "factory/evals/agent_evals.py"
+  },
+  {
+   "id": "ci-workflow",
+   "label": "factory-evals.yml",
+   "kind": "script",
+   "what": "Runs the offline evals in CI.",
+   "when": "On any change to .claude/, factory/, AGENTS.md or CLAUDE.md.",
+   "how": "A GitHub Actions workflow on Python 3.12.",
+   "source": ".github/workflows/factory-evals.yml"
+  },
+  {
+   "id": "hook-edits",
+   "label": "Hook: edits",
+   "kind": "hook",
+   "what": "Refuses edits to frozen paths and to tests during a bug fix.",
+   "when": "Every Edit or Write inside a factory worktree.",
+   "how": "Reads factory/policy.json. Path rules apply only inside worktrees, so you are never blocked in your own checkout.",
+   "source": ".claude/hooks/factory_hooks.py",
+   "sublabel": "frozen paths, test lock"
+  },
+  {
+   "id": "hook-bash",
+   "label": "Hook: commands",
+   "kind": "hook",
+   "what": "Blocks push, deploy, publish, secrets in a commit, and a hand-merge of a factory branch.",
+   "when": "Every Bash call.",
+   "how": "Read-only git merge-tree and merge-base are allowed. A person authorises a release by starting Claude Code with FACTORY_RELEASE_AUTHORIZED=1; an inline prefix does not count.",
+   "source": ".claude/hooks/factory_hooks.py",
+   "sublabel": "push, deploy, secrets"
+  },
+  {
+   "id": "weakened-bar",
+   "label": "Weakened-bar scan",
+   "kind": "hook",
+   "what": "Flags a quietly lowered quality bar.",
+   "when": "Every diff the approver or gate checks.",
+   "how": "Added @ts-ignore, eslint-disable, noqa, skipped or deleted tests, stripped assertions. Each is an ESCALATE-TRIGGER, not a failure, so a person decides.",
+   "source": "factory/scripts/policy_check.py"
+  },
+  {
+   "id": "secrets-scan",
+   "label": "Secrets in commits",
+   "kind": "hook",
+   "what": "Blocks committing secrets.",
+   "when": "Every commit command.",
+   "how": "The bash hook scans staged content for common key formats. It complements a real scanner.",
+   "source": ".claude/hooks/factory_hooks.py"
+  },
+  {
+   "id": "escalate-triggers",
+   "label": "Escalate triggers",
+   "kind": "hook",
+   "what": "What always sends a job to a person.",
+   "when": "At the approver and the gate.",
+   "how": "CI or deploy config, schema migrations, new dependencies, money, access or identity, a change over the size cap, a waived intent, a weakened bar, a high-risk spec.",
+   "source": "factory/policy.json"
+  },
+  {
+   "id": "test-lock",
+   "label": "Test lock (bugfix)",
+   "kind": "hook",
+   "what": "Tests are frozen after the failing-test commit.",
+   "when": "Type: bugfix.",
+   "how": "The builder commits a failing test, touches .factory-test-lock, and a hook then refuses test edits, so the code is fixed, never the test.",
+   "source": ".claude/hooks/factory_hooks.py"
+  },
+  {
+   "id": "release-var",
+   "label": "Release variable",
+   "kind": "hook",
+   "what": "Only a person can authorise a push or deploy.",
+   "when": "You start Claude Code yourself.",
+   "how": "FACTORY_RELEASE_AUTHORIZED=1 must be in the environment of the session you start; an agent cannot set it for the hook.",
+   "source": "factory/policy.json"
+  },
+  {
+   "id": "intent-inherit",
+   "label": "Inherited intent",
+   "kind": "hook",
+   "what": "Split children carry the parent's accepted intent.",
+   "when": "A child is created.",
+   "how": "No waiver is recorded, so the approver does not auto-escalate a child.",
+   "source": "factory/scripts/jobctl.py"
+  },
+  {
+   "id": "dep-check",
+   "label": "Dependency check",
+   "kind": "hook",
+   "what": "A child whose dependency has not merged is refused.",
+   "when": "Inside the merge gate.",
+   "how": "Reads depends_on from job.json and each dependency's stage.",
+   "source": "factory/scripts/merge_gate.py"
+  },
+  {
+   "id": "merge-lock",
+   "label": "Merge lock",
+   "kind": "hook",
+   "what": "One merge at a time.",
+   "when": "Inside the merge gate.",
+   "how": "A second gate run exits 6; you run it again. Stale after merge_policy.lock_stale_minutes.",
+   "source": "factory/scripts/merge_gate.py"
+  },
+  {
+   "id": "check-clean",
+   "label": "Clean main",
+   "kind": "hook",
+   "what": "Main must be on the base branch with no stray changes.",
+   "when": "First gate check.",
+   "how": "A dirty tree (for example __pycache__ that is not ignored) is refused.",
+   "source": "factory/scripts/merge_gate.py"
+  },
+  {
+   "id": "check-decision",
+   "label": "Decision present",
+   "kind": "hook",
+   "what": "APPROVE, or ESCALATE plus a human.",
+   "when": "Second gate check.",
+   "how": "ESCALATE merges only with the human-approved flag, passed only after /factory approve.",
+   "source": "factory/scripts/merge_gate.py"
+  },
+  {
+   "id": "check-pinned",
+   "label": "Commit pinned",
+   "kind": "hook",
+   "what": "The approval is bound to a commit.",
+   "when": "Third gate check.",
+   "how": "job.reviewed_sha must equal the branch head, or every later commit must touch only the audit folder. A code commit after the review voids the approval.",
+   "source": "factory/scripts/merge_gate.py"
+  },
+  {
+   "id": "check-policy",
+   "label": "Policy + intent",
+   "kind": "hook",
+   "what": "Frozen paths, escalate paths, size and intent.",
+   "when": "Fourth gate check.",
+   "how": "A frozen-path edit is always refused. Escalate paths, dependency files, size over the cap, or a waived intent need a human.",
+   "source": "factory/scripts/merge_gate.py"
+  },
+  {
+   "id": "trial-merge",
+   "label": "Trial merge",
+   "kind": "script",
+   "what": "Merge into a throwaway copy of main as it is now.",
+   "when": "After the checks pass.",
+   "how": "Catches a branch that merges cleanly but no longer builds against a base that moved.",
+   "source": "factory/scripts/merge_gate.py"
+  },
+  {
+   "id": "verify-cmds",
+   "label": "verify_commands",
+   "kind": "script",
+   "what": "Your build and tests, on the merged result.",
+   "when": "Inside the trial merge.",
+   "how": "Set merge_policy.verify_commands in policy.json. Empty prints NO VERIFY; require_verify refuses outright.",
+   "source": "factory/policy.json"
+  },
+  {
+   "id": "real-merge",
+   "label": "Real merge",
+   "kind": "script",
+   "what": "--no-ff merge, then cleanup.",
+   "when": "After proof.",
+   "how": "Removes the worktree and branch, sets stage merged, records an ADR. Never pushes.",
+   "source": "factory/scripts/merge_gate.py"
+  },
+  {
+   "id": "intent-md",
+   "label": "intent.md",
+   "kind": "board",
+   "what": "Your words, guesses marked, open questions.",
+   "when": "Written by intent-writer.",
+   "how": "First line INTENT: DRAFT; it is read as accepted once you accept it.",
+   "source": "factory/templates/intent.md",
+   "sublabel": "factory/jobs/<id>/"
+  },
+  {
+   "id": "spec-md",
+   "label": "spec.md",
+   "kind": "board",
+   "what": "Risk, design, requirements, acceptance criteria, optional Split.",
+   "when": "Written by spec-writer.",
+   "how": "Each criterion is one observable behaviour plus how to verify it.",
+   "sublabel": "factory/jobs/<id>/"
+  },
+  {
+   "id": "plan-md",
+   "label": "plan.md",
+   "kind": "board",
+   "what": "Steps, proof, blast radius, rollback.",
+   "when": "Written by planner.",
+   "how": "First line PLAN: READY or PLAN: BLOCKED.",
+   "sublabel": "factory/jobs/<id>/"
+  },
+  {
+   "id": "build-md",
+   "label": "build.md",
+   "kind": "board",
+   "what": "Evidence for every criterion, the Definition of Done, plan adherence.",
+   "when": "Written by builder.",
+   "how": "First line STATUS: READY or BLOCKED. Rewritten each round with a Log.",
+   "sublabel": "factory/jobs/<id>/"
+  },
+  {
+   "id": "review-files",
+   "label": "review-*.md",
+   "kind": "board",
+   "what": "One verdict file per reviewer per round.",
+   "when": "Written by each reviewer.",
+   "how": "First line VERDICT: PASS or VERDICT: CHANGES. A review that exists only in a message does not count.",
+   "sublabel": "round-N/"
+  },
+  {
+   "id": "decision-md",
+   "label": "decision.md",
+   "kind": "board",
+   "what": "APPROVE or ESCALATE, with a merge-danger block.",
+   "when": "Written by approver.",
+   "how": "Door (one-way or two-way), Blast radius, Evidence.",
+   "sublabel": "factory/jobs/<id>/"
+  },
+  {
+   "id": "job-json",
+   "label": "job.json",
+   "kind": "board",
+   "what": "Stage, round, reviews, history, parent and dependencies.",
+   "when": "Written only by jobctl.py.",
+   "how": "The dashboard and metrics read it.",
+   "sublabel": "factory/jobs/<id>/"
+  },
+  {
+   "id": "policy-json",
+   "label": "policy.json",
+   "kind": "board",
+   "what": "The rules.",
+   "when": "Read by hooks, policy_check and the gate.",
+   "how": "frozen_paths, escalate_paths, dependency_files, test_globs, blocked_commands, ticketing, merge_policy, adr. Agents cannot edit it.",
+   "source": "factory/policy.json"
+  },
+  {
+   "id": "dod",
+   "label": "Definition of done",
+   "kind": "board",
+   "what": "A standing bar every job clears.",
+   "when": "The builder ticks it; reviewers and approver check it.",
+   "how": "Correctness, quality, integration, documentation, ship readiness. Frozen to agents.",
+   "source": "factory/DEFINITION_OF_DONE.md"
+  },
+  {
+   "id": "review-md",
+   "label": "REVIEW.md",
+   "kind": "board",
+   "what": "What counts as Important versus a Nit.",
+   "when": "Every reviewer reads it.",
+   "how": "Important blocks; a Nit goes under Notes, at most five.",
+   "source": "factory/REVIEW.md"
+  },
+  {
+   "id": "checklists",
+   "label": "checklists/",
+   "kind": "board",
+   "what": "Security, accessibility, performance, observability, testing.",
+   "when": "Each reviewer applies the one for its pass.",
+   "how": "Short lists; an item the diff does not touch is skipped without comment.",
+   "source": "factory/checklists/"
+  },
+  {
+   "id": "out-of-scope",
+   "label": "out-of-scope.md",
+   "kind": "board",
+   "what": "Decisions already made not to build something.",
+   "when": "intent-writer and spec-writer read it.",
+   "how": "A person adds a line; agents may not.",
+   "source": "factory/out-of-scope.md"
+  },
+  {
+   "id": "glossary",
+   "label": "docs/GLOSSARY.md",
+   "kind": "board",
+   "what": "The project's terms.",
+   "when": "intent-writer, spec-writer and planner read it.",
+   "how": "Write one in your repo; it is not part of Forgeline."
+  },
+  {
+   "id": "adr-dir",
+   "label": "docs/adr/",
+   "kind": "board",
+   "what": "Durable decisions.",
+   "when": "Written by the merge gate after a merge.",
+   "how": "A real Design section becomes NNNN-slug.md. The spec-writer and planner read them.",
+   "source": "factory/scripts/adr.py"
+  },
+  {
+   "id": "constraints-json",
+   "label": "constraints.json",
+   "kind": "board",
+   "what": "Ratchet baselines and exceptions.",
+   "when": "Read by the merge gate from the base checkout.",
+   "how": "A person raises a baseline; the gate only reports when a number improved.",
+   "source": "factory/constraints.json"
+  },
+  {
+   "id": "worktree",
+   "label": "git worktree",
+   "kind": "board",
+   "what": "One checkout per job.",
+   "when": "Created at /factory accept.",
+   "how": "<repo>-factory/<job-id> on branch factory/<job-id>. Agents change code only here."
+  },
+  {
+   "id": "audit-trail",
+   "label": "Audit trail",
+   "kind": "board",
+   "what": "factory/audit/<job-id>/ on the branch.",
+   "when": "After each stage.",
+   "how": "Committed by snapshot_audit.py so the whole record merges with the change.",
+   "source": "factory/scripts/snapshot_audit.py"
+  },
+  {
+   "id": "backlog",
+   "label": "backlog.md",
+   "kind": "board",
+   "what": "Queue for /factory next.",
+   "when": "Maintain triage accepts findings into it.",
+   "how": "One unchecked line per item.",
+   "source": "factory/backlog.md"
+  },
+  {
+   "id": "dashboard-html",
+   "label": "dashboard.html",
+   "kind": "board",
+   "what": "The live board.",
+   "when": "cd factory && python3 -m http.server.",
+   "how": "Polls factory/jobs every two seconds. No build step.",
+   "source": "factory/dashboard.html",
+   "sublabel": "localhost:8000"
+  },
+  {
+   "id": "agents-md",
+   "label": "AGENTS.md",
+   "kind": "board",
+   "what": "Your repo's own instructions.",
+   "when": "Read by every agent first.",
+   "how": "Setup, tests, build, lint, dev server and port, layout, conventions, what not to touch. The agents carry nothing repo-specific."
+  },
+  {
+   "id": "incident-md",
+   "label": "incident.md",
+   "kind": "board",
+   "what": "A serious breach, written up.",
+   "when": "A metric reaches 3 sigma.",
+   "how": "Becomes an intent that waits for you.",
+   "source": "factory/maintain/"
+  },
+  {
+   "id": "collectors-json",
+   "label": "collectors.json",
+   "kind": "board",
+   "what": "Where metrics come from.",
+   "when": "Edit it for your service.",
+   "how": "Commands, HTTP endpoints, log files, git, the factory itself.",
+   "source": "factory/maintain/collectors.json"
+  },
+  {
+   "id": "findings",
+   "label": "findings",
+   "kind": "board",
+   "what": "Scan results, each verified.",
+   "when": "After a scan.",
+   "how": "New, recurring or previously dismissed; sorted by severity.",
+   "source": "factory/maintain/"
+  },
+  {
+   "id": "triage",
+   "label": "triage",
+   "kind": "public",
+   "what": "Accept a finding into the backlog, or dismiss it.",
+   "when": "After a scan.",
+   "how": "Dismiss needs a reason and the finding is not raised again.",
+   "source": ".claude/skills/factory/SKILL.md",
+   "sublabel": "accept or dismiss"
+  },
+  {
+   "id": "session",
+   "label": "Claude session",
+   "kind": "public",
+   "what": "One Claude Code session per job.",
+   "when": "You open one per job.",
+   "how": "A session orchestrates only the job it started.",
+   "sublabel": "/factory <job>"
+  },
+  {
+   "id": "ports",
+   "label": "Ports + sessions",
+   "kind": "board",
+   "what": "Builder 5100+10n, ux +1, ui +2.",
+   "when": "Each job.",
+   "how": "Each job and reviewer also gets its own agent-browser session."
+  },
+  {
+   "id": "slice",
+   "label": "Slice (child job)",
+   "kind": "lane",
+   "what": "A full job: spec, build, reviews, approver, gate.",
+   "when": "After its dependency merged.",
+   "how": "Specced against the code as it then is, so it reads the real earlier work and the ADR.",
+   "source": "factory/scripts/jobctl.py",
+   "sublabel": "depends on the one before"
+  },
+  {
+   "id": "parent-close",
+   "label": "Parent closes",
+   "kind": "script",
+   "what": "A split parent merges when every child has merged.",
+   "when": "jobctl ready --close-parents.",
+   "how": "The parent builds nothing; its worktree stays as the audit record.",
+   "source": "factory/scripts/jobctl.py"
+  },
+  {
+   "id": "copy-step",
+   "label": "Copy .claude/ + factory/",
+   "kind": "public",
+   "what": "Put the files in your repo.",
+   "when": "First install step.",
+   "how": "Start with an empty factory/jobs/ and an empty backlog.",
+   "sublabel": "into the repo root"
+  },
+  {
+   "id": "gitignore",
+   "label": ".gitignore.factory",
+   "kind": "script",
+   "what": "Lines to add to your .gitignore.",
+   "when": "Install step 2.",
+   "how": "/factory/jobs/, the test lock, __pycache__/. Without __pycache__ ignored the gate sees a dirty tree.",
+   "source": ".gitignore.factory"
+  },
+  {
+   "id": "policy-edit",
+   "label": "Edit policy.json",
+   "kind": "board",
+   "what": "Make the rules yours.",
+   "when": "Install step 4.",
+   "how": "escalate_paths, frozen_paths, test_globs and, above all, merge_policy.verify_commands.",
+   "source": "factory/policy.json"
+  },
+  {
+   "id": "python312",
+   "label": "Python 3.12+",
+   "kind": "hook",
+   "what": "Needed by the evals and maintain/scan.py.",
+   "when": "Always.",
+   "how": "The system Python 3.9 fails with a SyntaxError in scan.py. uv run --python 3.12 works."
+  },
+  {
+   "id": "audit-md",
+   "label": "AUDIT.md",
+   "kind": "board",
+   "what": "What is proven and what is not.",
+   "when": "Read it before trusting a part.",
+   "how": "Evidence from the offline evals, the live evals and the end-to-end runs.",
+   "source": "AUDIT.md"
+  },
+  {
+   "id": "e2e",
+   "label": "End-to-end runs",
+   "kind": "board",
+   "what": "Jobs run on a fixture repo.",
+   "when": "After big changes.",
+   "how": "Natural jobs, escalate with rework, a split job, UI jobs, and a CHANGES round on a fault-injected defect.",
+   "source": "AUDIT.md"
+  },
+  {
+   "id": "skip-intent",
+   "label": "--skip-intent \"reason\"",
+   "kind": "hook",
+   "what": "The one waiver of the required intent.",
+   "when": "You decide the feature is too small for an intent.",
+   "how": "The reason is kept in job.json and the approver always escalates a waived intent. Never used on an agent's own judgment.",
+   "source": "factory/scripts/jobctl.py",
+   "sublabel": "only a person"
+  },
+  {
+   "id": "flag-ticket",
+   "label": "--ticket KEY",
+   "kind": "board",
+   "what": "Links the job to a ticket.",
+   "when": "Your prompt gives a ticket.",
+   "how": "Every commit starts with the key. With policy.ticketing.mcp_server set, the ticket is read at the start and the outcome is commented at the end.",
+   "source": "factory/policy.json",
+   "sublabel": "commit prefix"
+  },
+  {
+   "id": "flag-bugfix",
+   "label": "--type bugfix",
+   "kind": "board",
+   "what": "Makes the builder reproduce the bug first.",
+   "when": "The job fixes a bug.",
+   "how": "The builder commits a failing test alone, then the test lock is created so the code is fixed, never the test.",
+   "source": ".claude/agents/builder.md",
+   "sublabel": "failing test first"
+  },
+  {
+   "id": "claim-line",
+   "label": "Claim a backlog line",
+   "kind": "script",
+   "what": "Replaces the exact line with a checked, claimed one.",
+   "when": "Every /factory next.",
+   "how": "If the edit fails because the line changed, another session claimed it; the next unchecked item is tried.",
+   "source": ".claude/skills/factory/SKILL.md",
+   "sublabel": "one edit"
+  },
+  {
+   "id": "human-approval",
+   "label": "human-approval.md",
+   "kind": "board",
+   "what": "The record of your merge approval.",
+   "when": "At /factory approve.",
+   "how": "Your instruction verbatim, the UTC time and the first line and Why of decision.md.",
+   "sublabel": "your words, with the time"
+  },
+  {
+   "id": "rework-md",
+   "label": "rework-N.md",
+   "kind": "board",
+   "what": "What you want changed before it merges.",
+   "when": "At /factory rework.",
+   "how": "The fresh builder reads it with the existing build.md and every round folder.",
+   "sublabel": "your note, verbatim"
+  },
+  {
+   "id": "st-pause",
+   "label": "jobctl pause",
+   "kind": "script",
+   "what": "Marks a job paused with its stage and a reason.",
+   "when": "At /factory stop.",
+   "how": "The pause stops the next stage from starting; nothing is lost because the stage and files are the state.",
+   "source": "factory/scripts/jobctl.py",
+   "sublabel": "--reason"
+  },
+  {
+   "id": "st-resume",
+   "label": "jobctl resume",
+   "kind": "script",
+   "what": "Continues from the stage the job paused at.",
+   "when": "At /factory resume.",
+   "how": "spec: spec-writer if spec.md is missing; plan, build, review and approve each pick up from their files.",
+   "source": "factory/scripts/jobctl.py",
+   "sublabel": "resume_at_stage"
+  },
+  {
+   "id": "st-gate",
+   "label": "Gate refuses a paused job",
+   "kind": "hook",
+   "what": "A paused job cannot merge.",
+   "when": "Every gate run.",
+   "how": "Resume it first.",
+   "source": "factory/scripts/merge_gate.py",
+   "sublabel": "inside merge_gate.py"
+  },
+  {
+   "id": "st-limit",
+   "label": "A running subagent",
+   "kind": "board",
+   "what": "Stop pauses the next stage only.",
+   "when": "A subagent is mid-run.",
+   "how": "Interrupt the session to stop it. Also what happens when the subscription session limit cuts a run off: resume from the files.",
+   "sublabel": "cannot be killed"
+  },
+  {
+   "id": "intent-template",
+   "label": "Intent template",
+   "kind": "board",
+   "what": "The sections the intent-writer fills.",
+   "when": "Every intent.",
+   "how": "In the originator's words, assumptions, open questions, success criteria. First line INTENT: DRAFT.",
+   "source": "factory/templates/intent.md",
+   "sublabel": "factory/templates/intent.md"
+  },
+  {
+   "id": "open-questions",
+   "label": "Open questions",
+   "kind": "board",
+   "what": "Every gap a product owner must fill, phrased to answer in a line.",
+   "when": "While drafting the intent.",
+   "how": "A suggested default in brackets when there is an obvious one; you answer in the file or in chat.",
+   "sublabel": "each with a default"
+  },
+  {
+   "id": "assumptions",
+   "label": "Assumptions (guess)",
+   "kind": "board",
+   "what": "Anything the intent-writer inferred, marked (guess).",
+   "when": "While drafting the intent.",
+   "how": "Kept apart from what you actually said so a guess is never read as a requirement.",
+   "sublabel": "never a requirement"
+  },
+  {
+   "id": "claim-number",
+   "label": "Claim a job number",
+   "kind": "script",
+   "what": "Takes the next 3-digit job number with a plain mkdir.",
+   "when": "Every job creation.",
+   "how": "If another session wins the race it retries, so two sessions never share a number.",
+   "source": "factory/scripts/jobctl.py",
+   "sublabel": "mkdir, atomic"
+  },
+  {
+   "id": "sec-0",
+   "label": "Risk",
+   "kind": "board",
+   "what": "The Risk section: low, medium or high with one line of reason; high for CI, deploy, money, access or data migration.",
+   "when": "Every spec.",
+   "how": "Written by the spec-writer; you approve the whole file.",
+   "sublabel": "section of spec.md"
+  },
+  {
+   "id": "sec-1",
+   "label": "Context",
+   "kind": "board",
+   "what": "The Context section: where this lives in the codebase, with paths.",
+   "when": "Every spec.",
+   "how": "Written by the spec-writer; you approve the whole file.",
+   "sublabel": "section of spec.md"
+  },
+  {
+   "id": "sec-2",
+   "label": "Design",
+   "kind": "board",
+   "what": "The Design section: decision, two named alternatives, consequences, interfaces; becomes an ADR after merge.",
+   "when": "Every spec.",
+   "how": "Written by the spec-writer; you approve the whole file.",
+   "sublabel": "section of spec.md"
+  },
+  {
+   "id": "sec-3",
+   "label": "Requirements",
+   "kind": "board",
+   "what": "The Requirements section: a numbered list of what must be true when done.",
+   "when": "Every spec.",
+   "how": "Written by the spec-writer; you approve the whole file.",
+   "sublabel": "section of spec.md"
+  },
+  {
+   "id": "sec-4",
+   "label": "Acceptance criteria",
+   "kind": "board",
+   "what": "The Acceptance criteria section: each one observable behaviour plus how to verify it.",
+   "when": "Every spec.",
+   "how": "Written by the spec-writer; you approve the whole file.",
+   "sublabel": "section of spec.md"
+  },
+  {
+   "id": "sec-5",
+   "label": "Out of scope",
+   "kind": "board",
+   "what": "The Out of scope section: what a builder might be tempted to do but must not.",
+   "when": "Every spec.",
+   "how": "Written by the spec-writer; you approve the whole file.",
+   "sublabel": "section of spec.md"
+  },
+  {
+   "id": "sec-6",
+   "label": "Split",
+   "kind": "board",
+   "what": "The Split section: 2 to 6 slices, each with Depends, only when the work is too big for one change.",
+   "when": "Only for work too big for one change.",
+   "how": "Written by the spec-writer; you approve the whole file.",
+   "sublabel": "section of spec.md"
+  },
+  {
+   "id": "sec-7",
+   "label": "Assumptions",
+   "kind": "board",
+   "what": "The Assumptions section: decisions made where the request was ambiguous, each with a reason.",
+   "when": "Every spec.",
+   "how": "Written by the spec-writer; you approve the whole file.",
+   "sublabel": "section of spec.md"
+  },
+  {
+   "id": "spec-feedback",
+   "label": "spec-feedback-N.md",
+   "kind": "board",
+   "what": "A human sent the spec back.",
+   "when": "After /factory respec.",
+   "how": "The spec-writer addresses each point and says how under Assumptions.",
+   "sublabel": "your note, verbatim"
+  },
+  {
+   "id": "spec-approval",
+   "label": "spec-approval.md",
+   "kind": "board",
+   "what": "The record of your approval.",
+   "when": "At /factory approve-spec.",
+   "how": "Your instruction verbatim and the UTC time, because a human decision belongs in the record in the human's own words.",
+   "sublabel": "your words, with the time"
+  },
+  {
+   "id": "pl-0",
+   "label": "Approach",
+   "kind": "board",
+   "what": "The Approach section: how the change will be made, citing real source and the version read.",
+   "when": "Every plan.",
+   "how": "Written by the planner; the builder follows it and reviewers check the diff against it.",
+   "sublabel": "section of plan.md"
+  },
+  {
+   "id": "pl-1",
+   "label": "Steps",
+   "kind": "board",
+   "what": "The Steps section: the files to change, in order.",
+   "when": "Every plan.",
+   "how": "Written by the planner; the builder follows it and reviewers check the diff against it.",
+   "sublabel": "section of plan.md"
+  },
+  {
+   "id": "pl-2",
+   "label": "Proof",
+   "kind": "board",
+   "what": "The Proof section: the test that proves each acceptance criterion, at agreed seams.",
+   "when": "Every plan.",
+   "how": "Written by the planner; the builder follows it and reviewers check the diff against it.",
+   "sublabel": "section of plan.md"
+  },
+  {
+   "id": "pl-3",
+   "label": "Blast radius",
+   "kind": "board",
+   "what": "The Blast radius section: everything else that depends on the changed files, with each safety claim labelled by how far it was checked.",
+   "when": "Every plan.",
+   "how": "Written by the planner; the builder follows it and reviewers check the diff against it.",
+   "sublabel": "section of plan.md"
+  },
+  {
+   "id": "pl-4",
+   "label": "Policy flags",
+   "kind": "board",
+   "what": "The Policy flags section: frozen paths (the plan is BLOCKED) and escalate paths it touches.",
+   "when": "Every plan.",
+   "how": "Written by the planner; the builder follows it and reviewers check the diff against it.",
+   "sublabel": "section of plan.md"
+  },
+  {
+   "id": "pl-5",
+   "label": "Risks and rollback",
+   "kind": "board",
+   "what": "The Risks and rollback section: what could go wrong and how to undo it.",
+   "when": "Every plan.",
+   "how": "Written by the planner; the builder follows it and reviewers check the diff against it.",
+   "sublabel": "section of plan.md"
+  },
+  {
+   "id": "lad-0",
+   "label": "Said so",
+   "kind": "board",
+   "what": "Evidence level 1: worthless on its own.",
+   "when": "Each safety claim in the blast radius.",
+   "how": "Get each claim as far down this list as is cheap and say where it stopped. Anything still at level 1 goes under Risks as unproven.",
+   "sublabel": "evidence level 1"
+  },
+  {
+   "id": "lad-1",
+   "label": "Pointed at a line",
+   "kind": "board",
+   "what": "Evidence level 2: a real file:line, or the library's own source.",
+   "when": "Each safety claim in the blast radius.",
+   "how": "Get each claim as far down this list as is cheap and say where it stopped. Anything still at level 1 goes under Risks as unproven.",
+   "sublabel": "evidence level 2"
+  },
+  {
+   "id": "lad-2",
+   "label": "Walked the failure",
+   "kind": "board",
+   "what": "Evidence level 3: followed step by step and it does not reach.",
+   "when": "Each safety claim in the blast radius.",
+   "how": "Get each claim as far down this list as is cheap and say where it stopped. Anything still at level 1 goes under Risks as unproven.",
+   "sublabel": "evidence level 3"
+  },
+  {
+   "id": "lad-3",
+   "label": "Ran it",
+   "kind": "board",
+   "what": "Evidence level 4: a script or test that calls the real code and fails loudly if wrong.",
+   "when": "Each safety claim in the blast radius.",
+   "how": "Get each claim as far down this list as is cheap and say where it stopped. Anything still at level 1 goes under Risks as unproven.",
+   "sublabel": "evidence level 4"
+  },
+  {
+   "id": "red-commit",
+   "label": "Failing test first",
+   "kind": "board",
+   "what": "For a bugfix: a test that reproduces the bug, committed on its own.",
+   "when": "Type: bugfix.",
+   "how": "It must fail for the reason the spec describes. Then the lock is created and the code is fixed until it passes.",
+   "sublabel": "committed alone"
+  },
+  {
+   "id": "dod-0",
+   "label": "Correctness",
+   "kind": "board",
+   "what": "Correctness: every criterion observed on the real artifact; a new test fails without the change.",
+   "when": "Ticked in build.md every job.",
+   "how": "Each box is [x] with evidence or n/a with a reason, never blank.",
+   "sublabel": "Definition of done"
+  },
+  {
+   "id": "dod-1",
+   "label": "Quality",
+   "kind": "board",
+   "what": "Quality: no dead code, no duplicated logic, lint passes, no weakened bar.",
+   "when": "Ticked in build.md every job.",
+   "how": "Each box is [x] with evidence or n/a with a reason, never blank.",
+   "sublabel": "Definition of done"
+  },
+  {
+   "id": "dod-2",
+   "label": "Integration",
+   "kind": "board",
+   "what": "Integration: callers checked, config and migrations accounted for, old callers keep working.",
+   "when": "Ticked in build.md every job.",
+   "how": "Each box is [x] with evidence or n/a with a reason, never blank.",
+   "sublabel": "Definition of done"
+  },
+  {
+   "id": "dod-3",
+   "label": "Documentation",
+   "kind": "board",
+   "what": "Documentation: AGENTS.md updated where behaviour changed; a decision worth keeping is in Design.",
+   "when": "Ticked in build.md every job.",
+   "how": "Each box is [x] with evidence or n/a with a reason, never blank.",
+   "sublabel": "Definition of done"
+  },
+  {
+   "id": "dod-4",
+   "label": "Ship readiness",
+   "kind": "board",
+   "what": "Ship readiness: untrusted input reviewed, a critical path logs enough, a risky change has a rollback.",
+   "when": "Ticked in build.md every job.",
+   "how": "Each box is [x] with evidence or n/a with a reason, never blank.",
+   "sublabel": "Definition of done"
+  },
+  {
+   "id": "wb-0",
+   "label": "Added suppression",
+   "kind": "hook",
+   "what": "Added suppression: @ts-ignore, eslint-disable, noqa, type: ignore.",
+   "when": "Any diff the approver or gate checks.",
+   "how": "An ESCALATE-TRIGGER, not a failure: a person decides whether the reason holds.",
+   "source": "factory/scripts/policy_check.py",
+   "sublabel": "weakened bar"
+  },
+  {
+   "id": "wb-1",
+   "label": "Skipped test",
+   "kind": "hook",
+   "what": "Skipped test: skip, xfail, focused only.",
+   "when": "Any diff the approver or gate checks.",
+   "how": "An ESCALATE-TRIGGER, not a failure: a person decides whether the reason holds.",
+   "source": "factory/scripts/policy_check.py",
+   "sublabel": "weakened bar"
+  },
+  {
+   "id": "wb-2",
+   "label": "Deleted test file",
+   "kind": "hook",
+   "what": "Deleted test file: a test file removed.",
+   "when": "Any diff the approver or gate checks.",
+   "how": "An ESCALATE-TRIGGER, not a failure: a person decides whether the reason holds.",
+   "source": "factory/scripts/policy_check.py",
+   "sublabel": "weakened bar"
+  },
+  {
+   "id": "wb-3",
+   "label": "Fewer assertions",
+   "kind": "hook",
+   "what": "Fewer assertions: assertions removed from a test.",
+   "when": "Any diff the approver or gate checks.",
+   "how": "An ESCALATE-TRIGGER, not a failure: a person decides whether the reason holds.",
+   "source": "factory/scripts/policy_check.py",
+   "sublabel": "weakened bar"
+  },
+  {
+   "id": "ck-security",
+   "label": "security.md",
+   "kind": "board",
+   "what": "Checklist: input validation, parameterised queries, auth on every new route, no secrets, workflow least privilege.",
+   "when": "The reviewer whose pass it belongs to reads it.",
+   "how": "Apply only the items the diff touches; skip the rest without comment. A broken item is a finding with a file and line.",
+   "source": "factory/checklists/security.md",
+   "sublabel": "checklist"
+  },
+  {
+   "id": "ck-access",
+   "label": "accessibility.md",
+   "kind": "board",
+   "what": "Checklist: keyboard, focus, labels, status announcements, contrast, targets, reduced motion.",
+   "when": "The reviewer whose pass it belongs to reads it.",
+   "how": "Apply only the items the diff touches; skip the rest without comment. A broken item is a finding with a file and line.",
+   "source": "factory/checklists/accessibility.md",
+   "sublabel": "checklist"
+  },
+  {
+   "id": "ck-perf",
+   "label": "performance.md",
+   "kind": "board",
+   "what": "Checklist: no query in a loop, indexes, bounded growth, streaming, measure before flagging.",
+   "when": "The reviewer whose pass it belongs to reads it.",
+   "how": "Apply only the items the diff touches; skip the rest without comment. A broken item is a finding with a file and line.",
+   "source": "factory/checklists/performance.md",
+   "sublabel": "checklist"
+  },
+  {
+   "id": "ck-obs",
+   "label": "observability.md",
+   "kind": "board",
+   "what": "Checklist: log a failure once with context, no swallowed errors, visible retries.",
+   "when": "The reviewer whose pass it belongs to reads it.",
+   "how": "Apply only the items the diff touches; skip the rest without comment. A broken item is a finding with a file and line.",
+   "source": "factory/checklists/observability.md",
+   "sublabel": "checklist"
+  },
+  {
+   "id": "ck-test",
+   "label": "testing.md",
+   "kind": "board",
+   "what": "Checklist: fails without the change, behaviour not implementation, no skips, deterministic.",
+   "when": "The reviewer whose pass it belongs to reads it.",
+   "how": "Apply only the items the diff touches; skip the rest without comment. A broken item is a finding with a file and line.",
+   "source": "factory/checklists/testing.md",
+   "sublabel": "checklist"
+  },
+  {
+   "id": "rr-spawn",
+   "label": "Spawn all four",
+   "kind": "script",
+   "what": "The orchestrator starts the four reviewers together so they run in parallel.",
+   "when": "Each review round.",
+   "how": "Each gets the job paths, a round number and, for ux and ui, a port.",
+   "sublabel": "in one message"
+  },
+  {
+   "id": "rr-wait",
+   "label": "Wait for all four",
+   "kind": "hook",
+   "what": "The round is done only when all four review files exist.",
+   "when": "Each review round.",
+   "how": "The builder is never resumed mid-round.",
+   "sublabel": "never resume mid-round"
+  },
+  {
+   "id": "rr-respawn",
+   "label": "Re-spawn once",
+   "kind": "hook",
+   "what": "A reviewer that returns without its file is run again once with a stronger prompt.",
+   "when": "A review file is missing or has no verdict.",
+   "how": "The orchestrator never writes a review itself and never takes a verdict from a reviewer's message; after a second miss it stops and tells you.",
+   "sublabel": "if a file is missing"
+  },
+  {
+   "id": "rr-changes",
+   "label": "Any CHANGES",
+   "kind": "script",
+   "what": "Any CHANGES verdict resumes the builder with the round folder.",
+   "when": "After the round.",
+   "how": "At most max_resumes times; after that the job goes to needs-human.",
+   "sublabel": "resume the builder"
+  },
+  {
+   "id": "rr-pass",
+   "label": "All PASS",
+   "kind": "script",
+   "what": "Four PASS verdicts send the job to the approver.",
+   "when": "After the round.",
+   "how": "The reviewed commit is pinned first, so a later code commit voids the approval.",
+   "sublabel": "go to the approver"
+  },
+  {
+   "id": "ap-disprove",
+   "label": "Disprove first",
+   "kind": "hook",
+   "what": "Names the one thing most likely to be wrong and checks it.",
+   "when": "Before writing APPROVE.",
+   "how": "By reading code or running a command, not from build.md's account. If it cannot check it, it escalates.",
+   "source": ".claude/agents/approver.md",
+   "sublabel": "before APPROVE"
+  },
+  {
+   "id": "ap-rerun",
+   "label": "Re-run a command",
+   "kind": "hook",
+   "what": "Re-runs at least one command that build.md cites and spot-checks a criterion.",
+   "when": "Every approval.",
+   "how": "Reviews share the builder's blind spots, so all-PASS is not enough.",
+   "sublabel": "from build.md"
+  },
+  {
+   "id": "dm-0",
+   "label": "First line",
+   "kind": "board",
+   "what": "First line: exactly APPROVE or ESCALATE.",
+   "when": "Every decision.",
+   "how": "Written by the approver and read by the gate and by you.",
+   "sublabel": "section of decision.md"
+  },
+  {
+   "id": "dm-1",
+   "label": "Why",
+   "kind": "board",
+   "what": "Why: two or three sentences, including what it checked itself.",
+   "when": "Every decision.",
+   "how": "Written by the approver and read by the gate and by you.",
+   "sublabel": "section of decision.md"
+  },
+  {
+   "id": "dm-2",
+   "label": "Acceptance criteria",
+   "kind": "board",
+   "what": "Acceptance criteria: met or not met, and how it knows.",
+   "when": "Every decision.",
+   "how": "Written by the approver and read by the gate and by you.",
+   "sublabel": "section of decision.md"
+  },
+  {
+   "id": "dm-3",
+   "label": "Plan adherence",
+   "kind": "board",
+   "what": "Plan adherence: whether the diff matches plan.md.",
+   "when": "Every decision.",
+   "how": "Written by the approver and read by the gate and by you.",
+   "sublabel": "section of decision.md"
+  },
+  {
+   "id": "dm-4",
+   "label": "Policy check",
+   "kind": "board",
+   "what": "Policy check: the output of policy_check.py, or clean.",
+   "when": "Every decision.",
+   "how": "Written by the approver and read by the gate and by you.",
+   "sublabel": "section of decision.md"
+  },
+  {
+   "id": "dm-5",
+   "label": "Merge danger",
+   "kind": "board",
+   "what": "Merge danger: door (one-way or two-way), blast radius in one word, before and after evidence.",
+   "when": "Every decision.",
+   "how": "Written by the approver and read by the gate and by you.",
+   "sublabel": "section of decision.md"
+  },
+  {
+   "id": "dm-6",
+   "label": "For the human",
+   "kind": "board",
+   "what": "For the human: only when escalating: the exact decision needed and the files to look at.",
+   "when": "Only on ESCALATE.",
+   "how": "Written by the approver and read by the gate and by you.",
+   "sublabel": "section of decision.md"
+  },
+  {
+   "id": "et-0",
+   "label": "CI or deploy config",
+   "kind": "hook",
+   "what": "CI or deploy config: .github/**, Dockerfile*, deploy*, k8s, terraform.",
+   "when": "At the approver and the gate.",
+   "how": "Even an APPROVE needs a human at the gate when one of these is present.",
+   "source": "factory/policy.json",
+   "sublabel": "always a person"
+  },
+  {
+   "id": "et-1",
+   "label": "Schema migrations",
+   "kind": "hook",
+   "what": "Schema migrations: any **/migrations/** path.",
+   "when": "At the approver and the gate.",
+   "how": "Even an APPROVE needs a human at the gate when one of these is present.",
+   "source": "factory/policy.json",
+   "sublabel": "always a person"
+  },
+  {
+   "id": "et-2",
+   "label": "New dependencies",
+   "kind": "hook",
+   "what": "New dependencies: a manifest or lockfile changed.",
+   "when": "At the approver and the gate.",
+   "how": "Even an APPROVE needs a human at the gate when one of these is present.",
+   "source": "factory/policy.json",
+   "sublabel": "always a person"
+  },
+  {
+   "id": "et-3",
+   "label": "Money, access, identity",
+   "kind": "hook",
+   "what": "Money, access, identity: payments, auth, permissions, security rules.",
+   "when": "At the approver and the gate.",
+   "how": "Even an APPROVE needs a human at the gate when one of these is present.",
+   "source": "factory/policy.json",
+   "sublabel": "always a person"
+  },
+  {
+   "id": "et-4",
+   "label": "Large change",
+   "kind": "hook",
+   "what": "Large change: over merge_policy.auto_max_lines (400).",
+   "when": "At the approver and the gate.",
+   "how": "Even an APPROVE needs a human at the gate when one of these is present.",
+   "source": "factory/policy.json",
+   "sublabel": "always a person"
+  },
+  {
+   "id": "et-5",
+   "label": "Waived intent",
+   "kind": "hook",
+   "what": "Waived intent: --skip-intent was used.",
+   "when": "At the approver and the gate.",
+   "how": "Even an APPROVE needs a human at the gate when one of these is present.",
+   "source": "factory/policy.json",
+   "sublabel": "always a person"
+  },
+  {
+   "id": "et-6",
+   "label": "Weakened bar",
+   "kind": "hook",
+   "what": "Weakened bar: a suppression, skipped test or stripped assertion.",
+   "when": "At the approver and the gate.",
+   "how": "Even an APPROVE needs a human at the gate when one of these is present.",
+   "source": "factory/policy.json",
+   "sublabel": "always a person"
+  },
+  {
+   "id": "et-7",
+   "label": "High-risk spec",
+   "kind": "hook",
+   "what": "High-risk spec: the spec's Risk line is high.",
+   "when": "At the approver and the gate.",
+   "how": "Even an APPROVE needs a human at the gate when one of these is present.",
+   "source": "factory/policy.json",
+   "sublabel": "always a person"
+  },
+  {
+   "id": "cp-0",
+   "label": "Frozen path edited",
+   "kind": "hook",
+   "what": "Frozen path edited: always refused, even with a human.",
+   "when": "Fourth gate check.",
+   "how": "Read from factory/policy.json by policy_check.py.",
+   "source": "factory/scripts/policy_check.py",
+   "sublabel": "policy check"
+  },
+  {
+   "id": "cp-1",
+   "label": "Escalate path touched",
+   "kind": "hook",
+   "what": "Escalate path touched: needs a human.",
+   "when": "Fourth gate check.",
+   "how": "Read from factory/policy.json by policy_check.py.",
+   "source": "factory/scripts/policy_check.py",
+   "sublabel": "policy check"
+  },
+  {
+   "id": "cp-2",
+   "label": "Dependency file changed",
+   "kind": "hook",
+   "what": "Dependency file changed: needs a human.",
+   "when": "Fourth gate check.",
+   "how": "Read from factory/policy.json by policy_check.py.",
+   "source": "factory/scripts/policy_check.py",
+   "sublabel": "policy check"
+  },
+  {
+   "id": "cp-3",
+   "label": "Over the size cap",
+   "kind": "hook",
+   "what": "Over the size cap: needs a human.",
+   "when": "Fourth gate check.",
+   "how": "Read from factory/policy.json by policy_check.py.",
+   "source": "factory/scripts/policy_check.py",
+   "sublabel": "policy check"
+  },
+  {
+   "id": "cp-4",
+   "label": "Intent waived",
+   "kind": "hook",
+   "what": "Intent waived: needs a human.",
+   "when": "Fourth gate check.",
+   "how": "Read from factory/policy.json by policy_check.py.",
+   "source": "factory/scripts/policy_check.py",
+   "sublabel": "policy check"
+  },
+  {
+   "id": "tm-copy",
+   "label": "Throwaway copy",
+   "kind": "script",
+   "what": "A detached worktree of the base branch.",
+   "when": "Every merge.",
+   "how": "Catches a branch that merges cleanly but no longer builds against a base that moved.",
+   "source": "factory/scripts/merge_gate.py",
+   "sublabel": "of main as it is now"
+  },
+  {
+   "id": "rm-nopush",
+   "label": "Never pushes",
+   "kind": "hook",
+   "what": "The gate merges locally and cleans up.",
+   "when": "Always.",
+   "how": "A person publishes the result, with the release variable set if they use Claude Code to do it.",
+   "sublabel": "local only"
+  },
+  {
+   "id": "ec-0",
+   "label": "exit 0",
+   "kind": "board",
+   "what": "Exit 0: merged.",
+   "when": "Every gate run.",
+   "how": "The orchestrator acts on the exit code and prints the gate's JSON.",
+   "source": "factory/scripts/merge_gate.py",
+   "sublabel": "merged"
+  },
+  {
+   "id": "ec-3",
+   "label": "exit 3",
+   "kind": "board",
+   "what": "Exit 3: a human must decide.",
+   "when": "Every gate run.",
+   "how": "The orchestrator acts on the exit code and prints the gate's JSON.",
+   "source": "factory/scripts/merge_gate.py",
+   "sublabel": "a human must decide"
+  },
+  {
+   "id": "ec-4",
+   "label": "exit 4",
+   "kind": "board",
+   "what": "Exit 4: refused.",
+   "when": "Every gate run.",
+   "how": "The orchestrator acts on the exit code and prints the gate's JSON.",
+   "source": "factory/scripts/merge_gate.py",
+   "sublabel": "refused"
+  },
+  {
+   "id": "ec-5",
+   "label": "exit 5",
+   "kind": "board",
+   "what": "Exit 5: verification or a ratchet failed.",
+   "when": "Every gate run.",
+   "how": "The orchestrator acts on the exit code and prints the gate's JSON.",
+   "source": "factory/scripts/merge_gate.py",
+   "sublabel": "verification or a ratchet failed"
+  },
+  {
+   "id": "ec-6",
+   "label": "exit 6",
+   "kind": "board",
+   "what": "Exit 6: another merge holds the lock; run it again.",
+   "when": "Every gate run.",
+   "how": "The orchestrator acts on the exit code and prints the gate's JSON.",
+   "source": "factory/scripts/merge_gate.py",
+   "sublabel": "another merge holds the lock; run it again"
+  },
+  {
+   "id": "ec-7",
+   "label": "exit 7",
+   "kind": "board",
+   "what": "Exit 7: the merge itself failed, for example a conflict.",
+   "when": "Every gate run.",
+   "how": "The orchestrator acts on the exit code and prints the gate's JSON.",
+   "source": "factory/scripts/merge_gate.py",
+   "sublabel": "the merge itself failed, for example a conflict"
+  },
+  {
+   "id": "pk-intent_required",
+   "label": "intent_required",
+   "kind": "board",
+   "what": "intent_required: a spec job needs an accepted intent.",
+   "when": "Read by the hooks, policy_check and the gate.",
+   "how": "Edited by a person; agents cannot edit factory/policy.json.",
+   "source": "factory/policy.json",
+   "sublabel": "policy.json key"
+  },
+  {
+   "id": "pk-spec_approval",
+   "label": "spec_approval",
+   "kind": "board",
+   "what": "spec_approval: human always pauses; auto only for low risk, never a split.",
+   "when": "Read by the hooks, policy_check and the gate.",
+   "how": "Edited by a person; agents cannot edit factory/policy.json.",
+   "source": "factory/policy.json",
+   "sublabel": "policy.json key"
+  },
+  {
+   "id": "pk-max_resumes",
+   "label": "max_resumes",
+   "kind": "board",
+   "what": "max_resumes: builder resumes after round 1.",
+   "when": "Read by the hooks, policy_check and the gate.",
+   "how": "Edited by a person; agents cannot edit factory/policy.json.",
+   "source": "factory/policy.json",
+   "sublabel": "policy.json key"
+  },
+  {
+   "id": "pk-frozen_paths",
+   "label": "frozen_paths",
+   "kind": "board",
+   "what": "frozen_paths: agents may never edit these.",
+   "when": "Read by the hooks, policy_check and the gate.",
+   "how": "Edited by a person; agents cannot edit factory/policy.json.",
+   "source": "factory/policy.json",
+   "sublabel": "policy.json key"
+  },
+  {
+   "id": "pk-escalate_paths",
+   "label": "escalate_paths",
+   "kind": "board",
+   "what": "escalate_paths: editable, but a human approves the merge.",
+   "when": "Read by the hooks, policy_check and the gate.",
+   "how": "Edited by a person; agents cannot edit factory/policy.json.",
+   "source": "factory/policy.json",
+   "sublabel": "policy.json key"
+  },
+  {
+   "id": "pk-dependency_files",
+   "label": "dependency_files",
+   "kind": "board",
+   "what": "dependency_files: a change needs a human.",
+   "when": "Read by the hooks, policy_check and the gate.",
+   "how": "Edited by a person; agents cannot edit factory/policy.json.",
+   "source": "factory/policy.json",
+   "sublabel": "policy.json key"
+  },
+  {
+   "id": "pk-test_globs",
+   "label": "test_globs",
+   "kind": "board",
+   "what": "test_globs: what counts as a test.",
+   "when": "Read by the hooks, policy_check and the gate.",
+   "how": "Edited by a person; agents cannot edit factory/policy.json.",
+   "source": "factory/policy.json",
+   "sublabel": "policy.json key"
+  },
+  {
+   "id": "pk-blocked_commands",
+   "label": "blocked_commands",
+   "kind": "board",
+   "what": "blocked_commands: push, deploy, publish and similar.",
+   "when": "Read by the hooks, policy_check and the gate.",
+   "how": "Edited by a person; agents cannot edit factory/policy.json.",
+   "source": "factory/policy.json",
+   "sublabel": "policy.json key"
+  },
+  {
+   "id": "pk-ticketing",
+   "label": "ticketing",
+   "kind": "board",
+   "what": "ticketing: ticket key pattern and optional MCP server.",
+   "when": "Read by the hooks, policy_check and the gate.",
+   "how": "Edited by a person; agents cannot edit factory/policy.json.",
+   "source": "factory/policy.json",
+   "sublabel": "policy.json key"
+  },
+  {
+   "id": "pk-merge_policy",
+   "label": "merge_policy",
+   "kind": "board",
+   "what": "merge_policy: size cap, verify_commands, constraints, lock timeout.",
+   "when": "Read by the hooks, policy_check and the gate.",
+   "how": "Edited by a person; agents cannot edit factory/policy.json.",
+   "source": "factory/policy.json",
+   "sublabel": "policy.json key"
+  },
+  {
+   "id": "pk-adr",
+   "label": "adr",
+   "kind": "board",
+   "what": "adr: where merged Design sections are recorded.",
+   "when": "Read by the hooks, policy_check and the gate.",
+   "how": "Edited by a person; agents cannot edit factory/policy.json.",
+   "source": "factory/policy.json",
+   "sublabel": "policy.json key"
+  },
+  {
+   "id": "he-scope",
+   "label": "Only in worktrees",
+   "kind": "hook",
+   "what": "The path rules apply only inside a factory worktree.",
+   "when": "Every edit.",
+   "how": "A person editing the main checkout is never blocked.",
+   "source": ".claude/hooks/factory_hooks.py",
+   "sublabel": "never blocks you"
+  },
+  {
+   "id": "he-frozen",
+   "label": "Frozen paths refused",
+   "kind": "hook",
+   "what": "An edit to a frozen path is refused.",
+   "when": "Every Edit or Write in a worktree.",
+   "how": "The agent writes BLOCKED and the job goes to needs-human; it never works around a hook.",
+   "source": ".claude/hooks/factory_hooks.py",
+   "sublabel": "write BLOCKED"
+  },
+  {
+   "id": "hb-0",
+   "label": "Publishing code",
+   "kind": "hook",
+   "what": "Publishing code: blocked unless a person authorised a release.",
+   "when": "Every Bash call.",
+   "how": "Matched against factory/policy.json blocked_commands.",
+   "source": ".claude/hooks/factory_hooks.py",
+   "sublabel": "blocked command"
+  },
+  {
+   "id": "hb-1",
+   "label": "Deploy and publish",
+   "kind": "hook",
+   "what": "Deploy and publish: terraform apply, kubectl, helm, docker push, npm publish.",
+   "when": "Every Bash call.",
+   "how": "Matched against factory/policy.json blocked_commands.",
+   "source": ".claude/hooks/factory_hooks.py",
+   "sublabel": "blocked command"
+  },
+  {
+   "id": "hb-2",
+   "label": "Hand-merging a factory branch",
+   "kind": "hook",
+   "what": "Hand-merging a factory branch: use merge_gate.py.",
+   "when": "Every Bash call.",
+   "how": "Matched against factory/policy.json blocked_commands.",
+   "source": ".claude/hooks/factory_hooks.py",
+   "sublabel": "blocked command"
+  },
+  {
+   "id": "hb-3",
+   "label": "Secrets in a commit",
+   "kind": "hook",
+   "what": "Secrets in a commit: common key formats.",
+   "when": "Every Bash call.",
+   "how": "Matched against factory/policy.json blocked_commands.",
+   "source": ".claude/hooks/factory_hooks.py",
+   "sublabel": "blocked command"
+  },
+  {
+   "id": "hb-allowed",
+   "label": "Read-only merge checks",
+   "kind": "board",
+   "what": "merge-tree and merge-base on a factory branch are allowed.",
+   "when": "The approver's conflict check.",
+   "how": "The pattern uses merge(?![\\w-]) so they are not mistaken for a merge.",
+   "source": "factory/policy.json",
+   "sublabel": "allowed"
+  },
+  {
+   "id": "mg-owners",
+   "label": "CODEOWNERS + branch protection",
+   "kind": "board",
+   "what": "Protect .claude/ and factory/policy.json.",
+   "when": "When you adopt it.",
+   "how": "Hooks in the repo can be edited by anyone with write access; this is the other half of enforcement.",
+   "sublabel": "your repo"
+  },
+  {
+   "id": "pt-0",
+   "label": "builder port",
+   "kind": "board",
+   "what": "builder uses 5100 + 10n, where n is the job number.",
+   "when": "Each job.",
+   "how": "Each also gets its own agent-browser session, named <job-id>-<role>.",
+   "sublabel": "5100 + 10n"
+  },
+  {
+   "id": "pt-1",
+   "label": "reviewer-ux port",
+   "kind": "board",
+   "what": "reviewer-ux uses 5101 + 10n, where n is the job number.",
+   "when": "Each job.",
+   "how": "Each also gets its own agent-browser session, named <job-id>-<role>.",
+   "sublabel": "5101 + 10n"
+  },
+  {
+   "id": "pt-2",
+   "label": "reviewer-ui port",
+   "kind": "board",
+   "what": "reviewer-ui uses 5102 + 10n, where n is the job number.",
+   "when": "Each job.",
+   "how": "Each also gets its own agent-browser session, named <job-id>-<role>.",
+   "sublabel": "5102 + 10n"
+  },
+  {
+   "id": "ml-exit",
+   "label": "exit 6",
+   "kind": "board",
+   "what": "Another merge holds the lock.",
+   "when": "Two jobs finish together.",
+   "how": "Wait a minute and run the gate again.",
+   "sublabel": "run it again"
+  },
+  {
+   "id": "cl-cmd",
+   "label": "A command",
+   "kind": "script",
+   "what": "Collector: a command, prints a number.",
+   "when": "Each collect run.",
+   "how": "Enable the entries in collectors.json that point at your service.",
+   "source": "factory/maintain/collectors.json",
+   "sublabel": "collector"
+  },
+  {
+   "id": "cl-http",
+   "label": "An HTTP JSON endpoint",
+   "kind": "script",
+   "what": "Collector: an http json endpoint, secrets read from environment variables.",
+   "when": "Each collect run.",
+   "how": "Enable the entries in collectors.json that point at your service.",
+   "source": "factory/maintain/collectors.json",
+   "sublabel": "collector"
+  },
+  {
+   "id": "cl-log",
+   "label": "A log file",
+   "kind": "script",
+   "what": "Collector: a log file, its error rate.",
+   "when": "Each collect run.",
+   "how": "Enable the entries in collectors.json that point at your service.",
+   "source": "factory/maintain/collectors.json",
+   "sublabel": "collector"
+  },
+  {
+   "id": "cl-git",
+   "label": "git",
+   "kind": "script",
+   "what": "Collector: git, commits or reverts per day.",
+   "when": "Each collect run.",
+   "how": "Enable the entries in collectors.json that point at your service.",
+   "source": "factory/maintain/collectors.json",
+   "sublabel": "collector"
+  },
+  {
+   "id": "cl-factory",
+   "label": "The factory itself",
+   "kind": "script",
+   "what": "Collector: the factory itself, its own cycle time.",
+   "when": "Each collect run.",
+   "how": "Enable the entries in collectors.json that point at your service.",
+   "source": "factory/maintain/collectors.json",
+   "sublabel": "collector"
+  },
+  {
+   "id": "bd-0",
+   "label": "1 sigma",
+   "kind": "board",
+   "what": "1 sigma: logged.",
+   "when": "Each detect run.",
+   "how": "Measured against that metric's own baseline; a dismissal widens it.",
+   "source": "factory/maintain/bands.json",
+   "sublabel": "band"
+  },
+  {
+   "id": "bd-1",
+   "label": "2 sigma",
+   "kind": "board",
+   "what": "2 sigma: diagnosed by the diagnoser.",
+   "when": "Each detect run.",
+   "how": "Measured against that metric's own baseline; a dismissal widens it.",
+   "source": "factory/maintain/bands.json",
+   "sublabel": "band"
+  },
+  {
+   "id": "bd-2",
+   "label": "3 sigma",
+   "kind": "board",
+   "what": "3 sigma: acted on: an incident and an intent.",
+   "when": "Each detect run.",
+   "how": "Measured against that metric's own baseline; a dismissal widens it.",
+   "source": "factory/maintain/bands.json",
+   "sublabel": "band"
+  },
+  {
+   "id": "dg-measure",
+   "label": "Check the measurement",
+   "kind": "hook",
+   "what": "Confirms the metric measures what the band assumes.",
+   "when": "Every diagnosis.",
+   "how": "Looks at how it is computed, whether its definition, unit or window changed, and whether the baseline period is comparable.",
+   "source": ".claude/agents/diagnoser.md",
+   "sublabel": "before blaming a change"
+  },
+  {
+   "id": "dg-hyp",
+   "label": "Competing hypotheses",
+   "kind": "board",
+   "what": "Candidate causes, each with what would confirm and what would rule it out.",
+   "when": "Every diagnosis.",
+   "how": "Keeps the ones it could not rule out and says which check would separate them.",
+   "source": ".claude/agents/diagnoser.md",
+   "sublabel": "2 or 3"
+  },
+  {
+   "id": "diagnosis-md",
+   "label": "diagnosis.md",
+   "kind": "board",
+   "what": "Evidence, likely cause, confidence, one suggested next step.",
+   "when": "After a breach.",
+   "how": "A person decides; it never suggests a rollback as the default.",
+   "source": "factory/maintain/",
+   "sublabel": "LIKELY-CAUSE | INCONCLUSIVE"
+  },
+  {
+   "id": "lens-secrets",
+   "label": "Secrets lens",
+   "kind": "script",
+   "what": "Looks for secrets in files and git history.",
+   "when": "Each scan.",
+   "how": "Plain code.",
+   "source": "factory/maintain/scan_lenses.py",
+   "sublabel": "no model"
+  },
+  {
+   "id": "lens-deps",
+   "label": "Dependencies lens",
+   "kind": "script",
+   "what": "Looks at dependency manifests.",
+   "when": "Each scan.",
+   "how": "Plain code.",
+   "source": "factory/maintain/scan_lenses.py",
+   "sublabel": "no model"
+  },
+  {
+   "id": "db-cols",
+   "label": "Columns",
+   "kind": "board",
+   "what": "Columns: Intent, Spec, Approve spec, Plan, Build, Review, Approve, Merged, Needs human, and Split when used.",
+   "when": "While jobs run.",
+   "how": "No build step and no dependencies.",
+   "source": "factory/dashboard.html",
+   "sublabel": "dashboard.html"
+  },
+  {
+   "id": "db-cards",
+   "label": "Cards",
+   "kind": "board",
+   "what": "Cards: feature, branch, review chips per round, tags such as paused or waits on, and the command you should run.",
+   "when": "While jobs run.",
+   "how": "No build step and no dependencies.",
+   "source": "factory/dashboard.html",
+   "sublabel": "dashboard.html"
+  },
+  {
+   "id": "db-drawer",
+   "label": "Drawer",
+   "kind": "board",
+   "what": "Drawer: click a card to read each job file, coloured by its first line.",
+   "when": "While jobs run.",
+   "how": "No build step and no dependencies.",
+   "source": "factory/dashboard.html",
+   "sublabel": "dashboard.html"
+  },
+  {
+   "id": "db-poll",
+   "label": "Polls jobs/",
+   "kind": "script",
+   "what": "Reads each job.json and its round folders.",
+   "when": "While the page is open.",
+   "how": "Each orchestrator session writes only its own job.json, so sessions never collide.",
+   "source": "factory/dashboard.html",
+   "sublabel": "every 2 seconds"
+  },
+  {
+   "id": "mt-cycle",
+   "label": "Median cycle time",
+   "kind": "board",
+   "what": "Median cycle time, from the job history.",
+   "when": "At /factory metrics.",
+   "how": "Computed from job.json timestamps; nothing else is stored.",
+   "source": "factory/scripts/metrics.py",
+   "sublabel": "/factory metrics"
+  },
+  {
+   "id": "mt-first",
+   "label": "First-pass rate",
+   "kind": "board",
+   "what": "First-pass rate, from the job history.",
+   "when": "At /factory metrics.",
+   "how": "Computed from job.json timestamps; nothing else is stored.",
+   "source": "factory/scripts/metrics.py",
+   "sublabel": "/factory metrics"
+  },
+  {
+   "id": "mt-rounds",
+   "label": "Average review rounds",
+   "kind": "board",
+   "what": "Average review rounds, from the job history.",
+   "when": "At /factory metrics.",
+   "how": "Computed from job.json timestamps; nothing else is stored.",
+   "source": "factory/scripts/metrics.py",
+   "sublabel": "/factory metrics"
+  },
+  {
+   "id": "mt-esc",
+   "label": "Escalation rate",
+   "kind": "board",
+   "what": "Escalation rate, from the job history.",
+   "when": "At /factory metrics.",
+   "how": "Computed from job.json timestamps; nothing else is stored.",
+   "source": "factory/scripts/metrics.py",
+   "sublabel": "/factory metrics"
+  },
+  {
+   "id": "ls-group",
+   "label": "Group findings",
+   "kind": "script",
+   "what": "Groups CHANGES findings that say nearly the same thing.",
+   "when": "At /factory lessons.",
+   "how": "Needs the same finding in at least two jobs; read the groups yourself.",
+   "source": "factory/scripts/lessons.py",
+   "sublabel": "word overlap"
+  },
+  {
+   "id": "ls-hint",
+   "label": "Fix level",
+   "kind": "board",
+   "what": "Architecture, types, a lint, a test, and only then a written rule.",
+   "when": "Per group.",
+   "how": "A suppression points at the existing weakened-bar scan; missing validation points at a boundary test or a type.",
+   "source": "factory/scripts/lessons.py",
+   "sublabel": "strongest first"
+  },
+  {
+   "id": "ev-config",
+   "label": "Config",
+   "kind": "board",
+   "what": "Offline checks for: config.",
+   "when": "run_evals.py.",
+   "how": "No model; mutation-tested where it matters.",
+   "source": "factory/evals/run_evals.py",
+   "sublabel": "offline checks"
+  },
+  {
+   "id": "ev-hooks",
+   "label": "Hooks",
+   "kind": "board",
+   "what": "Offline checks for: hooks.",
+   "when": "run_evals.py.",
+   "how": "No model; mutation-tested where it matters.",
+   "source": "factory/evals/run_evals.py",
+   "sublabel": "offline checks"
+  },
+  {
+   "id": "ev-managed",
+   "label": "Managed settings",
+   "kind": "board",
+   "what": "Offline checks for: managed settings.",
+   "when": "run_evals.py.",
+   "how": "No model; mutation-tested where it matters.",
+   "source": "factory/evals/run_evals.py",
+   "sublabel": "offline checks"
+  },
+  {
+   "id": "ev-maintain",
+   "label": "Maintain loop",
+   "kind": "board",
+   "what": "Offline checks for: maintain loop.",
+   "when": "run_evals.py.",
+   "how": "No model; mutation-tested where it matters.",
+   "source": "factory/evals/run_evals.py",
+   "sublabel": "offline checks"
+  },
+  {
+   "id": "ev-scan",
+   "label": "Scan lenses",
+   "kind": "board",
+   "what": "Offline checks for: scan lenses.",
+   "when": "run_evals.py.",
+   "how": "No model; mutation-tested where it matters.",
+   "source": "factory/evals/run_evals.py",
+   "sublabel": "offline checks"
+  },
+  {
+   "id": "ev-gate",
+   "label": "Merge gate",
+   "kind": "board",
+   "what": "Offline checks for: merge gate.",
+   "when": "run_evals.py.",
+   "how": "No model; mutation-tested where it matters.",
+   "source": "factory/evals/run_evals.py",
+   "sublabel": "offline checks"
+  },
+  {
+   "id": "ev-scripts",
+   "label": "Scripts",
+   "kind": "board",
+   "what": "Offline checks for: scripts.",
+   "when": "run_evals.py.",
+   "how": "No model; mutation-tested where it matters.",
+   "source": "factory/evals/run_evals.py",
+   "sublabel": "offline checks"
+  },
+  {
+   "id": "ev-artifacts",
+   "label": "Artifact formats",
+   "kind": "board",
+   "what": "Offline checks for: artifact formats.",
+   "when": "run_evals.py.",
+   "how": "No model; mutation-tested where it matters.",
+   "source": "factory/evals/run_evals.py",
+   "sublabel": "offline checks"
+  },
+  {
+   "id": "ae-loop",
+   "label": "Intent, spec, planner",
+   "kind": "board",
+   "what": "Live agent cases: Intent, spec, planner.",
+   "when": "agent_evals.py.",
+   "how": "Each runs the agent on a fixture repo and checks its output file mechanically.",
+   "source": "factory/evals/agent_evals.py",
+   "sublabel": "live cases"
+  },
+  {
+   "id": "ae-review",
+   "label": "Reviewers",
+   "kind": "board",
+   "what": "Live agent cases: Reviewers.",
+   "when": "agent_evals.py.",
+   "how": "Each runs the agent on a fixture repo and checks its output file mechanically.",
+   "source": "factory/evals/agent_evals.py",
+   "sublabel": "live cases"
+  },
+  {
+   "id": "ae-approve",
+   "label": "Approver",
+   "kind": "board",
+   "what": "Live agent cases: Approver.",
+   "when": "agent_evals.py.",
+   "how": "Each runs the agent on a fixture repo and checks its output file mechanically.",
+   "source": "factory/evals/agent_evals.py",
+   "sublabel": "live cases"
+  },
+  {
+   "id": "ae-diag",
+   "label": "Diagnoser",
+   "kind": "board",
+   "what": "Live agent cases: Diagnoser.",
+   "when": "agent_evals.py.",
+   "how": "Each runs the agent on a fixture repo and checks its output file mechanically.",
+   "source": "factory/evals/agent_evals.py",
+   "sublabel": "live cases"
+  },
+  {
+   "id": "ae-onb",
+   "label": "Onboarder",
+   "kind": "board",
+   "what": "Live agent cases: Onboarder.",
+   "when": "agent_evals.py.",
+   "how": "Each runs the agent on a fixture repo and checks its output file mechanically.",
+   "source": "factory/evals/agent_evals.py",
+   "sublabel": "live cases"
+  },
+  {
+   "id": "ae-scan",
+   "label": "Scanner",
+   "kind": "board",
+   "what": "Live agent cases: Scanner.",
+   "when": "agent_evals.py.",
+   "how": "Each runs the agent on a fixture repo and checks its output file mechanically.",
+   "source": "factory/evals/agent_evals.py",
+   "sublabel": "live cases"
+  },
+  {
+   "id": "ae-pr",
+   "label": "pr-reviewer",
+   "kind": "board",
+   "what": "Live agent cases: pr-reviewer.",
+   "when": "agent_evals.py.",
+   "how": "Each runs the agent on a fixture repo and checks its output file mechanically.",
+   "source": "factory/evals/agent_evals.py",
+   "sublabel": "live cases"
+  },
+  {
+   "id": "ae-build",
+   "label": "Builder",
+   "kind": "board",
+   "what": "Live agent cases: Builder.",
+   "when": "agent_evals.py.",
+   "how": "Each runs the agent on a fixture repo and checks its output file mechanically.",
+   "source": "factory/evals/agent_evals.py",
+   "sublabel": "live cases"
+  },
+  {
+   "id": "e2e-natural",
+   "label": "Natural jobs",
+   "kind": "board",
+   "what": "Natural jobs: intent to merge in round 1.",
+   "when": "Recorded in AUDIT.md.",
+   "how": "Run on a fixture repo with nested claude -p sessions in auto mode.",
+   "source": "AUDIT.md",
+   "sublabel": "end-to-end run"
+  },
+  {
+   "id": "e2e-escalate",
+   "label": "Escalate + rework",
+   "kind": "board",
+   "what": "Escalate + rework: a CI workflow: ESCALATE, human rework, round 2, human approve.",
+   "when": "Recorded in AUDIT.md.",
+   "how": "Run on a fixture repo with nested claude -p sessions in auto mode.",
+   "source": "AUDIT.md",
+   "sublabel": "end-to-end run"
+  },
+  {
+   "id": "e2e-split",
+   "label": "A split job",
+   "kind": "board",
+   "what": "A split job: three dependent children, ADRs, the parent closing.",
+   "when": "Recorded in AUDIT.md.",
+   "how": "Run on a fixture repo with nested claude -p sessions in auto mode.",
+   "source": "AUDIT.md",
+   "sublabel": "end-to-end run"
+  },
+  {
+   "id": "e2e-changes",
+   "label": "A CHANGES round",
+   "kind": "board",
+   "what": "A CHANGES round: a fault-injected defect caught by two reviewers, fixed, merged.",
+   "when": "Recorded in AUDIT.md.",
+   "how": "Run on a fixture repo with nested claude -p sessions in auto mode.",
+   "source": "AUDIT.md",
+   "sublabel": "end-to-end run"
+  },
+  {
+   "id": "e2e-ui",
+   "label": "UI jobs",
+   "kind": "board",
+   "what": "UI jobs: reviewers open the page with agent-browser.",
+   "when": "Recorded in AUDIT.md.",
+   "how": "Run on a fixture repo with nested claude -p sessions in auto mode.",
+   "source": "AUDIT.md",
+   "sublabel": "end-to-end run"
+  },
+  {
+   "id": "dc-agents",
+   "label": "AGENTS.md covers the basics",
+   "kind": "hook",
+   "what": "AGENTS.md covers the basics: setup, tests, build or lint, dev server and port, layout, conventions, what not to touch.",
+   "when": "/factory doctor.",
+   "how": "PASS, WARN or FAIL; a FAIL means jobs will misbehave.",
+   "source": "factory/scripts/doctor.py",
+   "sublabel": "doctor check"
+  },
+  {
+   "id": "dc-policy",
+   "label": "Policy is valid",
+   "kind": "hook",
+   "what": "Policy is valid: frozen, escalate and blocked lists, intent_required.",
+   "when": "/factory doctor.",
+   "how": "PASS, WARN or FAIL; a FAIL means jobs will misbehave.",
+   "source": "factory/scripts/doctor.py",
+   "sublabel": "doctor check"
+  },
+  {
+   "id": "dc-hooks",
+   "label": "Hooks are wired",
+   "kind": "hook",
+   "what": "Hooks are wired: settings.json calls the factory hooks.",
+   "when": "/factory doctor.",
+   "how": "PASS, WARN or FAIL; a FAIL means jobs will misbehave.",
+   "source": "factory/scripts/doctor.py",
+   "sublabel": "doctor check"
+  },
+  {
+   "id": "dc-skills",
+   "label": "Helper skills installed",
+   "kind": "hook",
+   "what": "Helper skills installed: tdd, diagnosing-bugs, codebase-design, code-review, grilling.",
+   "when": "/factory doctor.",
+   "how": "PASS, WARN or FAIL; a FAIL means jobs will misbehave.",
+   "source": "factory/scripts/doctor.py",
+   "sublabel": "doctor check"
+  },
+  {
+   "id": "dc-verify",
+   "label": "verify-app exists",
+   "kind": "hook",
+   "what": "verify-app exists: when the app has a dev server.",
+   "when": "/factory doctor.",
+   "how": "PASS, WARN or FAIL; a FAIL means jobs will misbehave.",
+   "source": "factory/scripts/doctor.py",
+   "sublabel": "doctor check"
+  },
+  {
+   "id": "cmd-feature",
+   "label": "/factory <feature>",
+   "kind": "public",
+   "what": "Runs a new job.",
+   "when": "You have a feature to build.",
+   "how": "Because intent is required, it starts at /factory intent and stops for you. Flags: --ticket KEY, --type bugfix, and a person's --skip-intent \"reason\".",
+   "source": ".claude/skills/factory/SKILL.md",
+   "sublabel": "[--ticket KEY] [--type bugfix]",
+   "verbs": [
+    "--ticket",
+    "--type bugfix",
+    "--skip-intent"
+   ]
+  },
+  {
+   "id": "commands",
+   "label": "Commands",
+   "kind": "lane",
+   "what": "All sixteen /factory commands.",
+   "when": "Whenever you want to know what to type.",
+   "how": "Each command opens its own view: what it runs, which agents, scripts and files it touches, and where it stops for you.",
+   "source": ".claude/skills/factory/SKILL.md",
+   "sublabel": "all 16 /factory commands",
+   "opensView": "commands"
+  },
+  {
+   "id": "pr-drop",
+   "label": "Comments off the diff",
+   "kind": "hook",
+   "what": "A comment whose file, line or quoted code is not in the diff is dropped.",
+   "when": "Every review_branch run.",
+   "how": "So an invented comment cannot reach a pull request.",
+   "source": "factory/scripts/review_branch.py",
+   "sublabel": "dropped by a script"
+  },
+  {
+   "id": "gh-script",
+   "label": "gh-review.sh",
+   "kind": "board",
+   "what": "For a pull request, the commands to post the review.",
+   "when": "After you read review.md.",
+   "how": "Nothing is ever posted for you.",
+   "sublabel": "you run it"
+  },
+  {
+   "id": "verify-proposed",
+   "label": "VERIFY.proposed.md",
+   "kind": "board",
+   "what": "A draft verify-app skill from the onboarder.",
+   "when": "For a repo with a runnable app.",
+   "how": "You read it, fix every UNKNOWN, and move it to .claude/skills/verify-app/SKILL.md yourself, because .claude/ is frozen.",
+   "sublabel": "a draft, not installed"
+  }
+ ],
+ "edges": [],
+ "views": [
+  {
+   "id": "root",
+   "parent": null,
+   "title": "Forgeline",
+   "caption": "A software factory for Claude Code. One job runs from idea to main with two human gates; open any area for its agents, files, scripts and guardrails.",
+   "nodeIds": [
+    "intake",
+    "spec",
+    "plan",
+    "build",
+    "review",
+    "approve",
+    "gate",
+    "commands",
+    "install",
+    "agents",
+    "guardrails",
+    "split",
+    "parallel",
+    "maintain",
+    "dashboard",
+    "evals"
+   ],
+   "edges": [
+    {
+     "from": "intake",
+     "to": "spec",
+     "label": "accepted"
+    },
+    {
+     "from": "spec",
+     "to": "plan",
+     "label": "approved"
+    },
+    {
+     "from": "plan",
+     "to": "build",
+     "label": "plan.md"
+    },
+    {
+     "from": "build",
+     "to": "review",
+     "label": "round N"
+    },
+    {
+     "from": "review",
+     "to": "approve",
+     "label": "all PASS"
+    },
+    {
+     "from": "approve",
+     "to": "gate",
+     "label": "APPROVE"
+    },
+    {
+     "from": "review",
+     "to": "build",
+     "label": "CHANGES"
+    }
+   ],
+   "containers": [
+    {
+     "id": "job-loop",
+     "label": "One job: idea → main",
+     "nodeIds": [
+      "intake",
+      "spec",
+      "plan",
+      "build",
+      "review",
+      "approve",
+      "gate"
+     ]
+    },
+    {
+     "id": "around",
+     "label": "Around the loop",
+     "nodeIds": [
+      "commands",
+      "install",
+      "agents",
+      "guardrails",
+      "split",
+      "parallel",
+      "maintain",
+      "dashboard",
+      "evals"
+     ]
+    }
+   ],
+   "mainSteps": true,
+   "render": "process",
+   "stepIds": [
+    "intake",
+    "spec",
+    "plan",
+    "build",
+    "review",
+    "approve",
+    "gate"
+   ],
+   "nodes": [
+    {
+     "id": "intake",
+     "label": "Intake",
+     "kind": "step",
+     "what": "Turns an idea into an accepted intent.",
+     "when": "Every job starts here unless intent is waived.",
+     "how": "intent-writer writes intent.md in your own words, with guesses marked and open questions listed. You answer them and accept.",
+     "source": "factory/templates/intent.md",
+     "sublabel": "idea → accepted intent",
+     "opensView": "intake"
+    },
+    {
+     "id": "spec",
+     "label": "Spec",
+     "kind": "step",
+     "what": "Turns the intent into a spec you approve.",
+     "when": "After you accept the intent.",
+     "how": "spec-writer writes risk, design and testable acceptance criteria, and a Split section for work too big for one change. A human gate follows.",
+     "sublabel": "spec.md + your approval",
+     "opensView": "spec"
+    },
+    {
+     "id": "plan",
+     "label": "Plan",
+     "kind": "step",
+     "what": "Writes the plan before any code.",
+     "when": "After you approve the spec.",
+     "how": "planner reads the real code and writes ordered steps, a proof for each criterion, the blast radius and the rollback.",
+     "sublabel": "plan.md",
+     "opensView": "plan"
+    },
+    {
+     "id": "build",
+     "label": "Build",
+     "kind": "step",
+     "what": "Implements the plan in the job's worktree.",
+     "when": "After the plan is READY.",
+     "how": "builder works test-first, ticks the Definition of Done, observes the real artifact, and commits. It is resumed when reviewers return CHANGES.",
+     "sublabel": "builder in a worktree",
+     "opensView": "build"
+    },
+    {
+     "id": "review",
+     "label": "Review",
+     "kind": "step",
+     "what": "Four lenses review the branch in parallel.",
+     "when": "After each build round.",
+     "how": "security, ux, ui and code reviewers each write one file. The round is done only when all four exist.",
+     "sublabel": "4 reviewers in parallel",
+     "opensView": "review"
+    },
+    {
+     "id": "approve",
+     "label": "Approve",
+     "kind": "step",
+     "what": "Decides whether the branch merges.",
+     "when": "After all four reviews PASS.",
+     "how": "approver tries to disprove its own decision, then writes APPROVE or ESCALATE with a merge-danger block.",
+     "sublabel": "APPROVE or ESCALATE",
+     "opensView": "approve"
+    },
+    {
+     "id": "gate",
+     "label": "Merge gate",
+     "kind": "step",
+     "what": "The only way a job reaches main.",
+     "when": "After APPROVE, or after /factory approve.",
+     "how": "merge_gate.py checks the decision, the pinned commit, policy and dependencies, proves the merge on a throwaway copy, then merges. It never pushes.",
+     "source": "factory/scripts/merge_gate.py",
+     "sublabel": "only way to main",
+     "opensView": "gate"
+    }
+   ],
+   "layout": {
+    "intake": [
+     0,
+     0
+    ],
+    "spec": [
+     1,
+     0
+    ],
+    "plan": [
+     2,
+     0
+    ],
+    "build": [
+     3,
+     0
+    ],
+    "review": [
+     4,
+     0
+    ],
+    "approve": [
+     5,
+     0
+    ],
+    "gate": [
+     6,
+     0
+    ],
+    "commands": [
+     0,
+     3
+    ],
+    "install": [
+     1,
+     3
+    ],
+    "agents": [
+     2,
+     3
+    ],
+    "guardrails": [
+     3,
+     3
+    ],
+    "split": [
+     4,
+     3
+    ],
+    "parallel": [
+     0,
+     4
+    ],
+    "maintain": [
+     1,
+     4
+    ],
+    "dashboard": [
+     2,
+     4
+    ],
+    "evals": [
+     3,
+     4
+    ]
+   }
+  },
+  {
+   "id": "intake",
+   "parent": "root",
+   "title": "Intake · idea → accepted intent",
+   "caption": "Intent is required by default. You answer the open questions, then accept.",
+   "nodeIds": [
+    "cmd-intent",
+    "jobctl",
+    "intent-writer",
+    "intent-md",
+    "cmd-accept",
+    "worktree",
+    "out-of-scope",
+    "glossary",
+    "intent-inherit"
+   ],
+   "edges": [
+    {
+     "from": "cmd-intent",
+     "to": "jobctl",
+     "label": "creates the job"
+    },
+    {
+     "from": "jobctl",
+     "to": "intent-writer",
+     "label": "spawns"
+    },
+    {
+     "from": "intent-writer",
+     "to": "intent-md",
+     "label": "writes"
+    },
+    {
+     "from": "intent-md",
+     "to": "cmd-accept",
+     "label": "you accept"
+    },
+    {
+     "from": "cmd-accept",
+     "to": "worktree",
+     "label": "creates"
+    },
+    {
+     "from": "out-of-scope",
+     "to": "intent-writer",
+     "label": "read"
+    },
+    {
+     "from": "glossary",
+     "to": "intent-writer",
+     "label": "read"
+    }
+   ]
+  },
+  {
+   "id": "spec",
+   "parent": "root",
+   "title": "Spec · design the change",
+   "caption": "The spec-writer proposes; you approve. A big spec adds a Split section.",
+   "nodeIds": [
+    "spec-writer",
+    "spec-md",
+    "cmd-approve-spec",
+    "cmd-respec",
+    "out-of-scope",
+    "glossary",
+    "adr-dir",
+    "split",
+    "agents-md"
+   ],
+   "edges": [
+    {
+     "from": "spec-writer",
+     "to": "spec-md",
+     "label": "writes"
+    },
+    {
+     "from": "spec-md",
+     "to": "cmd-approve-spec",
+     "label": "you approve"
+    },
+    {
+     "from": "spec-md",
+     "to": "cmd-respec",
+     "label": "or send back"
+    },
+    {
+     "from": "cmd-respec",
+     "to": "spec-writer",
+     "label": "revise"
+    },
+    {
+     "from": "out-of-scope",
+     "to": "spec-writer",
+     "label": "read"
+    },
+    {
+     "from": "glossary",
+     "to": "spec-writer",
+     "label": "read"
+    },
+    {
+     "from": "adr-dir",
+     "to": "spec-writer",
+     "label": "read"
+    },
+    {
+     "from": "agents-md",
+     "to": "spec-writer",
+     "label": "read"
+    },
+    {
+     "from": "spec-md",
+     "to": "split",
+     "label": "Split section"
+    }
+   ]
+  },
+  {
+   "id": "plan",
+   "parent": "root",
+   "title": "Plan · before any code",
+   "caption": "The planner reads real code and cites real source; claims are labelled by how far they were checked.",
+   "nodeIds": [
+    "planner",
+    "plan-md",
+    "codebase-design",
+    "adr-dir",
+    "policy-json",
+    "cmd-approve-spec"
+   ],
+   "edges": [
+    {
+     "from": "cmd-approve-spec",
+     "to": "planner",
+     "label": "starts"
+    },
+    {
+     "from": "planner",
+     "to": "plan-md",
+     "label": "writes"
+    },
+    {
+     "from": "codebase-design",
+     "to": "planner",
+     "label": "vocabulary"
+    },
+    {
+     "from": "adr-dir",
+     "to": "planner",
+     "label": "read"
+    },
+    {
+     "from": "policy-json",
+     "to": "planner",
+     "label": "frozen paths"
+    }
+   ]
+  },
+  {
+   "id": "build",
+   "parent": "root",
+   "title": "Build · in the job's worktree",
+   "caption": "Test first, observe the real thing, tick the Definition of Done, commit. Resumed on CHANGES, at most twice.",
+   "nodeIds": [
+    "builder",
+    "tdd",
+    "diagnosing-bugs",
+    "codebase-design",
+    "verify-app",
+    "agent-browser",
+    "test-lock",
+    "weakened-bar",
+    "dod",
+    "build-md",
+    "worktree",
+    "snapshot-audit"
+   ],
+   "edges": [
+    {
+     "from": "builder",
+     "to": "tdd",
+     "label": "calls"
+    },
+    {
+     "from": "builder",
+     "to": "diagnosing-bugs",
+     "label": "bugfix"
+    },
+    {
+     "from": "builder",
+     "to": "codebase-design",
+     "label": "if unclear"
+    },
+    {
+     "from": "builder",
+     "to": "verify-app",
+     "label": "UI criteria"
+    },
+    {
+     "from": "verify-app",
+     "to": "agent-browser",
+     "label": "drives"
+    },
+    {
+     "from": "builder",
+     "to": "build-md",
+     "label": "writes"
+    },
+    {
+     "from": "dod",
+     "to": "build-md",
+     "label": "ticked in"
+    },
+    {
+     "from": "test-lock",
+     "to": "builder",
+     "label": "blocks"
+    },
+    {
+     "from": "weakened-bar",
+     "to": "builder",
+     "label": "forbids"
+    },
+    {
+     "from": "builder",
+     "to": "worktree",
+     "label": "edits only here"
+    },
+    {
+     "from": "build-md",
+     "to": "snapshot-audit",
+     "label": "committed by"
+    }
+   ]
+  },
+  {
+   "id": "review",
+   "parent": "root",
+   "title": "Review · four lenses in parallel",
+   "caption": "Each reviewer writes one file. The round is done only when all four exist; a reviewer that returns without its file is re-spawned once.",
+   "nodeIds": [
+    "reviewer-security",
+    "reviewer-ux",
+    "reviewer-ui",
+    "reviewer-code",
+    "checklists",
+    "review-md",
+    "review-files",
+    "verify-app",
+    "agent-browser",
+    "code-review",
+    "dod"
+   ],
+   "edges": [
+    {
+     "from": "checklists",
+     "to": "reviewer-security",
+     "label": "security.md"
+    },
+    {
+     "from": "checklists",
+     "to": "reviewer-ux",
+     "label": "accessibility.md"
+    },
+    {
+     "from": "review-md",
+     "to": "reviewer-code",
+     "label": "Important vs Nit"
+    },
+    {
+     "from": "verify-app",
+     "to": "reviewer-ux",
+     "label": "read first"
+    },
+    {
+     "from": "reviewer-ux",
+     "to": "agent-browser",
+     "label": "opens the page"
+    },
+    {
+     "from": "reviewer-ui",
+     "to": "agent-browser",
+     "label": "opens the page"
+    },
+    {
+     "from": "code-review",
+     "to": "reviewer-code",
+     "label": "axes"
+    },
+    {
+     "from": "dod",
+     "to": "reviewer-code",
+     "label": "check ticks"
+    },
+    {
+     "from": "reviewer-security",
+     "to": "review-files",
+     "label": "writes"
+    },
+    {
+     "from": "reviewer-ux",
+     "to": "review-files",
+     "label": "writes"
+    },
+    {
+     "from": "reviewer-ui",
+     "to": "review-files",
+     "label": "writes"
+    },
+    {
+     "from": "reviewer-code",
+     "to": "review-files",
+     "label": "writes"
+    }
+   ],
+   "layout": {
+    "checklists": [
+     0,
+     0
+    ],
+    "verify-app": [
+     0,
+     1
+    ],
+    "review-md": [
+     0,
+     3
+    ],
+    "code-review": [
+     0,
+     4
+    ],
+    "dod": [
+     0,
+     5
+    ],
+    "reviewer-security": [
+     1,
+     0
+    ],
+    "reviewer-ux": [
+     1,
+     1
+    ],
+    "reviewer-ui": [
+     1,
+     2
+    ],
+    "reviewer-code": [
+     1,
+     3
+    ],
+    "agent-browser": [
+     2,
+     1
+    ],
+    "review-files": [
+     3,
+     2
+    ]
+   }
+  },
+  {
+   "id": "approve",
+   "parent": "root",
+   "title": "Approve · try to disprove first",
+   "caption": "APPROVE merges with no human looking; ESCALATE stops at needs-human.",
+   "nodeIds": [
+    "approver",
+    "policy-check",
+    "weakened-bar",
+    "escalate-triggers",
+    "decision-md",
+    "cmd-approve",
+    "cmd-rework",
+    "dod",
+    "merge-gate"
+   ],
+   "edges": [
+    {
+     "from": "approver",
+     "to": "policy-check",
+     "label": "runs"
+    },
+    {
+     "from": "policy-check",
+     "to": "weakened-bar",
+     "label": "includes"
+    },
+    {
+     "from": "escalate-triggers",
+     "to": "approver",
+     "label": "read"
+    },
+    {
+     "from": "dod",
+     "to": "approver",
+     "label": "spot-check"
+    },
+    {
+     "from": "approver",
+     "to": "decision-md",
+     "label": "writes"
+    },
+    {
+     "from": "decision-md",
+     "to": "merge-gate",
+     "label": "APPROVE"
+    },
+    {
+     "from": "decision-md",
+     "to": "cmd-approve",
+     "label": "ESCALATE: merge"
+    },
+    {
+     "from": "decision-md",
+     "to": "cmd-rework",
+     "label": "ESCALATE: change"
+    }
+   ]
+  },
+  {
+   "id": "gate",
+   "parent": "root",
+   "title": "Merge gate · merge_gate.py <job-id>",
+   "caption": "The only way to main. Checks run in order inside one lock; nothing is pushed.",
+   "nodeIds": [
+    "merge-lock",
+    "check-clean",
+    "check-decision",
+    "check-pinned",
+    "check-policy",
+    "dep-check",
+    "trial-merge",
+    "verify-cmds",
+    "constraints-py",
+    "real-merge",
+    "adr-py",
+    "constraints-json"
+   ],
+   "edges": [
+    {
+     "from": "merge-lock",
+     "to": "check-clean",
+     "label": "takes"
+    },
+    {
+     "from": "check-clean",
+     "to": "check-decision",
+     "label": "ok"
+    },
+    {
+     "from": "check-decision",
+     "to": "check-pinned",
+     "label": "ok"
+    },
+    {
+     "from": "check-pinned",
+     "to": "check-policy",
+     "label": "ok"
+    },
+    {
+     "from": "check-policy",
+     "to": "dep-check",
+     "label": "ok"
+    },
+    {
+     "from": "dep-check",
+     "to": "trial-merge",
+     "label": "ok"
+    },
+    {
+     "from": "trial-merge",
+     "to": "verify-cmds",
+     "label": "runs"
+    },
+    {
+     "from": "verify-cmds",
+     "to": "constraints-py",
+     "label": "then"
+    },
+    {
+     "from": "constraints-json",
+     "to": "constraints-py",
+     "label": "baseline"
+    },
+    {
+     "from": "constraints-py",
+     "to": "real-merge",
+     "label": "pass"
+    },
+    {
+     "from": "real-merge",
+     "to": "adr-py",
+     "label": "then"
+    }
+   ]
+  },
+  {
+   "id": "split",
+   "parent": "root",
+   "title": "Split jobs · big work → child jobs",
+   "caption": "A split parent builds nothing; children run in dependency order and each is a full job.",
+   "nodeIds": [
+    "spec-md",
+    "cmd-approve-spec",
+    "jobctl",
+    "intent-inherit",
+    "slice",
+    "cmd-ready",
+    "dep-check",
+    "parent-close"
+   ],
+   "edges": [
+    {
+     "from": "spec-md",
+     "to": "cmd-approve-spec",
+     "label": "has Split"
+    },
+    {
+     "from": "cmd-approve-spec",
+     "to": "jobctl",
+     "label": "creates children"
+    },
+    {
+     "from": "jobctl",
+     "to": "intent-inherit",
+     "label": "copies intent"
+    },
+    {
+     "from": "jobctl",
+     "to": "slice",
+     "label": "per slice"
+    },
+    {
+     "from": "cmd-ready",
+     "to": "slice",
+     "label": "starts ready"
+    },
+    {
+     "from": "dep-check",
+     "to": "slice",
+     "label": "refuses early"
+    },
+    {
+     "from": "slice",
+     "to": "parent-close",
+     "label": "all merged"
+    }
+   ]
+  },
+  {
+   "id": "parallel",
+   "parent": "root",
+   "title": "Parallel jobs + git worktrees",
+   "caption": "One session per job in the same repo; jobs never touch each other and merges are serialised.",
+   "nodeIds": [
+    "session",
+    "jobctl",
+    "worktree",
+    "ports",
+    "merge-lock",
+    "merge-gate",
+    "agent-browser"
+   ],
+   "edges": [
+    {
+     "from": "session",
+     "to": "jobctl",
+     "label": "claims a number"
+    },
+    {
+     "from": "jobctl",
+     "to": "worktree",
+     "label": "creates"
+    },
+    {
+     "from": "session",
+     "to": "ports",
+     "label": "gets"
+    },
+    {
+     "from": "ports",
+     "to": "agent-browser",
+     "label": "own session"
+    },
+    {
+     "from": "worktree",
+     "to": "merge-gate",
+     "label": "branch"
+    },
+    {
+     "from": "merge-gate",
+     "to": "merge-lock",
+     "label": "takes"
+    }
+   ]
+  },
+  {
+   "id": "agents",
+   "parent": "root",
+   "title": "All 14 agents",
+   "caption": "Nine run the job loop (four of them reviewers); five sit beside it. Each writes exactly one file.",
+   "nodeIds": [
+    "intent-writer",
+    "spec-writer",
+    "planner",
+    "builder",
+    "reviewer-security",
+    "reviewer-ux",
+    "reviewer-ui",
+    "reviewer-code",
+    "approver",
+    "onboarder",
+    "pr-reviewer",
+    "diagnoser",
+    "scanner-security",
+    "scanner-quality"
+   ],
+   "edges": [
+    {
+     "from": "intent-writer",
+     "to": "spec-writer",
+     "label": "intent"
+    },
+    {
+     "from": "spec-writer",
+     "to": "planner",
+     "label": "spec"
+    },
+    {
+     "from": "planner",
+     "to": "builder",
+     "label": "plan"
+    },
+    {
+     "from": "builder",
+     "to": "reviewer-code",
+     "label": "branch"
+    },
+    {
+     "from": "reviewer-code",
+     "to": "approver",
+     "label": "all PASS"
+    }
+   ],
+   "containers": [
+    {
+     "id": "loop",
+     "label": "Job loop",
+     "nodeIds": [
+      "intent-writer",
+      "spec-writer",
+      "planner",
+      "builder",
+      "approver"
+     ]
+    },
+    {
+     "id": "lenses",
+     "label": "Review lenses",
+     "nodeIds": [
+      "reviewer-security",
+      "reviewer-ux",
+      "reviewer-ui",
+      "reviewer-code"
+     ]
+    },
+    {
+     "id": "setup",
+     "label": "Setup and any-branch review",
+     "nodeIds": [
+      "onboarder",
+      "pr-reviewer"
+     ]
+    },
+    {
+     "id": "watch",
+     "label": "Maintain loop (read-only)",
+     "nodeIds": [
+      "diagnoser",
+      "scanner-security",
+      "scanner-quality"
+     ]
+    }
+   ],
+   "layout": {
+    "intent-writer": [
+     0,
+     0
+    ],
+    "spec-writer": [
+     1,
+     0
+    ],
+    "planner": [
+     2,
+     0
+    ],
+    "builder": [
+     3,
+     0
+    ],
+    "approver": [
+     5,
+     0
+    ],
+    "reviewer-security": [
+     1,
+     3
+    ],
+    "reviewer-ux": [
+     2,
+     3
+    ],
+    "reviewer-ui": [
+     3,
+     3
+    ],
+    "reviewer-code": [
+     4,
+     3
+    ],
+    "onboarder": [
+     0,
+     6
+    ],
+    "pr-reviewer": [
+     1,
+     6
+    ],
+    "diagnoser": [
+     3,
+     6
+    ],
+    "scanner-security": [
+     4,
+     6
+    ],
+    "scanner-quality": [
+     5,
+     6
+    ]
+   }
+  },
+  {
+   "id": "guardrails",
+   "parent": "root",
+   "title": "Guardrails",
+   "caption": "Hooks prevent, scans detect, the audit trail records, and the merge gate is the only way to main.",
+   "nodeIds": [
+    "policy-json",
+    "hook-edits",
+    "hook-bash",
+    "managed-install",
+    "release-var",
+    "weakened-bar",
+    "secrets-scan",
+    "test-lock",
+    "merge-gate",
+    "audit-trail",
+    "escalate-triggers"
+   ],
+   "edges": [
+    {
+     "from": "policy-json",
+     "to": "hook-edits",
+     "label": "rules"
+    },
+    {
+     "from": "policy-json",
+     "to": "hook-bash",
+     "label": "rules"
+    },
+    {
+     "from": "managed-install",
+     "to": "policy-json",
+     "label": "enforces"
+    },
+    {
+     "from": "release-var",
+     "to": "hook-bash",
+     "label": "authorises"
+    },
+    {
+     "from": "hook-bash",
+     "to": "secrets-scan",
+     "label": "includes"
+    },
+    {
+     "from": "hook-edits",
+     "to": "test-lock",
+     "label": "includes"
+    },
+    {
+     "from": "weakened-bar",
+     "to": "escalate-triggers",
+     "label": "is one"
+    },
+    {
+     "from": "escalate-triggers",
+     "to": "merge-gate",
+     "label": "need a human"
+    },
+    {
+     "from": "merge-gate",
+     "to": "audit-trail",
+     "label": "record"
+    }
+   ]
+  },
+  {
+   "id": "maintain",
+   "parent": "root",
+   "title": "Maintain loop · watch, diagnose, scan",
+   "caption": "Detection is plain statistics. The model only explains a breach and writes it up; a person decides.",
+   "nodeIds": [
+    "cmd-maintain",
+    "collectors-json",
+    "collect-py",
+    "detect-py",
+    "diagnoser",
+    "incident-md",
+    "cmd-accept",
+    "scan-py",
+    "triage",
+    "backlog",
+    "dismiss-py",
+    "schedule-py"
+   ],
+   "edges": [
+    {
+     "from": "cmd-maintain",
+     "to": "collect-py",
+     "label": "runs"
+    },
+    {
+     "from": "collectors-json",
+     "to": "collect-py",
+     "label": "config"
+    },
+    {
+     "from": "collect-py",
+     "to": "detect-py",
+     "label": "metrics"
+    },
+    {
+     "from": "detect-py",
+     "to": "diagnoser",
+     "label": "breach"
+    },
+    {
+     "from": "diagnoser",
+     "to": "incident-md",
+     "label": "3 sigma"
+    },
+    {
+     "from": "incident-md",
+     "to": "cmd-accept",
+     "label": "becomes an intent"
+    },
+    {
+     "from": "scan-py",
+     "to": "triage",
+     "label": "findings"
+    },
+    {
+     "from": "triage",
+     "to": "backlog",
+     "label": "accept"
+    },
+    {
+     "from": "triage",
+     "to": "dismiss-py",
+     "label": "dismiss"
+    },
+    {
+     "from": "schedule-py",
+     "to": "collect-py",
+     "label": "cron"
+    }
+   ]
+  },
+  {
+   "id": "dashboard",
+   "parent": "root",
+   "title": "Dashboard + metrics",
+   "caption": "dashboard.html, metrics and lessons all read the same job files.",
+   "nodeIds": [
+    "dashboard-html",
+    "job-json",
+    "cmd-metrics",
+    "metrics-py",
+    "cmd-lessons",
+    "lessons-py",
+    "jobctl"
+   ],
+   "edges": [
+    {
+     "from": "jobctl",
+     "to": "job-json",
+     "label": "writes"
+    },
+    {
+     "from": "job-json",
+     "to": "dashboard-html",
+     "label": "polled"
+    },
+    {
+     "from": "cmd-metrics",
+     "to": "metrics-py",
+     "label": "runs"
+    },
+    {
+     "from": "job-json",
+     "to": "metrics-py",
+     "label": "read"
+    },
+    {
+     "from": "cmd-lessons",
+     "to": "lessons-py",
+     "label": "runs"
+    },
+    {
+     "from": "job-json",
+     "to": "lessons-py",
+     "label": "read"
+    }
+   ],
+   "layout": {
+    "jobctl": [
+     0,
+     0
+    ],
+    "job-json": [
+     1,
+     0
+    ],
+    "dashboard-html": [
+     2,
+     0
+    ],
+    "metrics-py": [
+     2,
+     2
+    ],
+    "lessons-py": [
+     2,
+     3
+    ],
+    "cmd-metrics": [
+     1,
+     2
+    ],
+    "cmd-lessons": [
+     1,
+     3
+    ]
+   }
+  },
+  {
+   "id": "evals",
+   "parent": "root",
+   "title": "Evals + CI",
+   "caption": "Offline checks need no model; live cases run each agent on a fixture repo; end-to-end runs are recorded in AUDIT.md.",
+   "nodeIds": [
+    "run-evals",
+    "agent-evals",
+    "ci-workflow",
+    "python312",
+    "e2e",
+    "audit-md"
+   ],
+   "edges": [
+    {
+     "from": "run-evals",
+     "to": "python312",
+     "label": "needs"
+    },
+    {
+     "from": "run-evals",
+     "to": "ci-workflow",
+     "label": "run in CI"
+    },
+    {
+     "from": "e2e",
+     "to": "audit-md",
+     "label": "recorded in"
+    },
+    {
+     "from": "agent-evals",
+     "to": "audit-md",
+     "label": "recorded in"
+    }
+   ]
+  },
+  {
+   "id": "install",
+   "parent": "root",
+   "title": "Install in a repo",
+   "caption": "Copy, ignore the runtime files, run doctor, make the policy yours, then run your first job.",
+   "nodeIds": [
+    "copy-step",
+    "gitignore",
+    "cmd-doctor",
+    "cmd-init",
+    "onboarder",
+    "agents-md",
+    "verify-app",
+    "policy-edit",
+    "install-helpers",
+    "run-evals",
+    "cmd-intent"
+   ],
+   "edges": [
+    {
+     "from": "copy-step",
+     "to": "gitignore",
+     "label": "then"
+    },
+    {
+     "from": "gitignore",
+     "to": "cmd-doctor",
+     "label": "then"
+    },
+    {
+     "from": "cmd-doctor",
+     "to": "cmd-init",
+     "label": "if no AGENTS.md"
+    },
+    {
+     "from": "cmd-init",
+     "to": "onboarder",
+     "label": "spawns"
+    },
+    {
+     "from": "onboarder",
+     "to": "agents-md",
+     "label": "drafts"
+    },
+    {
+     "from": "onboarder",
+     "to": "verify-app",
+     "label": "drafts"
+    },
+    {
+     "from": "agents-md",
+     "to": "policy-edit",
+     "label": "then"
+    },
+    {
+     "from": "policy-edit",
+     "to": "install-helpers",
+     "label": "then"
+    },
+    {
+     "from": "install-helpers",
+     "to": "run-evals",
+     "label": "then"
+    },
+    {
+     "from": "run-evals",
+     "to": "cmd-intent",
+     "label": "first job"
+    }
+   ]
+  },
+  {
+   "id": "intent-writer",
+   "parent": "intake",
+   "title": "intent-writer",
+   "caption": "What it reads, what it fills in, and the one file it writes.",
+   "nodeIds": [
+    "intent-writer",
+    "agents-md",
+    "out-of-scope",
+    "glossary",
+    "intent-template",
+    "intent-md",
+    "open-questions",
+    "assumptions"
+   ],
+   "edges": [
+    {
+     "from": "agents-md",
+     "to": "intent-writer",
+     "label": "read"
+    },
+    {
+     "from": "out-of-scope",
+     "to": "intent-writer",
+     "label": "read"
+    },
+    {
+     "from": "glossary",
+     "to": "intent-writer",
+     "label": "read"
+    },
+    {
+     "from": "intent-template",
+     "to": "intent-writer",
+     "label": "fills"
+    },
+    {
+     "from": "intent-writer",
+     "to": "intent-md",
+     "label": "writes"
+    },
+    {
+     "from": "intent-md",
+     "to": "open-questions",
+     "label": "has"
+    },
+    {
+     "from": "intent-md",
+     "to": "assumptions",
+     "label": "has"
+    }
+   ]
+  },
+  {
+   "id": "jobctl",
+   "parent": "intake",
+   "title": "jobctl.py · the only writer of job state",
+   "caption": "Every stage change goes through it, and every artifact is snapshotted onto the job branch.",
+   "nodeIds": [
+    "claim-number",
+    "jobctl",
+    "job-json",
+    "worktree",
+    "snapshot-audit",
+    "audit-trail"
+   ],
+   "edges": [
+    {
+     "from": "claim-number",
+     "to": "jobctl",
+     "label": "number"
+    },
+    {
+     "from": "jobctl",
+     "to": "job-json",
+     "label": "writes"
+    },
+    {
+     "from": "jobctl",
+     "to": "worktree",
+     "label": "records path"
+    },
+    {
+     "from": "snapshot-audit",
+     "to": "audit-trail",
+     "label": "commits"
+    }
+   ]
+  },
+  {
+   "id": "spec-md",
+   "parent": "spec",
+   "title": "spec.md · what is in it",
+   "caption": "Eight sections. A person approves the whole file, so the trade-offs are explicit.",
+   "nodeIds": [
+    "spec-md",
+    "sec-0",
+    "sec-1",
+    "sec-2",
+    "sec-3",
+    "sec-4",
+    "sec-5",
+    "sec-6",
+    "sec-7"
+   ],
+   "edges": [
+    {
+     "from": "spec-md",
+     "to": "sec-0"
+    },
+    {
+     "from": "spec-md",
+     "to": "sec-1"
+    },
+    {
+     "from": "spec-md",
+     "to": "sec-2"
+    },
+    {
+     "from": "spec-md",
+     "to": "sec-3"
+    },
+    {
+     "from": "spec-md",
+     "to": "sec-4"
+    },
+    {
+     "from": "spec-md",
+     "to": "sec-5"
+    },
+    {
+     "from": "spec-md",
+     "to": "sec-6"
+    },
+    {
+     "from": "spec-md",
+     "to": "sec-7"
+    }
+   ]
+  },
+  {
+   "id": "spec-writer",
+   "parent": "spec",
+   "title": "spec-writer",
+   "caption": "Reads the intent and the real code; writes only spec.md.",
+   "nodeIds": [
+    "spec-writer",
+    "intent-md",
+    "agents-md",
+    "out-of-scope",
+    "glossary",
+    "adr-dir",
+    "spec-feedback",
+    "spec-md"
+   ],
+   "edges": [
+    {
+     "from": "intent-md",
+     "to": "spec-writer",
+     "label": "read"
+    },
+    {
+     "from": "agents-md",
+     "to": "spec-writer",
+     "label": "read"
+    },
+    {
+     "from": "out-of-scope",
+     "to": "spec-writer",
+     "label": "read"
+    },
+    {
+     "from": "glossary",
+     "to": "spec-writer",
+     "label": "read"
+    },
+    {
+     "from": "adr-dir",
+     "to": "spec-writer",
+     "label": "read"
+    },
+    {
+     "from": "spec-feedback",
+     "to": "spec-writer",
+     "label": "address"
+    },
+    {
+     "from": "spec-writer",
+     "to": "spec-md",
+     "label": "writes"
+    }
+   ]
+  },
+  {
+   "id": "plan-md",
+   "parent": "plan",
+   "title": "plan.md · what is in it",
+   "caption": "First line PLAN: READY or PLAN: BLOCKED.",
+   "nodeIds": [
+    "plan-md",
+    "pl-0",
+    "pl-1",
+    "pl-2",
+    "pl-3",
+    "pl-4",
+    "pl-5"
+   ],
+   "edges": [
+    {
+     "from": "plan-md",
+     "to": "pl-0"
+    },
+    {
+     "from": "plan-md",
+     "to": "pl-1"
+    },
+    {
+     "from": "plan-md",
+     "to": "pl-2"
+    },
+    {
+     "from": "plan-md",
+     "to": "pl-3"
+    },
+    {
+     "from": "plan-md",
+     "to": "pl-4"
+    },
+    {
+     "from": "plan-md",
+     "to": "pl-5"
+    }
+   ]
+  },
+  {
+   "id": "planner",
+   "parent": "plan",
+   "title": "planner",
+   "caption": "Reads the approved spec and the real code; never edits code.",
+   "nodeIds": [
+    "planner",
+    "spec-md",
+    "agents-md",
+    "policy-json",
+    "adr-dir",
+    "codebase-design",
+    "plan-md"
+   ],
+   "edges": [
+    {
+     "from": "spec-md",
+     "to": "planner",
+     "label": "read"
+    },
+    {
+     "from": "agents-md",
+     "to": "planner",
+     "label": "read"
+    },
+    {
+     "from": "policy-json",
+     "to": "planner",
+     "label": "frozen paths"
+    },
+    {
+     "from": "adr-dir",
+     "to": "planner",
+     "label": "read"
+    },
+    {
+     "from": "codebase-design",
+     "to": "planner",
+     "label": "vocabulary"
+    },
+    {
+     "from": "planner",
+     "to": "plan-md",
+     "label": "writes"
+    }
+   ]
+  },
+  {
+   "id": "pl-3",
+   "parent": "plan-md",
+   "title": "Blast radius · how far a claim was checked",
+   "caption": "The planner labels each safety claim, so an asserted claim is never mistaken for a proven one.",
+   "nodeIds": [
+    "pl-3",
+    "lad-0",
+    "lad-1",
+    "lad-2",
+    "lad-3"
+   ],
+   "edges": [
+    {
+     "from": "lad-0",
+     "to": "lad-1",
+     "label": "stronger"
+    },
+    {
+     "from": "lad-1",
+     "to": "lad-2",
+     "label": "stronger"
+    },
+    {
+     "from": "lad-2",
+     "to": "lad-3",
+     "label": "stronger"
+    },
+    {
+     "from": "pl-3",
+     "to": "lad-0",
+     "label": "labelled"
+    }
+   ]
+  },
+  {
+   "id": "tdd",
+   "parent": "build",
+   "title": "tdd · test first",
+   "caption": "Red before green, one slice at a time, at the seams the plan names.",
+   "nodeIds": [
+    "tdd",
+    "builder",
+    "red-commit",
+    "test-lock",
+    "diagnosing-bugs"
+   ],
+   "edges": [
+    {
+     "from": "builder",
+     "to": "tdd",
+     "label": "calls"
+    },
+    {
+     "from": "builder",
+     "to": "diagnosing-bugs",
+     "label": "bugfix"
+    },
+    {
+     "from": "diagnosing-bugs",
+     "to": "red-commit",
+     "label": "feedback loop"
+    },
+    {
+     "from": "red-commit",
+     "to": "test-lock",
+     "label": "then lock"
+    }
+   ]
+  },
+  {
+   "id": "verify-app",
+   "parent": "build",
+   "title": "verify-app · look at the real app",
+   "caption": "Your repo's own account of how to start the app, what each area should show and how to drive it.",
+   "nodeIds": [
+    "verify-app",
+    "onboarder",
+    "agents-md",
+    "doctor-py",
+    "agent-browser",
+    "builder",
+    "reviewer-ux",
+    "reviewer-ui"
+   ],
+   "edges": [
+    {
+     "from": "onboarder",
+     "to": "verify-app",
+     "label": "drafts"
+    },
+    {
+     "from": "agents-md",
+     "to": "onboarder",
+     "label": "read"
+    },
+    {
+     "from": "doctor-py",
+     "to": "verify-app",
+     "label": "warns until it exists"
+    },
+    {
+     "from": "verify-app",
+     "to": "agent-browser",
+     "label": "drives"
+    },
+    {
+     "from": "builder",
+     "to": "verify-app",
+     "label": "uses"
+    },
+    {
+     "from": "reviewer-ux",
+     "to": "verify-app",
+     "label": "reads"
+    },
+    {
+     "from": "reviewer-ui",
+     "to": "verify-app",
+     "label": "reads"
+    }
+   ]
+  },
+  {
+   "id": "dod",
+   "parent": "build",
+   "title": "Definition of done",
+   "caption": "A standing bar for every job. The builder ticks it; the code reviewer and approver check the ticks.",
+   "nodeIds": [
+    "dod",
+    "dod-0",
+    "dod-1",
+    "dod-2",
+    "dod-3",
+    "dod-4",
+    "build-md",
+    "reviewer-code",
+    "approver"
+   ],
+   "edges": [
+    {
+     "from": "dod",
+     "to": "dod-0"
+    },
+    {
+     "from": "dod",
+     "to": "dod-1"
+    },
+    {
+     "from": "dod",
+     "to": "dod-2"
+    },
+    {
+     "from": "dod",
+     "to": "dod-3"
+    },
+    {
+     "from": "dod",
+     "to": "dod-4"
+    },
+    {
+     "from": "build-md",
+     "to": "dod",
+     "label": "ticked in"
+    },
+    {
+     "from": "reviewer-code",
+     "to": "dod",
+     "label": "checks"
+    },
+    {
+     "from": "approver",
+     "to": "dod",
+     "label": "spot-checks"
+    }
+   ]
+  },
+  {
+   "id": "weakened-bar",
+   "parent": "build",
+   "title": "Weakened-bar scan",
+   "caption": "Getting to green by lowering the bar is the failure this exists for.",
+   "nodeIds": [
+    "weakened-bar",
+    "wb-0",
+    "wb-1",
+    "wb-2",
+    "wb-3",
+    "policy-check",
+    "reviewer-code",
+    "approver"
+   ],
+   "edges": [
+    {
+     "from": "weakened-bar",
+     "to": "wb-0",
+     "label": "flags"
+    },
+    {
+     "from": "weakened-bar",
+     "to": "wb-1",
+     "label": "flags"
+    },
+    {
+     "from": "weakened-bar",
+     "to": "wb-2",
+     "label": "flags"
+    },
+    {
+     "from": "weakened-bar",
+     "to": "wb-3",
+     "label": "flags"
+    },
+    {
+     "from": "policy-check",
+     "to": "weakened-bar",
+     "label": "includes"
+    },
+    {
+     "from": "reviewer-code",
+     "to": "weakened-bar",
+     "label": "reads"
+    },
+    {
+     "from": "approver",
+     "to": "weakened-bar",
+     "label": "escalates"
+    }
+   ]
+  },
+  {
+   "id": "builder",
+   "parent": "build",
+   "title": "builder",
+   "caption": "Reads the approved plan and writes code only in the worktree.",
+   "nodeIds": [
+    "builder",
+    "spec-md",
+    "plan-md",
+    "agents-md",
+    "policy-json",
+    "tdd",
+    "verify-app",
+    "dod",
+    "build-md",
+    "worktree"
+   ],
+   "edges": [
+    {
+     "from": "spec-md",
+     "to": "builder",
+     "label": "read"
+    },
+    {
+     "from": "plan-md",
+     "to": "builder",
+     "label": "follows"
+    },
+    {
+     "from": "agents-md",
+     "to": "builder",
+     "label": "read"
+    },
+    {
+     "from": "policy-json",
+     "to": "builder",
+     "label": "frozen paths"
+    },
+    {
+     "from": "builder",
+     "to": "tdd",
+     "label": "calls"
+    },
+    {
+     "from": "builder",
+     "to": "verify-app",
+     "label": "UI criteria"
+    },
+    {
+     "from": "builder",
+     "to": "worktree",
+     "label": "edits only here"
+    },
+    {
+     "from": "dod",
+     "to": "build-md",
+     "label": "ticked in"
+    },
+    {
+     "from": "builder",
+     "to": "build-md",
+     "label": "writes"
+    }
+   ]
+  },
+  {
+   "id": "reviewer-security",
+   "parent": "review",
+   "title": "reviewer-security",
+   "caption": "One lens, one checklist, one file.",
+   "nodeIds": [
+    "reviewer-security",
+    "ck-security",
+    "review-md",
+    "review-files"
+   ],
+   "edges": [
+    {
+     "from": "ck-security",
+     "to": "reviewer-security",
+     "label": "applies"
+    },
+    {
+     "from": "review-md",
+     "to": "reviewer-security",
+     "label": "Important vs Nit"
+    },
+    {
+     "from": "reviewer-security",
+     "to": "review-files",
+     "label": "writes"
+    }
+   ]
+  },
+  {
+   "id": "reviewer-ux",
+   "parent": "review",
+   "title": "reviewer-ux",
+   "caption": "Opens the page when the diff changes what it renders.",
+   "nodeIds": [
+    "reviewer-ux",
+    "ck-access",
+    "verify-app",
+    "agent-browser",
+    "review-md",
+    "review-files"
+   ],
+   "edges": [
+    {
+     "from": "ck-access",
+     "to": "reviewer-ux",
+     "label": "flow"
+    },
+    {
+     "from": "verify-app",
+     "to": "reviewer-ux",
+     "label": "read first"
+    },
+    {
+     "from": "reviewer-ux",
+     "to": "agent-browser",
+     "label": "opens the page"
+    },
+    {
+     "from": "review-md",
+     "to": "reviewer-ux",
+     "label": "Important vs Nit"
+    },
+    {
+     "from": "reviewer-ux",
+     "to": "review-files",
+     "label": "writes"
+    }
+   ]
+  },
+  {
+   "id": "reviewer-ui",
+   "parent": "review",
+   "title": "reviewer-ui",
+   "caption": "Looks at the page against the repo's own styles.",
+   "nodeIds": [
+    "reviewer-ui",
+    "ck-access",
+    "verify-app",
+    "agent-browser",
+    "review-files"
+   ],
+   "edges": [
+    {
+     "from": "ck-access",
+     "to": "reviewer-ui",
+     "label": "look"
+    },
+    {
+     "from": "verify-app",
+     "to": "reviewer-ui",
+     "label": "read first"
+    },
+    {
+     "from": "reviewer-ui",
+     "to": "agent-browser",
+     "label": "opens the page"
+    },
+    {
+     "from": "reviewer-ui",
+     "to": "review-files",
+     "label": "writes"
+    }
+   ]
+  },
+  {
+   "id": "reviewer-code",
+   "parent": "review",
+   "title": "reviewer-code",
+   "caption": "Checks the diff against the spec, the plan and the standing bar.",
+   "nodeIds": [
+    "reviewer-code",
+    "ck-perf",
+    "ck-obs",
+    "ck-test",
+    "code-review",
+    "dod",
+    "weakened-bar",
+    "plan-md",
+    "spec-md",
+    "review-files"
+   ],
+   "edges": [
+    {
+     "from": "ck-perf",
+     "to": "reviewer-code",
+     "label": "applies"
+    },
+    {
+     "from": "ck-obs",
+     "to": "reviewer-code",
+     "label": "applies"
+    },
+    {
+     "from": "ck-test",
+     "to": "reviewer-code",
+     "label": "applies"
+    },
+    {
+     "from": "code-review",
+     "to": "reviewer-code",
+     "label": "axes"
+    },
+    {
+     "from": "dod",
+     "to": "reviewer-code",
+     "label": "check ticks"
+    },
+    {
+     "from": "weakened-bar",
+     "to": "reviewer-code",
+     "label": "reads"
+    },
+    {
+     "from": "plan-md",
+     "to": "reviewer-code",
+     "label": "adherence"
+    },
+    {
+     "from": "spec-md",
+     "to": "reviewer-code",
+     "label": "criteria"
+    },
+    {
+     "from": "reviewer-code",
+     "to": "review-files",
+     "label": "writes"
+    }
+   ]
+  },
+  {
+   "id": "review-files",
+   "parent": "review",
+   "title": "Round rules",
+   "caption": "How one review round is run and closed.",
+   "nodeIds": [
+    "rr-spawn",
+    "reviewer-code",
+    "review-files",
+    "rr-wait",
+    "rr-respawn",
+    "rr-changes",
+    "rr-pass"
+   ],
+   "edges": [
+    {
+     "from": "rr-spawn",
+     "to": "reviewer-code",
+     "label": "four lenses"
+    },
+    {
+     "from": "reviewer-code",
+     "to": "review-files",
+     "label": "writes"
+    },
+    {
+     "from": "review-files",
+     "to": "rr-wait",
+     "label": "all four?"
+    },
+    {
+     "from": "rr-wait",
+     "to": "rr-respawn",
+     "label": "a file is missing"
+    },
+    {
+     "from": "rr-wait",
+     "to": "rr-pass",
+     "label": "all PASS"
+    },
+    {
+     "from": "rr-wait",
+     "to": "rr-changes",
+     "label": "any CHANGES"
+    }
+   ]
+  },
+  {
+   "id": "approver",
+   "parent": "approve",
+   "title": "approver",
+   "caption": "The final gate. APPROVE means the branch merges with no human looking.",
+   "nodeIds": [
+    "approver",
+    "build-md",
+    "review-files",
+    "dod",
+    "policy-check",
+    "ap-rerun",
+    "ap-disprove",
+    "escalate-triggers",
+    "decision-md"
+   ],
+   "edges": [
+    {
+     "from": "build-md",
+     "to": "approver",
+     "label": "claims"
+    },
+    {
+     "from": "review-files",
+     "to": "approver",
+     "label": "all PASS"
+    },
+    {
+     "from": "dod",
+     "to": "approver",
+     "label": "ticks"
+    },
+    {
+     "from": "approver",
+     "to": "policy-check",
+     "label": "runs"
+    },
+    {
+     "from": "approver",
+     "to": "ap-rerun",
+     "label": "then"
+    },
+    {
+     "from": "ap-rerun",
+     "to": "ap-disprove",
+     "label": "then"
+    },
+    {
+     "from": "escalate-triggers",
+     "to": "approver",
+     "label": "read"
+    },
+    {
+     "from": "approver",
+     "to": "decision-md",
+     "label": "writes"
+    }
+   ]
+  },
+  {
+   "id": "decision-md",
+   "parent": "approve",
+   "title": "decision.md · what is in it",
+   "caption": "The gate reads only the first line; people read the rest.",
+   "nodeIds": [
+    "decision-md",
+    "dm-0",
+    "dm-1",
+    "dm-2",
+    "dm-3",
+    "dm-4",
+    "dm-5",
+    "dm-6"
+   ],
+   "edges": [
+    {
+     "from": "decision-md",
+     "to": "dm-0"
+    },
+    {
+     "from": "decision-md",
+     "to": "dm-1"
+    },
+    {
+     "from": "decision-md",
+     "to": "dm-2"
+    },
+    {
+     "from": "decision-md",
+     "to": "dm-3"
+    },
+    {
+     "from": "decision-md",
+     "to": "dm-4"
+    },
+    {
+     "from": "decision-md",
+     "to": "dm-5"
+    },
+    {
+     "from": "decision-md",
+     "to": "dm-6"
+    }
+   ]
+  },
+  {
+   "id": "escalate-triggers",
+   "parent": "approve",
+   "title": "Escalate triggers",
+   "caption": "What always sends a job to a person, even after APPROVE.",
+   "nodeIds": [
+    "escalate-triggers",
+    "et-0",
+    "et-1",
+    "et-2",
+    "et-3",
+    "et-4",
+    "et-5",
+    "et-6",
+    "et-7"
+   ],
+   "edges": [
+    {
+     "from": "escalate-triggers",
+     "to": "et-0"
+    },
+    {
+     "from": "escalate-triggers",
+     "to": "et-1"
+    },
+    {
+     "from": "escalate-triggers",
+     "to": "et-2"
+    },
+    {
+     "from": "escalate-triggers",
+     "to": "et-3"
+    },
+    {
+     "from": "escalate-triggers",
+     "to": "et-4"
+    },
+    {
+     "from": "escalate-triggers",
+     "to": "et-5"
+    },
+    {
+     "from": "escalate-triggers",
+     "to": "et-6"
+    },
+    {
+     "from": "escalate-triggers",
+     "to": "et-7"
+    }
+   ]
+  },
+  {
+   "id": "check-policy",
+   "parent": "gate",
+   "title": "Policy + intent check",
+   "caption": "A frozen path is the only thing a human cannot override.",
+   "nodeIds": [
+    "check-policy",
+    "policy-json",
+    "cp-0",
+    "cp-1",
+    "cp-2",
+    "cp-3",
+    "cp-4"
+   ],
+   "edges": [
+    {
+     "from": "policy-json",
+     "to": "check-policy",
+     "label": "rules"
+    },
+    {
+     "from": "check-policy",
+     "to": "cp-0"
+    },
+    {
+     "from": "check-policy",
+     "to": "cp-1"
+    },
+    {
+     "from": "check-policy",
+     "to": "cp-2"
+    },
+    {
+     "from": "check-policy",
+     "to": "cp-3"
+    },
+    {
+     "from": "check-policy",
+     "to": "cp-4"
+    }
+   ]
+  },
+  {
+   "id": "trial-merge",
+   "parent": "gate",
+   "title": "Trial merge + proof",
+   "caption": "The merged result is built and tested before the real merge.",
+   "nodeIds": [
+    "tm-copy",
+    "trial-merge",
+    "verify-cmds",
+    "constraints-py",
+    "constraints-json",
+    "real-merge"
+   ],
+   "edges": [
+    {
+     "from": "tm-copy",
+     "to": "trial-merge",
+     "label": "merge into"
+    },
+    {
+     "from": "trial-merge",
+     "to": "verify-cmds",
+     "label": "runs"
+    },
+    {
+     "from": "verify-cmds",
+     "to": "constraints-py",
+     "label": "then"
+    },
+    {
+     "from": "constraints-json",
+     "to": "constraints-py",
+     "label": "baseline"
+    },
+    {
+     "from": "constraints-py",
+     "to": "real-merge",
+     "label": "pass"
+    }
+   ]
+  },
+  {
+   "id": "real-merge",
+   "parent": "gate",
+   "title": "Real merge + cleanup",
+   "caption": "Only after proof. Then the record is committed.",
+   "nodeIds": [
+    "real-merge",
+    "worktree",
+    "jobctl",
+    "adr-py",
+    "adr-dir",
+    "rm-nopush"
+   ],
+   "edges": [
+    {
+     "from": "real-merge",
+     "to": "worktree",
+     "label": "removes"
+    },
+    {
+     "from": "real-merge",
+     "to": "jobctl",
+     "label": "stage = merged"
+    },
+    {
+     "from": "real-merge",
+     "to": "adr-py",
+     "label": "then"
+    },
+    {
+     "from": "adr-py",
+     "to": "adr-dir",
+     "label": "commits"
+    },
+    {
+     "from": "real-merge",
+     "to": "rm-nopush"
+    }
+   ]
+  },
+  {
+   "id": "exit-codes",
+   "parent": "gate",
+   "title": "Gate exit codes",
+   "caption": "What each result means and what the orchestrator does.",
+   "nodeIds": [
+    "merge-gate",
+    "ec-0",
+    "ec-3",
+    "ec-4",
+    "ec-5",
+    "ec-6",
+    "ec-7"
+   ],
+   "edges": [
+    {
+     "from": "merge-gate",
+     "to": "ec-0"
+    },
+    {
+     "from": "merge-gate",
+     "to": "ec-3"
+    },
+    {
+     "from": "merge-gate",
+     "to": "ec-4"
+    },
+    {
+     "from": "merge-gate",
+     "to": "ec-5"
+    },
+    {
+     "from": "merge-gate",
+     "to": "ec-6"
+    },
+    {
+     "from": "merge-gate",
+     "to": "ec-7"
+    }
+   ]
+  },
+  {
+   "id": "policy-json",
+   "parent": "guardrails",
+   "title": "policy.json · the rules",
+   "caption": "One file read by the hooks, policy_check.py and the gate.",
+   "nodeIds": [
+    "policy-json",
+    "pk-intent_required",
+    "pk-spec_approval",
+    "pk-max_resumes",
+    "pk-frozen_paths",
+    "pk-escalate_paths",
+    "pk-dependency_files",
+    "pk-test_globs",
+    "pk-blocked_commands",
+    "pk-ticketing",
+    "pk-merge_policy",
+    "pk-adr"
+   ],
+   "edges": [
+    {
+     "from": "policy-json",
+     "to": "pk-intent_required"
+    },
+    {
+     "from": "policy-json",
+     "to": "pk-spec_approval"
+    },
+    {
+     "from": "policy-json",
+     "to": "pk-max_resumes"
+    },
+    {
+     "from": "policy-json",
+     "to": "pk-frozen_paths"
+    },
+    {
+     "from": "policy-json",
+     "to": "pk-escalate_paths"
+    },
+    {
+     "from": "policy-json",
+     "to": "pk-dependency_files"
+    },
+    {
+     "from": "policy-json",
+     "to": "pk-test_globs"
+    },
+    {
+     "from": "policy-json",
+     "to": "pk-blocked_commands"
+    },
+    {
+     "from": "policy-json",
+     "to": "pk-ticketing"
+    },
+    {
+     "from": "policy-json",
+     "to": "pk-merge_policy"
+    },
+    {
+     "from": "policy-json",
+     "to": "pk-adr"
+    }
+   ]
+  },
+  {
+   "id": "hook-edits",
+   "parent": "guardrails",
+   "title": "Hook: edits",
+   "caption": "PreToolUse on Edit, Write, MultiEdit and NotebookEdit.",
+   "nodeIds": [
+    "hook-edits",
+    "policy-json",
+    "he-scope",
+    "he-frozen",
+    "test-lock"
+   ],
+   "edges": [
+    {
+     "from": "policy-json",
+     "to": "hook-edits",
+     "label": "rules"
+    },
+    {
+     "from": "hook-edits",
+     "to": "he-scope"
+    },
+    {
+     "from": "hook-edits",
+     "to": "he-frozen"
+    },
+    {
+     "from": "hook-edits",
+     "to": "test-lock"
+    }
+   ]
+  },
+  {
+   "id": "hook-bash",
+   "parent": "guardrails",
+   "title": "Hook: commands",
+   "caption": "PreToolUse on Bash.",
+   "nodeIds": [
+    "hook-bash",
+    "hb-0",
+    "hb-1",
+    "hb-2",
+    "hb-3",
+    "hb-allowed",
+    "release-var"
+   ],
+   "edges": [
+    {
+     "from": "hook-bash",
+     "to": "hb-0",
+     "label": "blocks"
+    },
+    {
+     "from": "hook-bash",
+     "to": "hb-1",
+     "label": "blocks"
+    },
+    {
+     "from": "hook-bash",
+     "to": "hb-2",
+     "label": "blocks"
+    },
+    {
+     "from": "hook-bash",
+     "to": "hb-3",
+     "label": "blocks"
+    },
+    {
+     "from": "hook-bash",
+     "to": "hb-allowed",
+     "label": "allows"
+    },
+    {
+     "from": "release-var",
+     "to": "hb-0",
+     "label": "authorises"
+    }
+   ]
+  },
+  {
+   "id": "managed-install",
+   "parent": "guardrails",
+   "title": "managed/install.py",
+   "caption": "An admin step that makes the hooks impossible to disable.",
+   "nodeIds": [
+    "managed-install",
+    "policy-json",
+    "hook-edits",
+    "hook-bash",
+    "mg-owners"
+   ],
+   "edges": [
+    {
+     "from": "managed-install",
+     "to": "hook-edits",
+     "label": "installs"
+    },
+    {
+     "from": "managed-install",
+     "to": "hook-bash",
+     "label": "installs"
+    },
+    {
+     "from": "managed-install",
+     "to": "policy-json",
+     "label": "copies"
+    },
+    {
+     "from": "mg-owners",
+     "to": "policy-json",
+     "label": "protects"
+    }
+   ]
+  },
+  {
+   "id": "slice",
+   "parent": "split",
+   "title": "A slice (child job)",
+   "caption": "Created by the split, specced late, gated by its dependencies.",
+   "nodeIds": [
+    "slice",
+    "intent-inherit",
+    "dep-check",
+    "cmd-ready",
+    "parent-close",
+    "jobctl"
+   ],
+   "edges": [
+    {
+     "from": "jobctl",
+     "to": "slice",
+     "label": "creates"
+    },
+    {
+     "from": "intent-inherit",
+     "to": "slice",
+     "label": "intent"
+    },
+    {
+     "from": "cmd-ready",
+     "to": "slice",
+     "label": "starts"
+    },
+    {
+     "from": "dep-check",
+     "to": "slice",
+     "label": "refuses early"
+    },
+    {
+     "from": "slice",
+     "to": "parent-close",
+     "label": "all merged"
+    }
+   ]
+  },
+  {
+   "id": "session",
+   "parent": "parallel",
+   "title": "A session = a job",
+   "caption": "Open one Claude Code session per job in the same repo.",
+   "nodeIds": [
+    "session",
+    "claim-number",
+    "jobctl",
+    "worktree",
+    "ports"
+   ],
+   "edges": [
+    {
+     "from": "session",
+     "to": "claim-number",
+     "label": "claims"
+    },
+    {
+     "from": "claim-number",
+     "to": "jobctl",
+     "label": "number"
+    },
+    {
+     "from": "jobctl",
+     "to": "worktree",
+     "label": "creates"
+    },
+    {
+     "from": "session",
+     "to": "ports",
+     "label": "gets"
+    }
+   ]
+  },
+  {
+   "id": "ports",
+   "parent": "parallel",
+   "title": "Ports + browser sessions",
+   "caption": "So reviewers of different jobs never see each other's pages.",
+   "nodeIds": [
+    "ports",
+    "pt-0",
+    "pt-1",
+    "pt-2",
+    "agent-browser"
+   ],
+   "edges": [
+    {
+     "from": "ports",
+     "to": "pt-0"
+    },
+    {
+     "from": "ports",
+     "to": "pt-1"
+    },
+    {
+     "from": "ports",
+     "to": "pt-2"
+    },
+    {
+     "from": "pt-1",
+     "to": "agent-browser",
+     "label": "own session"
+    },
+    {
+     "from": "pt-2",
+     "to": "agent-browser",
+     "label": "own session"
+    }
+   ]
+  },
+  {
+   "id": "merge-lock",
+   "parent": "parallel",
+   "title": "Merge lock",
+   "caption": "Merges are serialised.",
+   "nodeIds": [
+    "merge-lock",
+    "merge-gate",
+    "check-clean",
+    "ml-exit"
+   ],
+   "edges": [
+    {
+     "from": "merge-gate",
+     "to": "merge-lock",
+     "label": "takes"
+    },
+    {
+     "from": "merge-lock",
+     "to": "check-clean",
+     "label": "then"
+    },
+    {
+     "from": "merge-lock",
+     "to": "ml-exit",
+     "label": "if held"
+    }
+   ]
+  },
+  {
+   "id": "collect-py",
+   "parent": "maintain",
+   "title": "collect.py · where metrics come from",
+   "caption": "Real values appended to factory/maintain/metrics/.",
+   "nodeIds": [
+    "collect-py",
+    "collectors-json",
+    "cl-cmd",
+    "cl-http",
+    "cl-log",
+    "cl-git",
+    "cl-factory"
+   ],
+   "edges": [
+    {
+     "from": "collectors-json",
+     "to": "collect-py",
+     "label": "config"
+    },
+    {
+     "from": "collect-py",
+     "to": "cl-cmd"
+    },
+    {
+     "from": "collect-py",
+     "to": "cl-http"
+    },
+    {
+     "from": "collect-py",
+     "to": "cl-log"
+    },
+    {
+     "from": "collect-py",
+     "to": "cl-git"
+    },
+    {
+     "from": "collect-py",
+     "to": "cl-factory"
+    }
+   ]
+  },
+  {
+   "id": "detect-py",
+   "parent": "maintain",
+   "title": "detect.py · plain statistics",
+   "caption": "Repeatable; the model is not involved.",
+   "nodeIds": [
+    "detect-py",
+    "bd-0",
+    "bd-1",
+    "bd-2",
+    "dismiss-py"
+   ],
+   "edges": [
+    {
+     "from": "detect-py",
+     "to": "bd-0"
+    },
+    {
+     "from": "detect-py",
+     "to": "bd-1"
+    },
+    {
+     "from": "detect-py",
+     "to": "bd-2"
+    },
+    {
+     "from": "dismiss-py",
+     "to": "detect-py",
+     "label": "widens"
+    }
+   ]
+  },
+  {
+   "id": "diagnoser",
+   "parent": "maintain",
+   "title": "diagnoser",
+   "caption": "Read-only; never changes a system.",
+   "nodeIds": [
+    "detect-py",
+    "diagnoser",
+    "dg-measure",
+    "dg-hyp",
+    "diagnosis-md",
+    "incident-md"
+   ],
+   "edges": [
+    {
+     "from": "detect-py",
+     "to": "diagnoser",
+     "label": "breach"
+    },
+    {
+     "from": "diagnoser",
+     "to": "dg-measure",
+     "label": "first"
+    },
+    {
+     "from": "dg-measure",
+     "to": "dg-hyp",
+     "label": "then"
+    },
+    {
+     "from": "dg-hyp",
+     "to": "diagnosis-md",
+     "label": "writes"
+    },
+    {
+     "from": "diagnosis-md",
+     "to": "incident-md",
+     "label": "at 3 sigma"
+    }
+   ]
+  },
+  {
+   "id": "scan-py",
+   "parent": "maintain",
+   "title": "scan.py · four lenses",
+   "caption": "Security and quality use agents; secrets and dependencies need no model. Every finding is verified against the repo.",
+   "nodeIds": [
+    "scan-py",
+    "scanner-security",
+    "scanner-quality",
+    "lens-secrets",
+    "lens-deps",
+    "findings",
+    "triage"
+   ],
+   "edges": [
+    {
+     "from": "scan-py",
+     "to": "scanner-security",
+     "label": "security"
+    },
+    {
+     "from": "scan-py",
+     "to": "scanner-quality",
+     "label": "quality"
+    },
+    {
+     "from": "scan-py",
+     "to": "lens-secrets",
+     "label": "secrets"
+    },
+    {
+     "from": "scan-py",
+     "to": "lens-deps",
+     "label": "dependencies"
+    },
+    {
+     "from": "scanner-security",
+     "to": "findings",
+     "label": "verified"
+    },
+    {
+     "from": "scanner-quality",
+     "to": "findings",
+     "label": "verified"
+    },
+    {
+     "from": "lens-secrets",
+     "to": "findings"
+    },
+    {
+     "from": "lens-deps",
+     "to": "findings"
+    },
+    {
+     "from": "findings",
+     "to": "triage",
+     "label": "you decide"
+    }
+   ]
+  },
+  {
+   "id": "triage",
+   "parent": "maintain",
+   "title": "triage",
+   "caption": "Accept a finding into the backlog, or dismiss it with a reason.",
+   "nodeIds": [
+    "findings",
+    "triage",
+    "backlog",
+    "dismiss-py",
+    "cmd-next"
+   ],
+   "edges": [
+    {
+     "from": "findings",
+     "to": "triage"
+    },
+    {
+     "from": "triage",
+     "to": "backlog",
+     "label": "accept"
+    },
+    {
+     "from": "triage",
+     "to": "dismiss-py",
+     "label": "dismiss"
+    },
+    {
+     "from": "backlog",
+     "to": "cmd-next",
+     "label": "/factory next"
+    }
+   ]
+  },
+  {
+   "id": "dashboard-html",
+   "parent": "dashboard",
+   "title": "dashboard.html",
+   "caption": "cd factory && python3 -m http.server, then open /dashboard.html.",
+   "nodeIds": [
+    "dashboard-html",
+    "db-poll",
+    "job-json",
+    "db-cols",
+    "db-cards",
+    "db-drawer"
+   ],
+   "edges": [
+    {
+     "from": "job-json",
+     "to": "db-poll",
+     "label": "read"
+    },
+    {
+     "from": "dashboard-html",
+     "to": "db-poll",
+     "label": "polls"
+    },
+    {
+     "from": "dashboard-html",
+     "to": "db-cols"
+    },
+    {
+     "from": "dashboard-html",
+     "to": "db-cards"
+    },
+    {
+     "from": "dashboard-html",
+     "to": "db-drawer"
+    }
+   ]
+  },
+  {
+   "id": "run-evals",
+   "parent": "evals",
+   "title": "run_evals.py · offline",
+   "caption": "326 checks with no model. Needs Python 3.12 or newer.",
+   "nodeIds": [
+    "run-evals",
+    "python312",
+    "ev-config",
+    "ev-hooks",
+    "ev-managed",
+    "ev-maintain",
+    "ev-scan",
+    "ev-gate",
+    "ev-scripts",
+    "ev-artifacts"
+   ],
+   "edges": [
+    {
+     "from": "run-evals",
+     "to": "python312",
+     "label": "needs"
+    },
+    {
+     "from": "run-evals",
+     "to": "ev-config"
+    },
+    {
+     "from": "run-evals",
+     "to": "ev-hooks"
+    },
+    {
+     "from": "run-evals",
+     "to": "ev-managed"
+    },
+    {
+     "from": "run-evals",
+     "to": "ev-maintain"
+    },
+    {
+     "from": "run-evals",
+     "to": "ev-scan"
+    },
+    {
+     "from": "run-evals",
+     "to": "ev-gate"
+    },
+    {
+     "from": "run-evals",
+     "to": "ev-scripts"
+    },
+    {
+     "from": "run-evals",
+     "to": "ev-artifacts"
+    }
+   ]
+  },
+  {
+   "id": "agent-evals",
+   "parent": "evals",
+   "title": "agent_evals.py · live",
+   "caption": "17 cases, about 15 minutes of subscription use. One failure can be a flake: re-run it once.",
+   "nodeIds": [
+    "agent-evals",
+    "ae-loop",
+    "ae-review",
+    "ae-approve",
+    "ae-diag",
+    "ae-onb",
+    "ae-scan",
+    "ae-pr",
+    "ae-build"
+   ],
+   "edges": [
+    {
+     "from": "agent-evals",
+     "to": "ae-loop"
+    },
+    {
+     "from": "agent-evals",
+     "to": "ae-review"
+    },
+    {
+     "from": "agent-evals",
+     "to": "ae-approve"
+    },
+    {
+     "from": "agent-evals",
+     "to": "ae-diag"
+    },
+    {
+     "from": "agent-evals",
+     "to": "ae-onb"
+    },
+    {
+     "from": "agent-evals",
+     "to": "ae-scan"
+    },
+    {
+     "from": "agent-evals",
+     "to": "ae-pr"
+    },
+    {
+     "from": "agent-evals",
+     "to": "ae-build"
+    }
+   ]
+  },
+  {
+   "id": "e2e",
+   "parent": "evals",
+   "title": "End-to-end runs",
+   "caption": "What has run for real, and what the defects it found were. AUDIT.md has the detail.",
+   "nodeIds": [
+    "e2e",
+    "e2e-natural",
+    "e2e-escalate",
+    "e2e-split",
+    "e2e-changes",
+    "e2e-ui",
+    "audit-md"
+   ],
+   "edges": [
+    {
+     "from": "e2e",
+     "to": "e2e-natural"
+    },
+    {
+     "from": "e2e",
+     "to": "e2e-escalate"
+    },
+    {
+     "from": "e2e",
+     "to": "e2e-split"
+    },
+    {
+     "from": "e2e",
+     "to": "e2e-changes"
+    },
+    {
+     "from": "e2e",
+     "to": "e2e-ui"
+    },
+    {
+     "from": "e2e",
+     "to": "audit-md",
+     "label": "recorded in"
+    }
+   ]
+  },
+  {
+   "id": "policy-edit",
+   "parent": "install",
+   "title": "Make the policy yours",
+   "caption": "The keys most repos change first.",
+   "nodeIds": [
+    "policy-edit",
+    "pk-escalate_paths",
+    "pk-frozen_paths",
+    "pk-test_globs",
+    "pk-merge_policy",
+    "pk-blocked_commands"
+   ],
+   "edges": [
+    {
+     "from": "policy-edit",
+     "to": "pk-escalate_paths"
+    },
+    {
+     "from": "policy-edit",
+     "to": "pk-frozen_paths"
+    },
+    {
+     "from": "policy-edit",
+     "to": "pk-test_globs"
+    },
+    {
+     "from": "policy-edit",
+     "to": "pk-merge_policy"
+    },
+    {
+     "from": "policy-edit",
+     "to": "pk-blocked_commands"
+    }
+   ]
+  },
+  {
+   "id": "install-helpers",
+   "parent": "install",
+   "title": "Helper skills",
+   "caption": "Five MIT skills pinned to one commit. Read them first: they become instructions your agents follow.",
+   "nodeIds": [
+    "install-helpers",
+    "tdd",
+    "diagnosing-bugs",
+    "codebase-design",
+    "code-review",
+    "grilling"
+   ],
+   "edges": [
+    {
+     "from": "install-helpers",
+     "to": "tdd",
+     "label": "installs"
+    },
+    {
+     "from": "install-helpers",
+     "to": "diagnosing-bugs",
+     "label": "installs"
+    },
+    {
+     "from": "install-helpers",
+     "to": "codebase-design",
+     "label": "installs"
+    },
+    {
+     "from": "install-helpers",
+     "to": "code-review",
+     "label": "installs"
+    },
+    {
+     "from": "install-helpers",
+     "to": "grilling",
+     "label": "installs"
+    }
+   ]
+  },
+  {
+   "id": "commands",
+   "parent": "root",
+   "title": "Commands · everything you can type",
+   "caption": "Three starts a job, two decide, the rest queue, look, set up and watch. Open one for what it runs.",
+   "nodeIds": [
+    "cmd-feature",
+    "cmd-intent",
+    "cmd-accept",
+    "cmd-approve-spec",
+    "cmd-respec",
+    "cmd-approve",
+    "cmd-rework",
+    "cmd-next",
+    "cmd-ready",
+    "cmd-stop",
+    "cmd-metrics",
+    "cmd-lessons",
+    "cmd-review",
+    "cmd-doctor",
+    "cmd-init",
+    "cmd-maintain"
+   ],
+   "edges": [
+    {
+     "from": "cmd-feature",
+     "to": "cmd-intent",
+     "label": "by default"
+    },
+    {
+     "from": "cmd-intent",
+     "to": "cmd-accept",
+     "label": "you accept"
+    },
+    {
+     "from": "cmd-accept",
+     "to": "cmd-approve-spec",
+     "label": "you approve"
+    },
+    {
+     "from": "cmd-approve-spec",
+     "to": "cmd-approve",
+     "label": "if ESCALATE"
+    },
+    {
+     "from": "cmd-approve",
+     "to": "cmd-rework",
+     "label": "or send back"
+    }
+   ],
+   "containers": [
+    {
+     "id": "start",
+     "label": "Start and steer a job",
+     "nodeIds": [
+      "cmd-feature",
+      "cmd-intent",
+      "cmd-accept",
+      "cmd-approve-spec",
+      "cmd-respec"
+     ]
+    },
+    {
+     "id": "decide",
+     "label": "Decide",
+     "nodeIds": [
+      "cmd-approve",
+      "cmd-rework"
+     ]
+    },
+    {
+     "id": "pace",
+     "label": "Queue and pace",
+     "nodeIds": [
+      "cmd-next",
+      "cmd-ready",
+      "cmd-stop"
+     ]
+    },
+    {
+     "id": "look",
+     "label": "Look and learn",
+     "nodeIds": [
+      "cmd-metrics",
+      "cmd-lessons",
+      "cmd-review"
+     ]
+    },
+    {
+     "id": "setup",
+     "label": "Set up and watch",
+     "nodeIds": [
+      "cmd-doctor",
+      "cmd-init",
+      "cmd-maintain"
+     ]
+    }
+   ],
+   "layout": {
+    "cmd-feature": [
+     0,
+     0
+    ],
+    "cmd-intent": [
+     1,
+     0
+    ],
+    "cmd-accept": [
+     2,
+     0
+    ],
+    "cmd-approve-spec": [
+     3,
+     0
+    ],
+    "cmd-respec": [
+     4,
+     0
+    ],
+    "cmd-next": [
+     0,
+     3
+    ],
+    "cmd-ready": [
+     1,
+     3
+    ],
+    "cmd-stop": [
+     2,
+     3
+    ],
+    "cmd-approve": [
+     4,
+     3
+    ],
+    "cmd-rework": [
+     5,
+     3
+    ],
+    "cmd-metrics": [
+     0,
+     6
+    ],
+    "cmd-lessons": [
+     1,
+     6
+    ],
+    "cmd-review": [
+     2,
+     6
+    ],
+    "cmd-doctor": [
+     3,
+     6
+    ],
+    "cmd-init": [
+     4,
+     6
+    ],
+    "cmd-maintain": [
+     5,
+     6
+    ]
+   }
+  },
+  {
+   "id": "cmd-feature",
+   "parent": "commands",
+   "title": "/factory <feature>",
+   "caption": "Runs a new job. Intent is required, so it starts at intent; only a person can waive that.",
+   "nodeIds": [
+    "cmd-feature",
+    "cmd-intent",
+    "skip-intent",
+    "flag-ticket",
+    "flag-bugfix",
+    "red-commit",
+    "test-lock",
+    "jobctl"
+   ],
+   "edges": [
+    {
+     "from": "cmd-feature",
+     "to": "cmd-intent",
+     "label": "by default"
+    },
+    {
+     "from": "cmd-feature",
+     "to": "skip-intent",
+     "label": "only a person"
+    },
+    {
+     "from": "skip-intent",
+     "to": "jobctl",
+     "label": "waiver recorded"
+    },
+    {
+     "from": "cmd-intent",
+     "to": "jobctl",
+     "label": "creates"
+    },
+    {
+     "from": "cmd-feature",
+     "to": "flag-ticket",
+     "label": "--ticket"
+    },
+    {
+     "from": "cmd-feature",
+     "to": "flag-bugfix",
+     "label": "--type"
+    },
+    {
+     "from": "flag-bugfix",
+     "to": "red-commit",
+     "label": "first"
+    },
+    {
+     "from": "red-commit",
+     "to": "test-lock",
+     "label": "then lock"
+    }
+   ]
+  },
+  {
+   "id": "cmd-intent",
+   "parent": "commands",
+   "title": "/factory intent",
+   "caption": "Writes intent.md and stops. You answer the open questions, then accept.",
+   "nodeIds": [
+    "cmd-intent",
+    "jobctl",
+    "intent-writer",
+    "out-of-scope",
+    "glossary",
+    "intent-md",
+    "open-questions"
+   ],
+   "edges": [
+    {
+     "from": "cmd-intent",
+     "to": "jobctl",
+     "label": "creates the job"
+    },
+    {
+     "from": "jobctl",
+     "to": "intent-writer",
+     "label": "spawns"
+    },
+    {
+     "from": "out-of-scope",
+     "to": "intent-writer",
+     "label": "read"
+    },
+    {
+     "from": "glossary",
+     "to": "intent-writer",
+     "label": "read"
+    },
+    {
+     "from": "intent-writer",
+     "to": "intent-md",
+     "label": "writes"
+    },
+    {
+     "from": "intent-md",
+     "to": "open-questions",
+     "label": "has"
+    }
+   ]
+  },
+  {
+   "id": "cmd-accept",
+   "parent": "commands",
+   "title": "/factory accept",
+   "caption": "You answer, the intent is rewritten, the worktree is created and the spec starts.",
+   "nodeIds": [
+    "intent-md",
+    "grilling",
+    "cmd-accept",
+    "jobctl",
+    "worktree",
+    "spec-writer"
+   ],
+   "edges": [
+    {
+     "from": "intent-md",
+     "to": "grilling",
+     "label": "unanswered"
+    },
+    {
+     "from": "grilling",
+     "to": "cmd-accept",
+     "label": "answers"
+    },
+    {
+     "from": "cmd-accept",
+     "to": "jobctl",
+     "label": "stage = spec"
+    },
+    {
+     "from": "cmd-accept",
+     "to": "worktree",
+     "label": "creates"
+    },
+    {
+     "from": "cmd-accept",
+     "to": "spec-writer",
+     "label": "spawns"
+    }
+   ]
+  },
+  {
+   "id": "cmd-approve-spec",
+   "parent": "commands",
+   "title": "/factory approve-spec",
+   "caption": "Approval is recorded, then the job goes to planning, or to the split step when the spec has a Split section.",
+   "nodeIds": [
+    "spec-md",
+    "cmd-approve-spec",
+    "spec-approval",
+    "policy-json",
+    "planner",
+    "split"
+   ],
+   "edges": [
+    {
+     "from": "spec-md",
+     "to": "cmd-approve-spec",
+     "label": "you approve"
+    },
+    {
+     "from": "cmd-approve-spec",
+     "to": "spec-approval",
+     "label": "records"
+    },
+    {
+     "from": "policy-json",
+     "to": "cmd-approve-spec",
+     "label": "spec_approval"
+    },
+    {
+     "from": "cmd-approve-spec",
+     "to": "planner",
+     "label": "starts"
+    },
+    {
+     "from": "cmd-approve-spec",
+     "to": "split",
+     "label": "if Split"
+    }
+   ]
+  },
+  {
+   "id": "cmd-respec",
+   "parent": "commands",
+   "title": "/factory respec",
+   "caption": "Sends the spec back with your note, saved verbatim.",
+   "nodeIds": [
+    "spec-md",
+    "cmd-respec",
+    "spec-feedback",
+    "jobctl",
+    "spec-writer"
+   ],
+   "edges": [
+    {
+     "from": "spec-md",
+     "to": "cmd-respec",
+     "label": "not yet"
+    },
+    {
+     "from": "cmd-respec",
+     "to": "spec-feedback",
+     "label": "saves"
+    },
+    {
+     "from": "cmd-respec",
+     "to": "jobctl",
+     "label": "bump respecs"
+    },
+    {
+     "from": "spec-feedback",
+     "to": "spec-writer",
+     "label": "address"
+    },
+    {
+     "from": "spec-writer",
+     "to": "spec-md",
+     "label": "revises"
+    }
+   ]
+  },
+  {
+   "id": "cmd-approve",
+   "parent": "commands",
+   "title": "/factory approve",
+   "caption": "Merges a needs-human job as it is. Only this command lets the gate use the human-approved flag.",
+   "nodeIds": [
+    "decision-md",
+    "cmd-approve",
+    "human-approval",
+    "snapshot-audit",
+    "merge-gate",
+    "real-merge"
+   ],
+   "edges": [
+    {
+     "from": "decision-md",
+     "to": "cmd-approve",
+     "label": "ESCALATE"
+    },
+    {
+     "from": "cmd-approve",
+     "to": "human-approval",
+     "label": "records"
+    },
+    {
+     "from": "cmd-approve",
+     "to": "snapshot-audit",
+     "label": "commits"
+    },
+    {
+     "from": "cmd-approve",
+     "to": "merge-gate",
+     "label": "human-approved"
+    },
+    {
+     "from": "merge-gate",
+     "to": "real-merge",
+     "label": "then"
+    }
+   ]
+  },
+  {
+   "id": "cmd-rework",
+   "parent": "commands",
+   "title": "/factory rework",
+   "caption": "Sends a needs-human job back to the builder with a fresh resume budget.",
+   "nodeIds": [
+    "decision-md",
+    "cmd-rework",
+    "rework-md",
+    "jobctl",
+    "builder",
+    "build-md"
+   ],
+   "edges": [
+    {
+     "from": "decision-md",
+     "to": "cmd-rework",
+     "label": "ESCALATE"
+    },
+    {
+     "from": "cmd-rework",
+     "to": "rework-md",
+     "label": "saves"
+    },
+    {
+     "from": "cmd-rework",
+     "to": "jobctl",
+     "label": "stage = build"
+    },
+    {
+     "from": "cmd-rework",
+     "to": "builder",
+     "label": "fresh builder"
+    },
+    {
+     "from": "builder",
+     "to": "build-md",
+     "label": "round N+1"
+    }
+   ]
+  },
+  {
+   "id": "cmd-next",
+   "parent": "commands",
+   "title": "/factory next",
+   "caption": "Runs the first unchecked backlog item, so two sessions never take the same one.",
+   "nodeIds": [
+    "backlog",
+    "cmd-next",
+    "claim-line",
+    "cmd-feature"
+   ],
+   "edges": [
+    {
+     "from": "backlog",
+     "to": "cmd-next",
+     "label": "first unchecked"
+    },
+    {
+     "from": "cmd-next",
+     "to": "claim-line",
+     "label": "claims"
+    },
+    {
+     "from": "claim-line",
+     "to": "backlog",
+     "label": "marks claimed"
+    },
+    {
+     "from": "cmd-next",
+     "to": "cmd-feature",
+     "label": "runs it"
+    }
+   ]
+  },
+  {
+   "id": "cmd-ready",
+   "parent": "commands",
+   "title": "/factory ready",
+   "caption": "Starts the split children whose dependencies have merged, and closes a parent whose children all merged.",
+   "nodeIds": [
+    "cmd-ready",
+    "jobctl",
+    "slice",
+    "worktree",
+    "spec-writer",
+    "parent-close"
+   ],
+   "edges": [
+    {
+     "from": "cmd-ready",
+     "to": "jobctl",
+     "label": "ready --close-parents"
+    },
+    {
+     "from": "jobctl",
+     "to": "slice",
+     "label": "which are ready"
+    },
+    {
+     "from": "cmd-ready",
+     "to": "worktree",
+     "label": "creates"
+    },
+    {
+     "from": "cmd-ready",
+     "to": "spec-writer",
+     "label": "specs the child"
+    },
+    {
+     "from": "slice",
+     "to": "parent-close",
+     "label": "all merged"
+    }
+   ]
+  },
+  {
+   "id": "cmd-stop",
+   "parent": "commands",
+   "title": "/factory stop | resume",
+   "caption": "Stop pauses the next stage; resume continues from the job files.",
+   "nodeIds": [
+    "cmd-stop",
+    "st-pause",
+    "job-json",
+    "st-resume",
+    "st-gate",
+    "st-limit"
+   ],
+   "edges": [
+    {
+     "from": "cmd-stop",
+     "to": "st-pause",
+     "label": "pause each job"
+    },
+    {
+     "from": "st-pause",
+     "to": "job-json",
+     "label": "writes"
+    },
+    {
+     "from": "job-json",
+     "to": "st-resume",
+     "label": "resume_at_stage"
+    },
+    {
+     "from": "st-pause",
+     "to": "st-gate"
+    },
+    {
+     "from": "cmd-stop",
+     "to": "st-limit"
+    }
+   ]
+  },
+  {
+   "id": "cmd-metrics",
+   "parent": "commands",
+   "title": "/factory metrics",
+   "caption": "Everything comes from the job files.",
+   "nodeIds": [
+    "cmd-metrics",
+    "metrics-py",
+    "job-json",
+    "mt-cycle",
+    "mt-first",
+    "mt-rounds",
+    "mt-esc"
+   ],
+   "edges": [
+    {
+     "from": "cmd-metrics",
+     "to": "metrics-py",
+     "label": "runs"
+    },
+    {
+     "from": "job-json",
+     "to": "metrics-py",
+     "label": "read"
+    },
+    {
+     "from": "metrics-py",
+     "to": "mt-cycle"
+    },
+    {
+     "from": "metrics-py",
+     "to": "mt-first"
+    },
+    {
+     "from": "metrics-py",
+     "to": "mt-rounds"
+    },
+    {
+     "from": "metrics-py",
+     "to": "mt-esc"
+    }
+   ]
+  },
+  {
+   "id": "cmd-lessons",
+   "parent": "commands",
+   "title": "/factory lessons",
+   "caption": "Turns repeated mistakes into checks. You decide what to build.",
+   "nodeIds": [
+    "cmd-lessons",
+    "lessons-py",
+    "review-files",
+    "ls-group",
+    "ls-hint"
+   ],
+   "edges": [
+    {
+     "from": "cmd-lessons",
+     "to": "lessons-py",
+     "label": "runs"
+    },
+    {
+     "from": "review-files",
+     "to": "lessons-py",
+     "label": "CHANGES reviews"
+    },
+    {
+     "from": "lessons-py",
+     "to": "ls-group"
+    },
+    {
+     "from": "ls-group",
+     "to": "ls-hint",
+     "label": "suggests"
+    }
+   ]
+  },
+  {
+   "id": "cmd-review",
+   "parent": "commands",
+   "title": "/factory review",
+   "caption": "Reviews any branch or pull request; read-only.",
+   "nodeIds": [
+    "cmd-review",
+    "review-branch",
+    "pr-reviewer",
+    "review-md",
+    "code-review",
+    "pr-drop",
+    "gh-script"
+   ],
+   "edges": [
+    {
+     "from": "cmd-review",
+     "to": "review-branch",
+     "label": "runs"
+    },
+    {
+     "from": "review-branch",
+     "to": "pr-reviewer",
+     "label": "spawns"
+    },
+    {
+     "from": "review-md",
+     "to": "pr-reviewer",
+     "label": "rules"
+    },
+    {
+     "from": "code-review",
+     "to": "pr-reviewer",
+     "label": "axes"
+    },
+    {
+     "from": "pr-reviewer",
+     "to": "pr-drop",
+     "label": "then"
+    },
+    {
+     "from": "pr-drop",
+     "to": "gh-script",
+     "label": "writes"
+    }
+   ]
+  },
+  {
+   "id": "cmd-doctor",
+   "parent": "commands",
+   "title": "/factory doctor",
+   "caption": "Fix every FAIL before the first job.",
+   "nodeIds": [
+    "cmd-doctor",
+    "doctor-py",
+    "dc-agents",
+    "dc-policy",
+    "dc-hooks",
+    "dc-skills",
+    "dc-verify"
+   ],
+   "edges": [
+    {
+     "from": "cmd-doctor",
+     "to": "doctor-py",
+     "label": "runs"
+    },
+    {
+     "from": "doctor-py",
+     "to": "dc-agents"
+    },
+    {
+     "from": "doctor-py",
+     "to": "dc-policy"
+    },
+    {
+     "from": "doctor-py",
+     "to": "dc-hooks"
+    },
+    {
+     "from": "doctor-py",
+     "to": "dc-skills"
+    },
+    {
+     "from": "doctor-py",
+     "to": "dc-verify"
+    }
+   ]
+  },
+  {
+   "id": "cmd-init",
+   "parent": "commands",
+   "title": "/factory init",
+   "caption": "Drafts the project doc; it runs read-only commands only.",
+   "nodeIds": [
+    "cmd-init",
+    "onboarder",
+    "agents-md",
+    "verify-proposed",
+    "verify-app",
+    "doctor-py"
+   ],
+   "edges": [
+    {
+     "from": "cmd-init",
+     "to": "onboarder",
+     "label": "spawns"
+    },
+    {
+     "from": "onboarder",
+     "to": "agents-md",
+     "label": "drafts"
+    },
+    {
+     "from": "onboarder",
+     "to": "verify-proposed",
+     "label": "drafts"
+    },
+    {
+     "from": "verify-proposed",
+     "to": "verify-app",
+     "label": "you install"
+    },
+    {
+     "from": "doctor-py",
+     "to": "agents-md",
+     "label": "checks"
+    }
+   ]
+  },
+  {
+   "id": "cmd-maintain",
+   "parent": "commands",
+   "title": "/factory maintain collect | schedule | run | scan | triage",
+   "caption": "Watches the running product and the repo. It never merges, deploys or pushes.",
+   "nodeIds": [
+    "cmd-maintain",
+    "collect-py",
+    "detect-py",
+    "diagnoser",
+    "scan-py",
+    "triage",
+    "schedule-py"
+   ],
+   "edges": [
+    {
+     "from": "cmd-maintain",
+     "to": "collect-py",
+     "label": "collect"
+    },
+    {
+     "from": "cmd-maintain",
+     "to": "detect-py",
+     "label": "run"
+    },
+    {
+     "from": "cmd-maintain",
+     "to": "scan-py",
+     "label": "scan"
+    },
+    {
+     "from": "cmd-maintain",
+     "to": "triage",
+     "label": "triage"
+    },
+    {
+     "from": "cmd-maintain",
+     "to": "schedule-py",
+     "label": "schedule"
+    },
+    {
+     "from": "detect-py",
+     "to": "diagnoser",
+     "label": "breach"
+    }
+   ]
+  }
+ ]
+}

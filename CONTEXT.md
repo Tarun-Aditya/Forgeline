@@ -63,6 +63,13 @@ factory/dashboard.html         live board over factory/jobs/
 factory/templates/             intent.md, verify-app.md
 ```
 
+## The map
+
+`diagrams/forgeline-map.html` is an interactive drill-down map (76 views, 283 nodes, a column browser, and one view per `/factory` command), rendered by the `/visual`
+skill from EricTechPro/super-board (MIT, pinned commit `21dd4b0`) from `diagrams/forgeline-map.json`, which
+`diagrams/src/build_map.py` writes. To change it, edit `build_map.py` and re-render; `diagrams/README.md` has the
+commands and `diagrams/THIRD_PARTY_NOTICES.md` the licence text. Its built-in check (crossings, overlaps) is clean.
+
 ## Status
 
 Re-audited against the 16 plays (`AUDIT.md`): 12 covered, 2 partial, 2 gaps. Partial:

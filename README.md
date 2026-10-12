@@ -5,6 +5,8 @@ review and a merge gate, with people deciding at the points that matter and hook
 file and a dashboard keeping it honest. One orchestrator skill, five team skills, fourteen
 subagents, scripts, evals and plain markdown; it runs on a Claude subscription.
 
+- **The map:** open `diagrams/forgeline-map.html` for an interactive, drill-down map of the whole system:
+  the job loop, all 14 agents, the guardrails, the merge gate, split jobs, worktrees and the maintain loop.
 - **Using it:** `USAGE.md` covers install, every command, parallel jobs and git worktrees,
   models, the dashboard, policy and the guardrails.
 - **Project state and next steps:** `CONTEXT.md`.
