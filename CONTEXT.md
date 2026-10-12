@@ -86,7 +86,7 @@ dashboard that shows split jobs.
 ## What is proven, and what is not
 
 Proven:
-- Offline evals: 326 checks pass with no model (Python 3.12+).
+- Offline evals: 357 checks pass with no model (Python 3.12+).
 - Live agent evals on Sonnet 5.5: 17 cases. The first run passed 16 (the one failure,
   `pr-reviewer`, passed 2 of 2 on re-run, so a flake). After all later prompt changes a full re-run
   passed 17 of 17.
@@ -107,8 +107,19 @@ Proven:
   first did not open the page (no Skill tool, an escape hatch in the prompt); fixed, and on a
   second UI job both opened it in the browser and said what they saw.
 - The dashboard was checked live in a browser against real job data.
+- Web layer (`web/`, Next.js + Vercel AI SDK + AI Elements) and the shared activity log
+  (`factory/scripts/activity.py`, hooks in `.claude/settings.json`): one real job (add a function to
+  a tiny Python library, Sonnet and Opus) was driven entirely from the web app, with the browser
+  closed during stages: intent, accept, approve-spec, plan, build, four reviews, approver, merge
+  gate, about 7 minutes and $1.75 API-equivalent. The web server was killed mid-run with a fake
+  CLI and the run finished and was recorded; a real session killed with `kill -9` showed
+  `crashed`. Found by that run and fixed: a real run emits several `result` events (cost and
+  per-model usage are cumulative and include subagents; turns and time add up).
 
 Not proven (built and covered by offline evals only):
+- The web layer in the desktop app and VS Code (only the CLI was run), MCP toggles against a real
+  server, `status --line` as a status line, Remote Control, and `managed/install.py` with the
+  activity hooks installed for real (the eval checks the files).
 - A CHANGES round on a defect the builder produced by itself: it was shown only with fault
   injection (a hand-planted bug and weakened bar, caught by the reviewers; see `AUDIT.md`).
 - `lessons.py` on real review data (only two jobs exist).

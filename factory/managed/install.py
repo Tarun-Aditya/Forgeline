@@ -44,8 +44,12 @@ DROPIN = os.path.join("managed-settings.d", "50-software-factory.json")
 COPIES = [
     (os.path.join(REPO, ".claude", "hooks", "factory_hooks.py"), os.path.join("factory", "hooks", "factory_hooks.py")),
     (os.path.join(FACTORY, "scripts", "factory_lib.py"), os.path.join("factory", "hooks", "factory_lib.py")),
+    (os.path.join(FACTORY, "scripts", "activity.py"), os.path.join("factory", "hooks", "activity.py")),
     (os.path.join(FACTORY, "policy.json"), os.path.join("factory", "policy.json")),
 ]
+
+# Events the activity log records (see factory/scripts/activity.py).
+ACTIVITY_EVENTS = ["SessionStart", "UserPromptSubmit", "PostToolUse", "SubagentStart", "SubagentStop", "Stop", "SessionEnd"]
 
 DENY = [
     "Read(./.env)",
@@ -63,6 +67,7 @@ DENY = [
 
 def build_settings(hook_path, python, sandbox, default_mode=None):
     command = f'{python} -I "{hook_path}"'
+    activity = {"type": "command", "command": f'{python} -I "{os.path.join(os.path.dirname(hook_path), "activity.py")}" record'}
     settings = {
         "allowManagedHooksOnly": True,
         "allowManagedPermissionRulesOnly": True,
@@ -73,7 +78,9 @@ def build_settings(hook_path, python, sandbox, default_mode=None):
                  "hooks": [{"type": "command", "command": f"{command} files"}]},
                 {"matcher": "Bash",
                  "hooks": [{"type": "command", "command": f"{command} bash"}]},
-            ]
+                {"hooks": [activity]},
+            ],
+            **{event: [{"hooks": [activity]}] for event in ACTIVITY_EVENTS},
         },
     }
     if default_mode:

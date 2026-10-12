@@ -63,16 +63,19 @@ factory/
   constraints.json             ratchet baselines and exceptions (people edit)
   checklists/                  security, accessibility, performance, observability, testing
   scripts/                     jobctl, merge_gate, policy_check, snapshot_audit, metrics, doctor,
-                               review_branch, install_helper_skills, lessons, constraints, adr
+                               review_branch, install_helper_skills, lessons, constraints, adr,
+                               activity (shared activity log: feed, status)
   evals/run_evals.py           deterministic evals (config, hooks, managed, maintain, scan)
   evals/agent_evals.py         runs the agents on fixture repos and checks their output
   maintain/                    detect, run, dismiss, scan, collect_factory, bands, runbooks
   managed/install.py           installs the hooks as managed settings (admin step)
   backlog.md  dashboard.html   queue and visual board
   jobs/                        runtime state, one folder per job (gitignored)
+  activity/                    shared activity log written by hooks (gitignored)
   audit/                       committed copy of each job's record (made on the job branch)
 .github/workflows/factory-evals.yml   runs the evals on any change to the factory
 .gitignore.factory             lines to add to your .gitignore
+web/                           optional local web app over the factory (not copied into other repos)
 ```
 
 ## Commands
@@ -174,6 +177,39 @@ Split, appears when a big spec was split into child jobs, which show what they w
 a spec waiting for approval or a job needing you stands out, with the command to run. Click a card to read
 its markdown files. It polls every two seconds.
 
+## Activity log: one live view from every surface
+
+Hooks in `.claude/settings.json` write a short, secret-redacted line for every prompt, tool call,
+subagent start and stop to `factory/activity/` (gitignored). Hooks run in the CLI, the desktop
+app, the VS Code extension and headless runs, so a job driven from any of them is visible in the
+same place, with no server needed:
+
+```bash
+python3 factory/scripts/activity.py feed -f              # follow everything (add --job <id> for one job)
+python3 factory/scripts/activity.py status               # running, idle, ended, stalled or crashed
+python3 factory/scripts/activity.py status --line        # one short line, for a status line
+```
+
+A session whose process vanished without a clean end shows as **crashed** at once; one that is
+alive but silent for 10 minutes shows as **stalled**. Both print `/factory resume <job-id>`, which
+continues the job from its files. Details are in `USAGE.md` section 7a.
+
+## Web app
+
+`web/` is an optional local web app (Next.js, Vercel AI SDK, AI Elements) over the same factory.
+It does not replace the orchestrator: each action launches `claude -p "/factory ..."` in the
+chosen repo. It gives you an input box for a task or ticket, the job board with approval buttons,
+a live run log, the shared activity feed, a Runs tab that replays any run, and cost and token
+metrics by model, job and day. Runs are detached processes, so closing the browser or crashing
+the web server does not stop a job.
+
+```bash
+cd web && npm install && npm run dev      # http://127.0.0.1:3000, needs Node 22+ and a logged-in claude CLI
+```
+
+It listens on `127.0.0.1` only and refuses cross-origin writes. See `web/README.md` for settings
+and `USAGE.md` section 7b.
+
 ## Maintain loop
 
 ```bash
@@ -240,7 +276,7 @@ edit to a protected path (checked live: `git push` was blocked in auto mode).
 ## Evals
 
 ```bash
-python3 factory/evals/run_evals.py      # 326 deterministic checks, no model, run on every change
+python3 factory/evals/run_evals.py      # 353 deterministic checks, no model, run on every change
 python3 factory/evals/agent_evals.py    # 17 live agent cases, uses your Claude login
 ```
 

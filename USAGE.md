@@ -150,6 +150,54 @@ a running job live. No build step, no dependencies.
   decision), colour-coded by their first line.
 - An unknown stage shows as a banner at the top.
 
+## 7a. The activity log: one live view from every surface
+
+Hooks in `.claude/settings.json` append a short line for every prompt, tool call, subagent
+start and stop, and finished turn to `factory/activity/<session>.jsonl`. Hooks run in the
+CLI, the desktop app, the VS Code extension and headless runs alike, so a job driven from
+any of them shows up in the same place. Only summaries are logged (a Bash description or a
+file path, never tool output), obvious secrets are redacted, and the folder is gitignored.
+
+```bash
+python3 factory/scripts/activity.py feed -f              # follow everything
+python3 factory/scripts/activity.py feed --job 003-x -f  # one job
+python3 factory/scripts/activity.py status               # running, idle, ended or stalled
+```
+
+Each event also records the process id of the Claude Code session that ran the hook, so
+`status` can tell the states apart:
+
+| State | Meaning |
+| --- | --- |
+| running | The session is alive and active. |
+| idle | A turn finished normally and the session is waiting (or a headless run is winding down). |
+| ended | The session closed cleanly. |
+| stalled | The session is alive but silent for over 10 minutes (`--stall-minutes` or `FACTORY_STALL_MINUTES`). |
+| crashed | The process is gone without a clean end: killed, crashed, or the machine restarted. Seen at once, not after a timeout. |
+
+For stalled and crashed sessions it prints `/factory resume <job-id>`, which continues the job
+from its files. A job is attached to a session when one of its events names it (a
+`/factory ... <job-id>` command, a path under `factory/jobs/<id>` or the job's worktree);
+later events of that session follow it.
+
+`status --line` prints one short line (`factory: 1 running · 1 crashed`) that you can use as a
+status line in Claude Code (`statusLine` in your user settings, type `command`). I have not
+tried that in the desktop app or VS Code.
+
+This works with no web app and no server: the log is files, and every reader is a script. It
+is also installed by `managed/install.py`, so it records where only managed hooks run.
+
+Limits: it shows what agents do, not the model's streamed text, and each hook call costs about
+50 ms. The pid check only works on the machine that runs the session.
+
+## 7b. The web app
+
+`web/` is an optional local web layer (Next.js, Vercel AI SDK, AI Elements) that starts
+`/factory` runs from a browser, streams the run live, shows the board with approval buttons,
+reads the activity log (7a) and reports cost and token usage. Runs are detached processes, so
+closing the browser or crashing the web server does not stop a job. It launches the same `claude -p "/factory ..."` commands;
+see `web/README.md`. It is not copied into other repos.
+
 ## 8. Policy: `factory/policy.json`
 
 Agents cannot edit it, and neither `factory/scripts/`, `templates/`, `checklists/`,
@@ -251,7 +299,7 @@ whose dependencies have not merged. The parent closes when every child has merge
 ## 14. Verifying the factory itself
 
 ```bash
-python3 factory/evals/run_evals.py      # 326 offline checks, no model; needs Python 3.12+
+python3 factory/evals/run_evals.py      # 353 offline checks, no model; needs Python 3.12+
 python3 factory/evals/agent_evals.py    # 17 live agent cases; about 15 minutes of subscription use
 ```
 

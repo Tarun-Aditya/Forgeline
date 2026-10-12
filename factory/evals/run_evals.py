@@ -21,6 +21,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(ROOT, "factory", "scripts"))
@@ -286,8 +287,13 @@ def eval_managed():
         check("managed: hook, lib and policy are installed",
               all(os.path.isfile(p) for p in (hook, os.path.join(dest, "factory", "hooks", "factory_lib.py"),
                                               os.path.join(dest, "factory", "policy.json"))))
-        commands = [h["command"] for g in settings["hooks"]["PreToolUse"] for h in g["hooks"]]
+        commands = [h["command"] for g in settings["hooks"]["PreToolUse"] for h in g["hooks"] if "activity.py" not in h["command"]]
         check("managed: hook commands point at the installed script", all(hook in c for c in commands), str(commands))
+        activity_hook = os.path.join(dest, "factory", "hooks", "activity.py")
+        recorded = {ev for ev, groups in settings["hooks"].items() for g in groups for h in g["hooks"] if activity_hook in h["command"]}
+        check("managed: activity.py is installed and records every event",
+              os.path.isfile(activity_hook) and recorded == {"PreToolUse", "SessionStart", "UserPromptSubmit", "PostToolUse",
+                                                             "SubagentStart", "SubagentStop", "Stop", "SessionEnd"}, str(recorded))
 
         sandboxed = run([sys.executable, "-I", installer, "--dest-root", os.path.join(tmp, "sb"), "--apply", "--sandbox"])
         sb = json.loads(read(os.path.join(tmp, "sb", "managed-settings.d", "50-software-factory.json")))
@@ -1320,6 +1326,106 @@ def eval_scripts():
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+# --------------------------------------------------------------------------- activity
+
+def eval_activity():
+    print("activity")
+    import activity  # factory/scripts is on sys.path
+    from datetime import datetime, timedelta, timezone
+
+    script = os.path.join(ROOT, "factory", "scripts", "activity.py")
+    tmp = tempfile.mkdtemp()
+    try:
+        os.makedirs(os.path.join(tmp, "factory", "jobs", "003-add-button"))
+
+        def rec(payload):
+            return activity.record(payload, tmp)
+
+        e = rec({"hook_event_name": "UserPromptSubmit", "session_id": "s1", "prompt": "/factory approve 003-add-button"})
+        check("activity: a /factory command names its job", e and e["job"] == "003-add-button", str(e))
+        e = rec({"hook_event_name": "PreToolUse", "session_id": "s1", "agent_type": "builder", "tool_name": "Bash",
+                 "tool_input": {"command": "curl -H token=abc1234567890 https://x", "description": ""}})
+        check("activity: the session's job is sticky", e["job"] == "003-add-button" and e["agent"] == "builder", str(e))
+        check("activity: secrets in commands are redacted", "abc1234567890" not in e["text"] and "[redacted]" in e["text"], e["text"])
+        e = rec({"hook_event_name": "PreToolUse", "session_id": "s2", "tool_name": "Edit",
+                 "tool_input": {"file_path": "/work/repo-factory/003-add-button/src/a.py"}})
+        check("activity: a worktree path names its job", e["job"] == "003-add-button", str(e))
+        e = rec({"hook_event_name": "PreToolUse", "session_id": "s3", "tool_name": "Read",
+                 "tool_input": {"file_path": "factory/jobs/999-nope/spec.md"}})
+        check("activity: a job id that does not exist is ignored", e["job"] is None, str(e))
+        check("activity: hand-backs between agents are not logged",
+              rec({"hook_event_name": "UserPromptSubmit", "session_id": "s1", "prompt": "<agent-message from=\"a\">x"}) is None
+              and rec({"hook_event_name": "PreToolUse", "session_id": "s1", "tool_name": "SubagentHandback"}) is None)
+        check("activity: unknown hook events are ignored", rec({"hook_event_name": "Whatever", "session_id": "s1"}) is None)
+        ts = activity.now_iso()
+        check("activity: timestamps have exactly three fractional digits", re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z", ts) is not None, ts)
+        check("activity: parse_ts reads 3, 4 and 6 fractional digits (older logs hold 4)",
+              all(activity.parse_ts(f"2026-10-12T13:25:49.{f}Z").microsecond == int(f.ljust(6, "0")) for f in ("607", "6079", "607912")))
+        e = rec({"hook_event_name": "PostToolUse", "session_id": "s1", "tool_name": "Bash",
+                 "tool_input": {"command": "ls"}, "tool_response": {"stdout": "SECRET OUTPUT"}, "duration_ms": 12})
+        check("activity: tool output is never logged", "SECRET OUTPUT" not in json.dumps(e) and e["ms"] == 12, str(e))
+
+        out = subprocess.run([sys.executable, "-I", script, "record"], input="not json", capture_output=True, text=True,
+                             env={**os.environ, "CLAUDE_PROJECT_DIR": tmp})
+        check("activity: record never fails a session", out.returncode == 0, out.stderr)
+
+        # States, with a fixed clock.
+        at = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+
+        def ev(sid, kind, minutes_ago, job="003-add-button"):
+            ts = (at - timedelta(minutes=minutes_ago)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+            return {"ts": ts, "sid": sid, "ev": kind, "agent": "builder", "tool": "", "text": "", "job": job}
+
+        def with_pid(e, pid):
+            return {**e, "pid": pid}
+
+        states = {s["session"]: s["state"] for s in activity.session_states([
+            ev("run", "tool", 1), ev("slow", "tool", 30), ev("idle", "stop", 30), ev("done", "session_end", 30),
+        ], 10, at)}
+        check("activity: state running", states["run"] == "running", str(states))
+        check("activity: state stalled after the threshold", states["slow"] == "stalled", str(states))
+        check("activity: a finished turn is idle, not stalled", states["idle"] == "idle", str(states))
+        check("activity: state ended", states["done"] == "ended", str(states))
+        dead = {s["session"]: s["state"] for s in activity.session_states(
+            [with_pid(ev("gone", "tool", 1), 111), with_pid(ev("up", "tool", 1), 222), with_pid(ev("clean", "session_end", 1), 111)],
+            10, at, alive=lambda pid: pid == 222)}
+        check("activity: a vanished process is crashed at once, not after the stall time", dead["gone"] == "crashed", str(dead))
+        check("activity: a live process stays running", dead["up"] == "running", str(dead))
+        check("activity: a clean end is ended even though its process is gone", dead["clean"] == "ended", str(dead))
+        if os.path.isdir("/proc/self"):
+            child = subprocess.Popen(["sleep", "30"])
+            child.kill()
+            time.sleep(0.2)  # killed but not yet reaped: a zombie
+            check("activity: a killed, unreaped process counts as dead", activity.pid_alive(child.pid) is False)
+            child.wait()
+        hook_run = subprocess.run(["sh", "-c", f'"{sys.executable}" -I "{script}" record'],
+                                  input=json.dumps({"hook_event_name": "Stop", "session_id": "pidtest"}),
+                                  capture_output=True, text=True, env={**os.environ, "CLAUDE_PROJECT_DIR": tmp})
+        with open(os.path.join(tmp, "factory", "activity", "pidtest.jsonl")) as fh:
+            pid_seen = json.loads(fh.readline()).get("pid")
+        check("activity: the hook records the pid of the process that ran it (through sh)", pid_seen == os.getpid(), f"{pid_seen} vs {os.getpid()} {hook_run.stderr}")
+
+        run = lambda *a: subprocess.run([sys.executable, "-I", script, "--project", tmp, *a], capture_output=True, text=True)
+        feed = run("feed", "--job", "003-add-button", "--json")
+        lines = [json.loads(x) for x in feed.stdout.splitlines()]
+        check("activity: feed --job filters and prints json", feed.returncode == 0 and lines and all(l["job"] == "003-add-button" for l in lines), feed.stderr)
+        check("activity: feed -n limits the lines", len(run("feed", "-n", "2", "--json").stdout.splitlines()) == 2)
+        status = run("status", "--json")
+        check("activity: status --json lists sessions", status.returncode == 0 and {s["session"] for s in json.loads(status.stdout)} >= {"s1", "s2"}, status.stderr)
+        line = run("status", "--line")
+        check("activity: status --line is one short line", line.returncode == 0 and len(line.stdout.strip().splitlines()) == 1 and line.stdout.startswith("factory:"), line.stdout)
+        check("activity: status with no log says so",
+              "No activity" in subprocess.run([sys.executable, "-I", script, "--project", os.path.join(tmp, "factory"), "status"],
+                                              capture_output=True, text=True).stdout)
+
+        settings = json.loads(read(os.path.join(ROOT, ".claude", "settings.json")))
+        hooked = {ev for ev, groups in settings["hooks"].items() for g in groups for h in g["hooks"] if "activity.py" in h["command"]}
+        check("activity: settings.json records every event", hooked == set(activity.EVENTS), str(hooked))
+        check("activity: the log folder is gitignored", "/factory/activity/" in read(os.path.join(ROOT, ".gitignore.factory")))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def main():
     eval_config()
     eval_hooks()
@@ -1330,6 +1436,7 @@ def main():
     eval_gate()
     eval_artifacts()
     eval_scripts()
+    eval_activity()
     failed = [r for r in RESULTS if not r[1]]
     print(f"\n{len(RESULTS) - len(failed)}/{len(RESULTS)} checks passed")
     sys.exit(1 if failed else 0)
