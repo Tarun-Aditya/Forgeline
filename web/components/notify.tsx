@@ -28,8 +28,12 @@ function beep() {
 /** The tab title always counts what needs you. When alerts are on, a new item also pops a notification and a short sound while the tab is in the background. */
 export function useAttention(repo: string | null, jobs: Job[], trouble: Map<string, string>, questions: Set<string>, count: number) {
   const [on, setOn] = useState(false);
+  const [blocked, setBlocked] = useState(false); // read after mount: the server cannot know the browser permission
   const prev = useRef<Snapshot | null>(null);
-  useEffect(() => setOn(read()), []);
+  useEffect(() => {
+    setOn(read());
+    setBlocked(typeof Notification !== "undefined" && Notification.permission === "denied");
+  }, []);
   useEffect(() => { prev.current = null; }, [repo]); // another repo: start quiet again
 
   useEffect(() => {
@@ -49,11 +53,11 @@ export function useAttention(repo: string | null, jobs: Job[], trouble: Map<stri
   const toggle = async () => {
     if (on) { setOn(false); write(false); return; }
     if (typeof Notification !== "undefined" && Notification.permission === "default") await Notification.requestPermission();
+    setBlocked(typeof Notification !== "undefined" && Notification.permission === "denied");
     setOn(true);
     write(true);
     beep(); // lets you hear what it sounds like, and unlocks audio
   };
-  const blocked = typeof Notification !== "undefined" && Notification.permission === "denied";
   return { on, toggle, blocked };
 }
 

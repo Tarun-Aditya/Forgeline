@@ -27,7 +27,8 @@ export function useShortcuts(setTab: (t: Tab) => void, openHelp: () => void) {
       }
       if (e.key === "g") chord.current = window.setTimeout(() => { chord.current = null; }, 1000);
       else if (e.key === "n") {
-        const box = document.querySelector<HTMLTextAreaElement>('textarea[placeholder^="Describe a task"]');
+        // The side panel stays mounted (hidden) on small screens, so take the box that is actually showing.
+        const box = [...document.querySelectorAll<HTMLTextAreaElement>('textarea[placeholder^="Describe a task"]')].find((el) => el.offsetParent !== null);
         if (box) { e.preventDefault(); box.focus(); }
       } else if (e.key === "?") { e.preventDefault(); openHelp(); }
     };

@@ -1,4 +1,5 @@
 "use client";
+import { MessageSquarePlus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AgentsView } from "@/components/agents-view";
 import { ActivityView, type ActivityData } from "@/components/activity-view";
@@ -9,8 +10,10 @@ import type { Options } from "@/components/run-panel";
 import { RunsPanel } from "@/components/runs-panel";
 import { NotifyButton, useAttention } from "@/components/notify";
 import { RunsView, type Run } from "@/components/runs-view";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { ShortcutsHelp, useHelp, useShortcuts, type Tab } from "@/components/shortcuts";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ChangesProvider, usePoll, usePushConnected } from "@/components/use-poll";
 import type { Job } from "@/lib/jobs";
 import type { McpServer } from "@/lib/mcp";
@@ -39,6 +42,7 @@ function Shell({ repo, repos, onPick }: { repo: string | null; repos: Repo[]; on
   const { data: activity, error: activityError } = usePoll<ActivityData>(q && `/api/activity?repo=${q}`, 2000, "activity");
   const [tab, setTab] = useState<Tab>("board");
   const help = useHelp();
+  const [sheet, setSheet] = useState(false);
   useShortcuts(setTab, help.show);
   const [open, setOpen] = useState<string | null>(null);
   const [options, setOptions] = useState<Options>({ type: "feature", ticket: "", mcpOff: [] });
@@ -121,16 +125,20 @@ function Shell({ repo, repos, onPick }: { repo: string | null; repos: Repo[]; on
   const pushed = usePushConnected();
   const alerts = useAttention(repo, jobs, trouble, new Set(Object.keys(questions).filter((id) => !running.has(id))), needMe);
 
+  const panel = (
+    <RunsPanel warnings={checkData?.warnings ?? []} runs={runs} selected={selectedRun} onSelect={setSelectedRun} error={submitError} posting={posting} servers={servers} options={options} onOptions={setOptions} onSubmit={submit} onStop={stop} />
+  );
+
   return (
     <div className="flex h-screen flex-col">
-      <header className="flex items-center gap-3 border-b px-4 py-2">
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b px-3 py-2 sm:px-4">
         <h1 className="text-sm font-semibold tracking-tight">Forgeline</h1>
-        <select className="rounded-md border bg-background px-2 py-1 text-sm" value={repo ?? ""} onChange={(e) => onPick(e.target.value)} aria-label="Repository">
+        <select className="min-w-0 max-w-[45vw] rounded-md border bg-background px-2 py-1 text-sm sm:max-w-none" value={repo ?? ""} onChange={(e) => onPick(e.target.value)} aria-label="Repository">
           {repos.map((r) => (
             <option key={r.path} value={r.path} disabled={!r.ready}>{r.name}{r.ready ? "" : " (no factory)"}</option>
           ))}
         </select>
-        <nav className="ml-2 flex gap-1">
+        <nav className="order-last -mx-1 flex w-full gap-1 overflow-x-auto px-1 sm:order-none sm:mx-0 sm:ml-2 sm:w-auto sm:overflow-visible sm:px-0" aria-label="Sections">
           <Button size="sm" variant={tab === "board" ? "secondary" : "ghost"} onClick={() => setTab("board")}>
             Board{needMe > 0 && <span className="ml-1.5 rounded-full bg-call px-1.5 text-[10px] text-white">{needMe}</span>}
           </Button>
@@ -141,7 +149,7 @@ function Shell({ repo, repos, onPick }: { repo: string | null; repos: Repo[]; on
           <Button size="sm" variant={tab === "runs" ? "secondary" : "ghost"} onClick={() => setTab("runs")}>Runs</Button>
           <Button size="sm" variant={tab === "metrics" ? "secondary" : "ghost"} onClick={() => setTab("metrics")}>Metrics</Button>
         </nav>
-        <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground"><NotifyButton {...alerts} /><Button size="sm" variant="ghost" onClick={help.show} aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">?</Button>{jobError ? <span className="text-destructive">{jobError}</span> : pushed ? "● live" : "polling"}</span>
+        <span className="ml-auto flex items-center gap-1 text-xs text-muted-foreground"><NotifyButton {...alerts} /><ThemeToggle /><Button size="sm" variant="ghost" onClick={help.show} aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)">?</Button><span className="hidden sm:inline">{jobError ? <span className="text-destructive">{jobError}</span> : pushed ? "● live" : "polling"}</span></span>
       </header>
       <div className="flex min-h-0 flex-1">
         <main className="min-w-0 flex-1 overflow-auto p-4">
@@ -159,10 +167,18 @@ function Shell({ repo, repos, onPick }: { repo: string | null; repos: Repo[]; on
             <MetricsView repo={repo} />
           )}
         </main>
-        <aside className="hidden w-[400px] shrink-0 border-l md:block">
-          <RunsPanel warnings={checkData?.warnings ?? []} runs={runs} selected={selectedRun} onSelect={setSelectedRun} error={submitError} posting={posting} servers={servers} options={options} onOptions={setOptions} onSubmit={submit} onStop={stop} />
-        </aside>
+        <aside className="hidden w-[400px] shrink-0 border-l md:block">{panel}</aside>
       </div>
+      {/* On narrow screens the side panel is hidden; this opens the same panel as a sheet. */}
+      <Button className="fixed bottom-4 right-4 z-30 rounded-full shadow-lg md:hidden" onClick={() => setSheet(true)} aria-label="New task and runs">
+        <MessageSquarePlus className="size-4" /> New task{runs.some((r) => r.status === "running") && <span className="ml-1 size-2 animate-pulse rounded-full bg-current" />}
+      </Button>
+      <Dialog open={sheet} onOpenChange={setSheet}>
+        <DialogContent className="flex h-[88vh] max-w-lg flex-col gap-0 overflow-hidden p-0">
+          <DialogTitle className="sr-only">New task and runs</DialogTitle>
+          {panel}
+        </DialogContent>
+      </Dialog>
       <ShortcutsHelp open={help.open} onClose={help.hide} />
       {repo && <JobDrawer job={jobs.find((j) => j.id === open)} repo={repo} busy={posting} working={!!open && running.has(open)} note={open ? notes.get(open) : undefined} question={open ? questions[open] : undefined} onClose={() => setOpen(null)} onCommand={submit} onAnswer={answer} />}
     </div>

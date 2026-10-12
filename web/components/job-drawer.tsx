@@ -132,8 +132,8 @@ export function JobDrawer({ job, repo, busy, working, note, question, onClose, o
             {mine ? <WorkingBanner /> : job.stage !== "merged" && !question && <LastMessage text={note} />}
             <Actions job={job} busy={locked} stuck={isStuck(job, working)} onCommand={send} />
             {question && !working && !mine && <QuestionBox question={question} locked={locked} onSend={(t) => send(t, (x) => onAnswer(job.id, x))} />}
-            <div className="flex min-h-0 flex-1 gap-3">
-              <nav className="w-52 shrink-0 space-y-1 overflow-y-auto text-sm">
+            <div className="flex min-h-0 flex-1 flex-col gap-3 sm:flex-row">
+              <nav className="max-h-28 shrink-0 space-y-1 overflow-y-auto text-sm sm:max-h-none sm:w-52">
                 <button onClick={() => setPicked(ACTIVITY)} className={cn("block w-full truncate rounded px-2 py-1 text-left hover:bg-accent", showActivity && "bg-accent")}>
                   activity (live)
                 </button>
