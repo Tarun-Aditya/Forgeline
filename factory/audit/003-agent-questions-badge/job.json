@@ -5,7 +5,7 @@
   "ticket": null,
   "branch": "factory/003-agent-questions-badge",
   "worktree": "/Users/tarunaditya/workspace/software-factory-plus-factory/003-agent-questions-badge",
-  "stage": "needs-human",
+  "stage": "build",
   "round": 2,
   "reviews": {
     "security": "PASS",
@@ -14,7 +14,7 @@
     "code": "PASS"
   },
   "respecs": 0,
-  "reworks": 0,
+  "reworks": 1,
   "created": "2026-10-12T15:18:49Z",
   "intent_waived": null,
   "history": [
@@ -57,6 +57,10 @@
     {
       "stage": "needs-human",
       "at": "2026-10-12T16:02:16Z"
+    },
+    {
+      "stage": "build",
+      "at": "2026-10-12T16:12:35Z"
     }
   ],
   "reviewed_sha": "470101f4e2a8829919fbc1f9c19a6ed272b5a3a8",
