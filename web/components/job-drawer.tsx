@@ -17,7 +17,11 @@ const rank = (f: string) => (FIRST.includes(f) ? FIRST.indexOf(f) : f.startsWith
 type Props = { job: Job | undefined; repo: string; busy: boolean; working: boolean; onClose: () => void; onCommand: (text: string) => void };
 
 /** Buttons that map to the exact /factory commands for the job's stage. */
-export function Actions({ job, busy, onCommand }: Pick<Props, "busy" | "onCommand"> & { job: Job }) {
+/** Stages where an agent should be working; if none is, the job needs a nudge. */
+const AGENT_STAGES = new Set(["spec", "plan", "build", "review", "approve"]);
+export const isStuck = (job: Job, working: boolean) => AGENT_STAGES.has(job.stage) && !job.paused && !working;
+
+export function Actions({ job, busy, stuck, onCommand }: Pick<Props, "busy" | "onCommand"> & { job: Job; stuck?: boolean }) {
   const [note, setNote] = useState("");
   const run = (verb: string, withNote = false) => {
     if (verb === "approve" && !window.confirm(`Merge ${job.id} into main?`)) return;
@@ -43,7 +47,13 @@ export function Actions({ job, busy, onCommand }: Pick<Props, "busy" | "onComman
         <Button variant="secondary" disabled={busy || !noteOk} onClick={() => run("rework", true)}>Send back</Button>
       </div>
     );
-  if (job.paused) return <Button disabled={busy} onClick={() => run("resume")}>Resume</Button>;
+  if (job.paused || stuck)
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <Button disabled={busy} onClick={() => run("resume")}>Resume</Button>
+        {stuck && !job.paused && <span className="text-xs text-muted-foreground">No agent is running on this job. Resume continues it from where it stopped.</span>}
+      </div>
+    );
   return null;
 }
 
@@ -95,7 +105,7 @@ export function JobDrawer({ job, repo, busy, working, onClose, onCommand }: Prop
               <p className="font-mono text-xs text-muted-foreground">{job.branch} · {job.stage} · round {job.round}</p>
             </DialogHeader>
             {mine && <WorkingBanner />}
-            <Actions job={job} busy={locked} onCommand={send} />
+            <Actions job={job} busy={locked} stuck={isStuck(job, working)} onCommand={send} />
             <div className="flex min-h-0 flex-1 gap-3">
               <nav className="w-52 shrink-0 space-y-1 overflow-y-auto text-sm">
                 <button onClick={() => setPicked(ACTIVITY)} className={cn("block w-full truncate rounded px-2 py-1 text-left hover:bg-accent", showActivity && "bg-accent")}>

@@ -110,7 +110,7 @@ export function AgentFlow({ view, events, jobKey, selected, onSelect }: { view: 
           </>
         )}
         <input
-          type="range" min={0} max={1000} value={Math.round(((at - t0) / Math.max(t1 - t0, 1)) * 1000)} disabled={live}
+          type="range" min={0} max={1000} value={Math.min(1000, Math.round(((at - t0) / Math.max(t1 - t0, 1)) * 1000))} disabled={live}
           onChange={(e) => { setPlaying(false); setT(t0 + (Number(e.target.value) / 1000) * (t1 - t0)); }}
           className="min-w-40 flex-1 accent-[var(--claude)]" aria-label="Job time"
         />

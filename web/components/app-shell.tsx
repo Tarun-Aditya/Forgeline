@@ -1,14 +1,13 @@
 "use client";
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AgentsView } from "@/components/agents-view";
 import { ActivityView, type ActivityData } from "@/components/activity-view";
 import { Board } from "@/components/board";
 import { JobDrawer } from "@/components/job-drawer";
 import { MetricsView } from "@/components/metrics-view";
-import { RunPanel, type Options } from "@/components/run-panel";
-import { RunsView } from "@/components/runs-view";
+import type { Options } from "@/components/run-panel";
+import { RunsPanel } from "@/components/runs-panel";
+import { RunsView, type Run } from "@/components/runs-view";
 import { Button } from "@/components/ui/button";
 import { usePoll } from "@/components/use-poll";
 import type { Job } from "@/lib/jobs";
@@ -29,53 +28,54 @@ export function AppShell() {
   const [tab, setTab] = useState<"board" | "agents" | "activity" | "runs" | "metrics">("board");
   const [open, setOpen] = useState<string | null>(null);
   const [options, setOptions] = useState<Options>({ type: "feature", ticket: "", mcpOff: [] });
-  const runId = useRef<string | null>(null);
 
   const servers = mcpData?.servers ?? [];
-  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
-  const { messages, sendMessage, status, error } = useChat({
-    transport,
-    onData: (part) => {
-      if (part.type === "data-run") runId.current = (part.data as { runId: string }).runId;
-    },
-  });
-  const busy = status === "submitted" || status === "streaming";
+  const jobs = jobData?.jobs ?? [];
 
-  // A new task has no job card until the agent creates one; show "starting" in the meantime.
-  const [starting, setStarting] = useState<string | null>(null);
-  const jobCount = useRef(0);
-  const before = useRef(0);
-  const sawBusy = useRef(false);
+  // Runs are independent processes, so any number can go at once. This panel just follows one of them.
+  const { data: runData } = usePoll<{ runs: Run[] }>("/api/runs", 2000);
+  const [selectedRun, setSelectedRun] = useState<string | null>(null);
+  const [fresh, setFresh] = useState<Run | null>(null); // a run just started, before the next poll lists it
+  const [posting, setPosting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const polled = (runData?.runs ?? []).filter((r) => r.repo === repo);
+  const runs = fresh && !polled.some((r) => r.runId === fresh.runId) ? [fresh, ...polled] : polled;
+  useEffect(() => { if (fresh && polled.some((r) => r.runId === fresh.runId)) setFresh(null); }, [fresh, polled]);
 
   const submit = useCallback(
-    (text: string) => {
+    async (text: string) => {
       if (!repo) return;
-      if (!/^\/factory\s+(accept|approve|approve-spec|respec|rework|resume|next|metrics|doctor|init)\b/i.test(text.trim())) {
-        before.current = jobCount.current;
-        sawBusy.current = false;
-        setStarting(text.trim());
+      setPosting(true);
+      setSubmitError(null);
+      try {
+        const mcp = options.mcpOff.length ? servers.map((s) => s.name).filter((n) => !options.mcpOff.includes(n)) : undefined;
+        const res = await fetch("/api/runs", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ repo, text, type: options.type, ticket: options.ticket.trim() || undefined, mcp }),
+        });
+        const body = await res.json();
+        if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+        setFresh({ runId: body.runId, repo, prompt: text.trim().startsWith("/factory") ? text.trim() : `/factory ${text.trim()}`, startedAt: new Date().toISOString(), status: "running", jobIds: [] });
+        setSelectedRun(body.runId);
+      } catch (e) {
+        setSubmitError(e instanceof Error ? e.message : "Could not start the run.");
+      } finally {
+        setPosting(false);
       }
-      const mcp = options.mcpOff.length ? servers.map((s) => s.name).filter((n) => !options.mcpOff.includes(n)) : undefined;
-      sendMessage({ text }, { body: { repo, type: options.type, ticket: options.ticket.trim() || undefined, mcp } });
     },
-    [repo, options, servers, sendMessage],
+    [repo, options, servers],
   );
-  const stop = useCallback(() => {
-    if (runId.current) fetch(`/api/runs/${runId.current}/stop`, { method: "POST" });
-  }, []);
+  const stop = useCallback((id: string) => { fetch(`/api/runs/${id}/stop`, { method: "POST" }); }, []);
 
-  const jobs = jobData?.jobs ?? [];
-  jobCount.current = jobs.length;
-  useEffect(() => {
-    if (!starting) return;
-    if (jobs.length > before.current) setStarting(null); // the job card exists now
-    else if (busy) sawBusy.current = true;
-    else if (sawBusy.current) setStarting(null); // the run ended without creating a job
-  }, [starting, jobs.length, busy]);
+  // A new task has no job card until its agent creates one; each such run shows a "starting" card.
+  const NOT_A_NEW_JOB = /^\/factory\s+(accept|approve|approve-spec|respec|rework|resume|stop|next|metrics|review|doctor|init)\b/i;
+  const starting = runs.filter((r) => r.status === "running" && r.jobIds.length === 0 && !NOT_A_NEW_JOB.test(r.prompt)).map((r) => r.prompt.replace(/^\/factory\s+/, ""));
   // "Running" comes from the shared activity log, so it is true for jobs driven from any surface.
   const sessions = activity?.sessions ?? [];
   const running = new Set([
     ...(jobData?.active ?? []).map((a) => a.jobKey).filter((k): k is string => !!k),
+    ...runs.filter((r) => r.status === "running").flatMap((r) => r.jobIds),
     ...sessions.filter((s) => s.state === "running" && s.job).map((s) => s.job as string),
   ]);
   const trouble = new Map<string, "stalled" | "crashed">(
@@ -112,7 +112,7 @@ export function AppShell() {
           ) : tab === "board" ? (
             <Board starting={starting} jobs={jobs} stages={jobData?.stages ?? []} running={running} trouble={trouble} onOpen={setOpen} />
           ) : tab === "agents" ? (
-            <AgentsView starting={starting} repo={repo} jobs={jobs} stages={jobData?.stages ?? []} busy={busy} running={running} trouble={trouble} onCommand={submit} onOpen={setOpen} />
+            <AgentsView starting={starting} repo={repo} jobs={jobs} stages={jobData?.stages ?? []} busy={posting} running={running} trouble={trouble} onCommand={submit} onOpen={setOpen} />
           ) : tab === "activity" ? (
             <ActivityView data={activity} error={activityError} />
           ) : tab === "runs" ? (
@@ -122,10 +122,10 @@ export function AppShell() {
           )}
         </main>
         <aside className="hidden w-[400px] shrink-0 border-l md:block">
-          <RunPanel messages={messages} status={status} error={error} servers={servers} options={options} onOptions={setOptions} onSubmit={submit} onStop={stop} />
+          <RunsPanel runs={runs} selected={selectedRun} onSelect={setSelectedRun} error={submitError} posting={posting} servers={servers} options={options} onOptions={setOptions} onSubmit={submit} onStop={stop} />
         </aside>
       </div>
-      {repo && <JobDrawer job={jobs.find((j) => j.id === open)} repo={repo} busy={busy} working={!!open && running.has(open)} onClose={() => setOpen(null)} onCommand={submit} />}
+      {repo && <JobDrawer job={jobs.find((j) => j.id === open)} repo={repo} busy={posting} working={!!open && running.has(open)} onClose={() => setOpen(null)} onCommand={submit} />}
     </div>
   );
 }

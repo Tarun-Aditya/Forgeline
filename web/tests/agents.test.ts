@@ -20,8 +20,9 @@ test("pairs subagent start and stop into spans, ordered by pipeline", () => {
   assert.equal(planner.spans[0].open, false);
 });
 
-test("an agent that has started but not stopped is an open span", () => {
-  const l = buildLanes([ev("00.000", "subagent_start", "builder"), ev("03.000", "tool_done", "builder")]);
+test("an agent that has started but not stopped is an open span while the log is fresh", () => {
+  const now = Date.parse("2026-01-01T00:00:10.000Z");
+  const l = buildLanes([ev("00.000", "subagent_start", "builder"), ev("03.000", "tool_done", "builder")], now);
   assert.equal(l.lanes[0].spans[0].open, true);
   assert.equal(l.t1, Date.parse("2026-01-01T00:00:03.000Z"));
 });
@@ -64,4 +65,11 @@ test("handoffsAt only returns hand-offs inside the window", () => {
   const t0 = Date.parse("2026-01-01T00:00:00.000Z");
   assert.equal(handoffsAt(view, t0 + 300, 900).length, 1);
   assert.equal(handoffsAt(view, t0 + 1500, 900).length, 0);
+});
+
+test("an agent that never stopped and went quiet is treated as dead, not live", () => {
+  const events = [ev("00.000", "subagent_start", "builder"), ev("03.000", "tool_done", "builder")];
+  const l = buildLanes(events, Date.parse("2026-01-01T00:10:00.000Z"));
+  assert.equal(l.lanes[0].spans[0].open, false);
+  assert.equal(stateAt(l, events, Date.parse("2026-01-01T00:09:00.000Z")).get("builder")?.status, "done");
 });

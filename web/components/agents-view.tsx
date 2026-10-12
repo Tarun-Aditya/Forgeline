@@ -3,7 +3,7 @@ import { Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AgentFlow } from "@/components/agent-flow";
 import { ReviewChips } from "@/components/board";
-import { Actions, useJobCommand, WorkingBanner } from "@/components/job-drawer";
+import { Actions, isStuck, useJobCommand, WorkingBanner } from "@/components/job-drawer";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ const LABEL = 150;
 
 /** How each agent worked on one job: who ran when, who ran together, and what each one did. */
 type Props = {
-  starting: string | null; repo: string; jobs: Job[]; stages: { key: string; label: string }[]; busy: boolean; running: Set<string>;
+  starting: string[]; repo: string; jobs: Job[]; stages: { key: string; label: string }[]; busy: boolean; running: Set<string>;
   trouble: Map<string, "stalled" | "crashed">; onCommand: (text: string) => void; onOpen: (id: string) => void;
 };
 
@@ -45,7 +45,7 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
   useEffect(reset, [job]);
   const view = useMemo(() => (data ? buildLanes(data.events) : null), [data]);
 
-  if (starting && jobs.length === 0) return <Starting text={starting} />;
+  if (starting.length > 0 && jobs.length === 0) return <div className="space-y-2">{starting.map((t, i) => <Starting key={i} text={t} />)}</div>;
   if (jobs.length === 0) return <p className="p-8 text-center text-sm text-muted-foreground">No jobs yet. Start one from the panel on the right and its agents will show up here.</p>;
   const span = view ? view.t1 - view.t0 : 1;
   const pct = (t: number) => `${((t - (view?.t0 ?? 0)) / span) * 100}%`;
@@ -55,7 +55,7 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
 
   return (
     <div className="space-y-4">
-      {starting && <Starting text={starting} />}
+      {starting.map((t, i) => <Starting key={i} text={t} />)}
       <div className="flex flex-wrap items-center gap-3">
         <select className="rounded-md border bg-background px-2 py-1 text-sm" value={job ?? ""} onChange={(e) => setPicked(e.target.value)} aria-label="Job">
           {[...jobs].reverse().map((j) => <option key={j.id} value={j.id}>{j.id} · {j.stage}</option>)}
@@ -83,7 +83,7 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
           </div>
           <p className="text-sm">{current.feature}</p>
           {mine && <WorkingBanner />}
-          <Actions job={current} busy={locked} onCommand={send} />
+          <Actions job={current} busy={locked} stuck={isStuck(current, running.has(current.id))} onCommand={send} />
         </section>
       )}
       {error && <p className="text-sm text-destructive">{error}</p>}
