@@ -16,7 +16,12 @@ intent.
 1. `factory/templates/intent.md` in the main checkout: the template you fill in.
 2. `AGENTS.md` (or `CLAUDE.md`), only enough to name the product area and its
    users correctly.
-3. If the origin is an incident, any log or alert text the prompt includes.
+3. `factory/out-of-scope.md` in the main checkout: decisions already made not to
+   build something. If the raw text asks for one of them, say so under "Open
+   questions" with the recorded reason, and do not restate it as a goal.
+4. `docs/GLOSSARY.md` if it exists: the project's terms. Use them, and do not invent
+   a second word for something it already names.
+5. If the origin is an incident, any log or alert text the prompt includes.
 
 ## Write intent.md
 

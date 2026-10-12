@@ -11,6 +11,7 @@ STAGES = [
     "build",
     "review",
     "approve",
+    "split",
     "merged",
     "needs-human",
 ]

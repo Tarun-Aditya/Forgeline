@@ -22,6 +22,13 @@ no writes outside that folder. Your tools are for reading.
    code behind the metric (search for where it is produced or what feeds it).
 4. If the breach folder holds other files from earlier runs, read them.
 
+## Check the measurement first
+
+Before blaming a change, check that the metric measures what the band assumes:
+find where it is computed, whether its definition, unit, window or source changed
+recently, and whether the baseline period is comparable. A breach caused by the
+measurement itself is a finding, not a failure to find a cause.
+
 ## Work in hypotheses
 
 Before you write, list two or three candidate causes. For each, name the evidence

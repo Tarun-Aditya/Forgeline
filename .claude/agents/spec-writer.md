@@ -27,9 +27,16 @@ worktree. The job folder is in the main checkout; your one file goes there.
 4. `<job folder>/intent.md` if it exists. It is the accepted statement of the
    problem: the spec must serve its success criteria, and every answered open
    question in it is a decision, not something to re-ask.
-5. Every `<job folder>/spec-feedback-*.md`, if any. A human sent the spec back;
+5. If your prompt gives a `Parent spec:`, read it. You are writing one slice of it:
+   stay inside that slice's line, keep its Design, and do not add a Split section.
+6. `factory/out-of-scope.md` in the main checkout. Anything it lists that the
+   feature brushes against goes under the spec's Out of scope, with the reason.
+7. `docs/GLOSSARY.md` if it exists, and any ADR in `docs/adr/` for the area you touch:
+   use the glossary's terms, and build on a recorded decision or say why the spec
+   departs from it.
+8. Every `<job folder>/spec-feedback-*.md`, if any. A human sent the spec back;
    address each point and say how under Assumptions.
-6. `factory/policy.json` in the main checkout, for `frozen_paths` and
+9. `factory/policy.json` in the main checkout, for `frozen_paths` and
    `escalate_paths`. A spec that needs a frozen path is not buildable: say so.
 
 ## Write spec.md
@@ -73,6 +80,16 @@ every item must be checkable by someone who only has the repo.
 
 ## Out of scope
 What a reasonable builder might be tempted to do but must not.
+
+## Split
+Only when the work is too big for one reviewable change: well over a few hundred
+changed lines, or several parts that can ship separately. Otherwise leave this section
+out. When present, the rest of the spec is the overall design and each slice becomes
+its own job, with its own spec, build and review. One line per slice, 2 to 6 slices,
+in the order they should merge:
+- `<slug>: <what this slice delivers, in a sentence>. Depends: none | <earlier slug>, ...`
+Each slug is 1 to 4 lowercase words joined by hyphens. Each slice must be testable on
+its own, and a `Depends:` may name only an earlier slice.
 
 ## Assumptions
 Decisions you made where the request was ambiguous, each with a one-line reason.

@@ -1,3 +1,4 @@
 # Add these lines to your repo's .gitignore
 /factory/jobs/
 .factory-test-lock
+__pycache__/

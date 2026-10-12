@@ -90,6 +90,15 @@ def main():
     except (OSError, ValueError):
         add("WARN", "helper skills installed", "factory/skills/helper-skills.json missing")
 
+    docs = ""
+    for name in ("AGENTS.md", "CLAUDE.md"):
+        if os.path.isfile(os.path.join(repo, name)):
+            docs += open(os.path.join(repo, name), encoding="utf-8").read()
+    if re.search(r"localhost:\d+|--port\b|\bPORT=|npm run dev|flask run|uvicorn|next dev|vite", docs):
+        have = os.path.isfile(os.path.join(repo, ".claude", "skills", "verify-app", "SKILL.md"))
+        add("PASS" if have else "WARN", "verify-app skill exists (the app has a dev server)",
+            "" if have else "reviewer-ux and reviewer-ui need it; run /factory init, read VERIFY.proposed.md, move it to .claude/skills/verify-app/SKILL.md")
+
     ignore = open(os.path.join(repo, ".gitignore"), encoding="utf-8").read() if os.path.isfile(os.path.join(repo, ".gitignore")) else ""
     add("PASS" if "factory/jobs" in ignore else "WARN", ".gitignore ignores factory/jobs", "see .gitignore.factory")
     add("PASS" if run(repo, "python3", "--version").returncode == 0 else "FAIL", "python3 is available (hooks need it)")

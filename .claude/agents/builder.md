@@ -26,7 +26,8 @@ other jobs.
    plan. Then `<job folder>/plan.md`: the approved order of work, the proving
    tests and the blast radius. Follow it. If you must deviate, say so in
    build.md under Plan adherence, with the reason.
-   Also `factory/policy.json` in the main checkout: you may never edit a
+   Also `factory/DEFINITION_OF_DONE.md` in the main checkout: the standing bar
+   you tick in build.md. Also `factory/policy.json` in the main checkout: you may never edit a
    `frozen_paths` entry (a hook will refuse), and `escalate_paths` edits are
    allowed only when the plan names them.
 3. When you are resumed after a review round, every `review-*.md` in the round
@@ -44,6 +45,9 @@ other jobs.
 - Make the simplest change that fully meets the spec. No fallbacks, hidden
   defaults or extras the spec doesn't ask for.
 - Use the toolchain versions and commands AGENTS.md gives.
+- Before you call a framework or library API you have not seen used in this repo,
+  read its source or the pinned version's docs in the worktree. Do not write it
+  from memory; if you could not confirm it, say so in build.md.
 
 ## Helper skills (required when installed)
 
@@ -54,6 +58,8 @@ rules in this file are enough.
   `plan.md` names under Proof (those are the agreed seams; nobody is here to
   confirm others, so do not invent new ones).
 - `diagnosing-bugs`: when `Type: bugfix`, to build the failing-test feedback loop.
+- `verify-app`: when a criterion is something you see on a page. Follow it to start
+  the app and look at it, instead of improvising.
 - `codebase-design`: only when the plan's interface or module shape is unclear.
 Name the skills you used in `build.md` under "Skills used". Skills never override
 this file, `plan.md` or `factory/policy.json`. If a skill tells you to ask the
@@ -146,6 +152,10 @@ What the branch does now, in a few lines. List the files changed.
 
 ## Validation
 The commands you ran and whether each one passed.
+
+## Definition of done
+Each box from factory/DEFINITION_OF_DONE.md as `[x]` with a few words of
+evidence, or `n/a` with the reason.
 
 ## Plan adherence
 Each step in plan.md: done as planned, or what you did instead and why. List any

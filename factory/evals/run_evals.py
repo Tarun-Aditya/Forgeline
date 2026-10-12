@@ -99,6 +99,28 @@ def eval_config():
             check(f"agent {stem}: states the VERDICT first-line rule", "VERDICT: PASS" in text)
 
     check("REVIEW.md exists", os.path.isfile(os.path.join(ROOT, "factory", "REVIEW.md")))
+    for stem, files in (("reviewer-security", ["security.md"]), ("reviewer-ux", ["accessibility.md"]), ("reviewer-ui", ["accessibility.md"]),
+                        ("reviewer-code", ["performance.md", "observability.md", "testing.md"])):
+        with open(os.path.join(ROOT, ".claude", "agents", stem + ".md"), encoding="utf-8") as fh:
+            body = fh.read()
+        for f in files:
+            check(f"agent {stem}: reads checklists/{f}", f"checklists/{f}" in body and os.path.isfile(os.path.join(ROOT, "factory", "checklists", f)))
+    with open(os.path.join(ROOT, "factory", "templates", "verify-app.md"), encoding="utf-8") as fh:
+        vt = fh.read()
+    check("verify-app template has a name and a feature map", vt.startswith("---\nname: verify-app") and "## Feature map" in vt)
+    for stem in ("builder", "reviewer-ux", "reviewer-ui"):
+        with open(os.path.join(ROOT, ".claude", "agents", stem + ".md"), encoding="utf-8") as fh:
+            body = fh.read()
+        check(f"agent {stem}: uses the verify-app skill", "verify-app" in body)
+        check(f"agent {stem}: has the Skill tool", re.search(r"^tools:.*\bSkill\b", body, re.M) is not None)
+    check("out-of-scope.md exists", os.path.isfile(os.path.join(ROOT, "factory", "out-of-scope.md")))
+    for stem in ("intent-writer", "spec-writer"):
+        with open(os.path.join(ROOT, ".claude", "agents", stem + ".md"), encoding="utf-8") as fh:
+            check(f"agent {stem}: reads out-of-scope.md", "out-of-scope.md" in fh.read())
+    check("DEFINITION_OF_DONE.md exists", os.path.isfile(os.path.join(ROOT, "factory", "DEFINITION_OF_DONE.md")))
+    for stem in ("builder", "reviewer-code", "approver"):
+        with open(os.path.join(ROOT, ".claude", "agents", stem + ".md"), encoding="utf-8") as fh:
+            check(f"agent {stem}: reads DEFINITION_OF_DONE.md", "DEFINITION_OF_DONE.md" in fh.read())
     check("intent template exists", os.path.isfile(os.path.join(ROOT, "factory", "templates", "intent.md")))
 
     try:
@@ -193,6 +215,8 @@ def eval_hooks():
         check("gate: git status allowed", bash("git status") == 0)
         check("gate: merging a factory branch by hand is blocked (use merge_gate.py)", bash("git merge --no-ff factory/001-x") == 2)
         check("gate: git -C . merge factory/... blocked", bash("git -C . merge factory/001-x -m m") == 2)
+        check("gate: read-only merge-tree on a factory branch is allowed", bash("git merge-tree --write-tree main factory/001-x") == 0)
+        check("gate: merge-base on a factory branch is allowed", bash("git merge-base main factory/001-x") == 0)
         check("gate: merging an ordinary branch is allowed", bash("git merge feature/login") == 0)
         check("gate: ordinary pipe allowed", bash("ls | grep foo") == 0)
 
@@ -590,6 +614,13 @@ def eval_extras():
         full = run([sys.executable, "-I", os.path.join(sdir, "doctor.py"), "--repo", repo, "--json"])
         rows = json.loads(full.stdout)
         check("doctor: a complete AGENTS.md has no FAIL", not [r for r in rows if r["level"] == "FAIL"], str([r for r in rows if r["level"] == "FAIL"]))
+        check("doctor: an app with a dev server and no verify-app skill gets a WARN",
+              any(r["level"] == "WARN" and "verify-app" in r["check"] for r in rows), str(rows))
+        os.makedirs(os.path.join(repo, ".claude", "skills", "verify-app"))
+        open(os.path.join(repo, ".claude", "skills", "verify-app", "SKILL.md"), "w").write("---\nname: verify-app\n---\n")
+        rows2 = json.loads(run([sys.executable, "-I", os.path.join(sdir, "doctor.py"), "--repo", repo, "--json"]).stdout)
+        check("doctor: with the verify-app skill present it passes",
+              any(r["level"] == "PASS" and "verify-app" in r["check"] for r in rows2), str(rows2))
         open(os.path.join(repo, "AGENTS.md"), "w").write("# App\nTODO\n")
         stub = run([sys.executable, "-I", os.path.join(sdir, "doctor.py"), "--repo", repo])
         check("doctor: a stub AGENTS.md fails", stub.returncode == 1 and "not a stub" in stub.stdout)
@@ -801,7 +832,7 @@ def eval_gate():
     tmp = tempfile.mkdtemp(prefix="factory-evals-gate-")
     n = [0]
 
-    def make(policy_patch=None, decision="APPROVE\n\n## Why\nok\n", branch_files=None, pin=True, intent=True, waived=None):
+    def make(policy_patch=None, decision="APPROVE\n\n## Why\nok\n", branch_files=None, pin=True, intent=True, waived=None, constraints_file=None):
         """A fresh repo with factory scripts, a job branch in a worktree, and a pinned head."""
         n[0] += 1
         app = os.path.join(tmp, f"app{n[0]}")
@@ -815,7 +846,9 @@ def eval_gate():
         for k, v in (policy_patch or {}).items():
             pol[k] = v if k != "merge_policy" else dict(pol["merge_policy"], **v)
         json.dump(pol, open(os.path.join(app, "factory", "policy.json"), "w"))
-        open(os.path.join(app, ".gitignore"), "w").write("factory/jobs/\n")
+        open(os.path.join(app, ".gitignore"), "w").write("factory/jobs/\n__pycache__/\n")
+        if constraints_file is not None:
+            json.dump(constraints_file, open(os.path.join(app, "factory", "constraints.json"), "w"))
         git(app, "add", "-A")
         git(app, "commit", "-qm", "base")
         jid = "001-x"
@@ -855,6 +888,85 @@ def eval_gate():
               not os.path.isdir(wt) and git(app, "rev-parse", "--verify", "factory/001-x").returncode != 0
               and json.load(open(os.path.join(app, "factory", "jobs", jid, "job.json")))["stage"] == "merged")
         check("gate: the lock is released", not os.path.exists(os.path.join(app, ".git", "factory-merge.lock")))
+
+        ratchet = {"name": "cov", "command": "python3 cov.py", "pattern": r"COV=(\d+(?:\.\d+)?)", "direction": "min", "tolerance": 0.5}
+        def cov_files(v):
+            return {"cov.py": f"print('COV={v}')\n"}
+        def tomorrow(days):
+            import datetime
+            return (datetime.datetime.now(datetime.timezone.utc).date() + datetime.timedelta(days=days)).isoformat()
+
+        app, wt, jid = make({"merge_policy": {"constraints": [ratchet]}}, branch_files=cov_files(70), constraints_file={"baselines": {"cov": 80}})
+        code, body = go(app, jid)
+        check("gate: a number below its baseline is refused", code == 5 and body.get("status") == "constraint-failed", str(body))
+        app, wt, jid = make({"merge_policy": {"constraints": [ratchet]}}, branch_files=cov_files(79.7), constraints_file={"baselines": {"cov": 80}})
+        code, body = go(app, jid)
+        check("gate: a drop inside the tolerance merges", code == 0, str(body))
+        app, wt, jid = make({"merge_policy": {"constraints": [ratchet]}}, branch_files=cov_files(85), constraints_file={"baselines": {"cov": 80}})
+        code, body = go(app, jid)
+        check("gate: an improvement merges and says to raise the baseline",
+              code == 0 and any("raise it" in n for n in body.get("notes", [])), str(body))
+        ex = {"constraint": "cov", "owner": "ana", "reason": "legacy module", "expires": tomorrow(30)}
+        app, wt, jid = make({"merge_policy": {"constraints": [ratchet]}}, branch_files=cov_files(70), constraints_file={"baselines": {"cov": 80}, "exceptions": [ex]})
+        code, body = go(app, jid)
+        check("gate: a valid exception lets a drop through and is named in the notes",
+              code == 0 and any("ana" in n for n in body.get("notes", [])), str(body))
+        for label, bad in (("expired", dict(ex, expires=tomorrow(-1))), ("no owner", dict(ex, owner="")),
+                           ("two years out", dict(ex, expires=tomorrow(800)))):
+            app, wt, jid = make({"merge_policy": {"constraints": [ratchet]}}, branch_files=cov_files(70), constraints_file={"baselines": {"cov": 80}, "exceptions": [bad]})
+            code, body = go(app, jid)
+            check(f"gate: an exception that is {label} does not help", code == 5, str(body))
+        app, wt, jid = make({"merge_policy": {"constraints": [dict(ratchet, pattern="NOPE(\\d+)")]}}, branch_files=cov_files(90), constraints_file={"baselines": {"cov": 80}})
+        code, body = go(app, jid)
+        check("gate: an unreadable measurement fails closed", code == 5, str(body))
+        app, wt, jid = make({"merge_policy": {"constraints": [ratchet]}}, branch_files=cov_files(10))
+        code, body = go(app, jid)
+        check("gate: with no baseline it merges and says so",
+              code == 0 and any("no baseline" in n for n in body.get("notes", [])), str(body))
+        app, wt, jid = make({"merge_policy": {"constraints": [ratchet]}}, branch_files={"cov.py": "print('COV=95')\n", "factory/constraints.json": json.dumps({"baselines": {"cov": 1}})}, constraints_file={"baselines": {"cov": 99}})
+        code, body = go(app, jid)
+        check("gate: a branch cannot lower its own baseline", code in (4, 5) , str(body))
+
+        def with_spec(text):
+            a, w, j = make()
+            open(os.path.join(a, "factory", "jobs", j, "spec.md"), "w").write(text)
+            return a, w, j
+        design_spec = "# Add a cache layer\n\n- Ticket: ABC-1\n\n## Design\n- **Decision**: put Redis in front of reads.\n- **Alternatives considered**: none worth it.\n\n## Requirements\n1. x\n"
+        app, wt, jid = with_spec(design_spec)
+        code, body = go(app, jid)
+        adr_files = os.listdir(os.path.join(app, "docs", "adr")) if os.path.isdir(os.path.join(app, "docs", "adr")) else []
+        adr_text = open(os.path.join(app, "docs", "adr", adr_files[0])).read() if adr_files else ""
+        check("gate: a real Design section is committed as ADR 0001 after the merge",
+              code == 0 and adr_files == ["0001-add-a-cache-layer.md"] and "put Redis in front of reads" in adr_text
+              and "Status: Accepted" in adr_text and "Ticket: ABC-1" in adr_text and "adr: 001-x" in git(app, "log", "--oneline", "-1").stdout, str(body) + str(adr_files))
+        check("gate: the working tree is clean after the ADR commit", git(app, "status", "--porcelain").stdout.strip() == "", git(app, "status", "--porcelain").stdout)
+        os.makedirs(os.path.join(app, "docs", "adr"), exist_ok=True)
+        app, wt, jid = with_spec("# Tiny\n\n## Design\nNot architectural. One guard clause.\n\n## Requirements\n1. x\n")
+        code, body = go(app, jid)
+        check("gate: 'Not architectural' writes no ADR", code == 0 and not os.path.isdir(os.path.join(app, "docs", "adr")), str(body))
+        app, wt, jid = with_spec(design_spec)
+        os.makedirs(os.path.join(app, "docs", "adr"))
+        open(os.path.join(app, "docs", "adr", "0007-old.md"), "w").write("old\n")
+        git(app, "add", "-A"); git(app, "commit", "-qm", "old adr")
+        code, body = go(app, jid)
+        check("gate: the next ADR number follows the highest existing one",
+              os.path.isfile(os.path.join(app, "docs", "adr", "0008-add-a-cache-layer.md")), str(body) + str(os.listdir(os.path.join(app, "docs", "adr"))))
+        app, wt, jid = with_spec(design_spec)
+        pol = json.load(open(os.path.join(app, "factory", "policy.json"))); pol["adr"] = {"dir": ""}
+        json.dump(pol, open(os.path.join(app, "factory", "policy.json"), "w")); git(app, "add", "-A"); git(app, "commit", "-qm", "adr off")
+        code, body = go(app, jid)
+        check("gate: policy.adr.dir empty turns ADRs off", code == 0 and not os.path.isdir(os.path.join(app, "docs", "adr")), str(body))
+
+        app, wt, jid = make()
+        os.makedirs(os.path.join(app, "factory", "jobs", "000-first"))
+        json.dump({"id": "000-first", "stage": "build"}, open(os.path.join(app, "factory", "jobs", "000-first", "job.json"), "w"))
+        jp = os.path.join(app, "factory", "jobs", jid, "job.json")
+        jj = json.load(open(jp)); jj["depends_on"] = ["000-first"]; json.dump(jj, open(jp, "w"))
+        code, body = go(app, jid)
+        check("gate: a job whose dependency has not merged is refused", code == 4 and "000-first" in json.dumps(body), str(body))
+        json.dump({"id": "000-first", "stage": "merged"}, open(os.path.join(app, "factory", "jobs", "000-first", "job.json"), "w"))
+        code, body = go(app, jid)
+        check("gate: once the dependency has merged the job merges", code == 0, str(body))
 
         app, wt, jid = make(pin=False)
         code, body = go(app, jid)
@@ -1061,6 +1173,44 @@ def eval_scripts():
                "--waive-intent", "tiny typo fix, owner agreed")
         wj = json.loads(py("jobctl.py", "--factory", factory, "show", w.stdout.strip()).stdout) if w.returncode == 0 else {}
         check("jobctl: a waiver is recorded in job.json", wj.get("intent_waived") == "tiny typo fix, owner agreed", w.stderr)
+        sf = os.path.join(tmp, "splitf")
+        os.makedirs(sf)
+        parent_id = py("jobctl.py", "--factory", sf, "create", "--slug", "big", "--feature", "big", "--worktree-root", root).stdout.strip()
+        os.makedirs(os.path.join(sf, "jobs", parent_id), exist_ok=True)
+        open(os.path.join(sf, "jobs", parent_id, "intent.md"), "w").write("INTENT: ACCEPTED\n")
+        k1 = py("jobctl.py", "--factory", sf, "create", "--slug", "slice-one", "--feature", "one", "--worktree-root", root,
+                "--parent", parent_id, "--intent-from", parent_id)
+        k1id = k1.stdout.strip()
+        k2 = py("jobctl.py", "--factory", sf, "create", "--slug", "slice-two", "--feature", "two", "--worktree-root", root,
+                "--parent", parent_id, "--intent-from", parent_id, "--depends", k1id)
+        k2id = k2.stdout.strip()
+        j1 = json.loads(py("jobctl.py", "--factory", sf, "show", k1id).stdout) if k1.returncode == 0 else {}
+        check("split: a child inherits the parent's intent without a waiver",
+              k1.returncode == 0 and j1.get("parent") == parent_id and j1.get("intent_waived") is None
+              and os.path.isfile(os.path.join(sf, "jobs", k1id, "intent.md")), k1.stderr)
+        check("split: the parent records its children and a child its dependency",
+              json.loads(py("jobctl.py", "--factory", sf, "show", parent_id).stdout).get("children") == [k1id, k2id]
+              and json.loads(py("jobctl.py", "--factory", sf, "show", k2id).stdout).get("depends_on") == [k1id])
+        orphan = py("jobctl.py", "--factory", sf, "create", "--slug", "orphan", "--feature", "x", "--worktree-root", root, "--parent", parent_id)
+        check("split: --parent without --intent-from is refused", orphan.returncode != 0 and "--intent-from" in orphan.stderr, orphan.stderr)
+        baddep = py("jobctl.py", "--factory", sf, "create", "--slug", "baddep", "--feature", "x", "--worktree-root", root,
+                    "--parent", parent_id, "--intent-from", parent_id, "--depends", "999-nope")
+        check("split: a dependency on a job that does not exist is refused", baddep.returncode != 0, baddep.stderr)
+        rd = json.loads(py("jobctl.py", "--factory", sf, "ready").stdout)
+        by = {r["id"]: r for r in rd["jobs"]}
+        check("split: ready lists the child with no dependency and holds the dependent one",
+              by.get(k1id, {}).get("ready") is True and by.get(k2id, {}).get("ready") is False
+              and by.get(k2id, {}).get("waiting_on") == [k1id], str(rd))
+        py("jobctl.py", "--factory", sf, "set", parent_id, "stage=split")
+        py("jobctl.py", "--factory", sf, "set", k1id, "stage=merged")
+        rd2 = json.loads(py("jobctl.py", "--factory", sf, "ready").stdout)
+        check("split: a child becomes ready once its dependency has merged",
+              {r["id"]: r["ready"] for r in rd2["jobs"]}.get(k2id) is True, str(rd2))
+        py("jobctl.py", "--factory", sf, "set", k2id, "stage=merged")
+        closed = json.loads(py("jobctl.py", "--factory", sf, "ready", "--close-parents").stdout)
+        check("split: the parent closes when every child has merged", closed["parents_closed"] == [parent_id], str(closed))
+        check("split: a split parent is not listed as active work",
+              parent_id not in [r["id"] for r in json.loads(py("jobctl.py", "--factory", sf, "active").stdout)])
         os.remove(os.path.join(factory, "policy.json"))
 
         job_dir = os.path.join(factory, "jobs", "001-demo")
@@ -1122,6 +1272,35 @@ def eval_scripts():
         ok = py("policy_check.py", wt, "factory/bar-ok", "--base", "factory/bar-base").stdout.strip()
         check("policy_check: an added assertion is CLEAN", ok == "CLEAN", ok)
         git(wt, "checkout", "-q", "factory/001-demo")
+
+        lz = os.path.join(tmp, "lessonsf")
+        def review(job, rnd, name, verdict, items, where="jobs"):
+            d = os.path.join(lz, where, job, rnd)
+            os.makedirs(d, exist_ok=True)
+            body = f"VERDICT: {verdict}\n\n## Findings\n" + ("\n".join(f"{i}. {t}" for i, t in enumerate(items, 1)) or "None.") + "\n\n## Notes\nx\n"
+            open(os.path.join(d, f"review-{name}.md"), "w").write(body)
+        review("001-a", "round-1", "code", "CHANGES", ["src/a.py:10 unused import of os left in the module, remove it", "src/a.py:30 missing await on save"])
+        review("002-b", "round-1", "code", "CHANGES", ["src/b.py:4 unused import of sys left in the file, remove it"])
+        review("002-b", "round-1", "code", "CHANGES", ["src/b.py:4 unused import of sys left in the file, remove it"], where="audit")
+        review("003-c", "round-1", "code", "PASS", [])
+        review("004-d", "round-1", "code", "CHANGES", ["src/d.py:9 new noqa suppression with no reason and no linter configured, remove the noqa suppression"])
+        review("005-e", "round-1", "code", "CHANGES", ["src/e.py:2 new noqa suppression with no reason and no linter configured, remove the noqa suppression"])
+        review("004-d", "round-2", "code", "CHANGES", ["src/d.py:20 function never validates the negative cap, add a boundary check and reject the bad input"])
+        review("005-e", "round-2", "code", "CHANGES", ["src/e.py:30 function never validates the negative limit, add a boundary check and reject the bad input"])
+        res = subprocess.run([sys.executable, "-I", os.path.join(ROOT, "factory", "scripts", "lessons.py"), "--factory", lz],
+                             capture_output=True, text=True)
+        check("lessons: a finding seen in two jobs is reported with a lint suggestion",
+              "unused import" in res.stdout and "Suggested level: **lint**" in res.stdout and "2 jobs" in res.stdout, res.stdout + res.stderr)
+        check("lessons: a one-off finding is not reported", "missing await" not in res.stdout, res.stdout)
+        check("lessons: the committed audit copy is not counted twice", "Seen 2 time(s) in 2 jobs" in res.stdout, res.stdout)
+        check("lessons: a PASS review contributes nothing", "003-c" not in res.stdout, res.stdout)
+        check("lessons: a repeated suppression points at the weakened-bar scan, not at architecture",
+              "policy_check.py already scans" in res.stdout, res.stdout)
+        check("lessons: a repeated missing-validation finding suggests a boundary test or type",
+              "a boundary test, or a type that cannot hold the bad value" in res.stdout, res.stdout)
+        none = subprocess.run([sys.executable, "-I", os.path.join(ROOT, "factory", "scripts", "lessons.py"), "--factory", os.path.join(tmp, "empty")],
+                              capture_output=True, text=True)
+        check("lessons: an empty factory says nothing repeats", "Nothing repeats yet." in none.stdout, none.stdout + none.stderr)
 
         stamp = json.loads(py("jobctl.py", "--factory", factory, "show", "001-demo").stdout)
         stamp["stage"] = "merged"

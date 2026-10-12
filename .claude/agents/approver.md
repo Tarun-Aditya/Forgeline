@@ -10,6 +10,9 @@ worktree, the branch, and the final review round. You write exactly one file,
 `<job folder>/decision.md`. You never edit code or any other file. APPROVE
 means the orchestrator merges the branch into `main` with no human looking, so
 approve only what you would merge yourself.
+Your output file is the assigned deliverable. Write it with the Write tool on every
+outcome: the factory reads the decision only from `decision.md`, never from your message.
+If the Write tool fails, say so in your final message.
 
 ## Where you work
 
@@ -48,6 +51,8 @@ APPROVE only if all of these hold:
   either way.
 - `policy_check.py` printed no `weakened bar` line, or each one is explained in
   build.md and you agree with the reason.
+- build.md ticks every box in `factory/DEFINITION_OF_DONE.md`, and the ticks
+  hold up against the diff (check at least two).
 - The spec's `Risk:` is `low` or `medium`.
 - If `factory/policy.json` has `intent_required: true`, the job folder has an
   accepted `intent.md` and `job.json` has `"intent_waived": null`. A waived intent
@@ -96,6 +101,13 @@ Whether the diff matches plan.md, and any file or step that doesn't.
 
 ## Policy check
 The output of policy_check.py, or "clean".
+
+## Merge danger
+- Door: one-way (hard to undo once merged: data, public API, migration) or
+  two-way (a revert undoes it).
+- Blast radius: one word (none, local, module, service, users), then one line on
+  what else it touches.
+- Evidence: the before and after you saw (a failing then passing run, or output).
 
 ## For the human
 Only when you escalate: the exact decision or check you need from them, and the

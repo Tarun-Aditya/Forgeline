@@ -27,6 +27,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -102,7 +103,21 @@ def cmd_create(args):
         sys.exit("error: a job can only start at stage intent or spec")
     if args.waive_intent is not None and len(args.waive_intent.strip()) < 5:
         sys.exit("error: --waive-intent needs a real reason; it is kept in the record")
-    if args.stage == "spec" and intent_required(args.factory) and not args.waive_intent:
+    parent = None
+    if args.intent_from:
+        if not args.parent or args.intent_from != args.parent:
+            sys.exit("error: --intent-from must name the --parent job")
+        parent = read_job(args.factory, args.parent)
+        if args.waive_intent:
+            sys.exit("error: a split job inherits its parent's intent; do not waive it")
+        if not os.path.isfile(os.path.join(args.factory, "jobs", args.parent, "intent.md")) and not parent.get("intent_waived"):
+            sys.exit("error: the parent has no accepted intent to inherit")
+    elif args.parent:
+        sys.exit("error: --parent needs --intent-from <parent> so the child carries the accepted intent")
+    depends = [d for d in (args.depends or "").split(",") if d]
+    for dep in depends:
+        read_job(args.factory, dep)  # must exist
+    if args.stage == "spec" and intent_required(args.factory) and not args.waive_intent and not args.intent_from:
         sys.exit("error: policy.intent_required is true: start with --stage intent (/factory intent), "
                  "or have a person waive it with --waive-intent \"reason\"")
     job_id = claim_job_dir(args.factory, args.slug)
@@ -120,9 +135,19 @@ def cmd_create(args):
         "respecs": 0,
         "reworks": 0,
         "created": stamp,
-        "intent_waived": args.waive_intent.strip() if args.waive_intent else None,
+        "intent_waived": args.waive_intent.strip() if args.waive_intent else (parent or {}).get("intent_waived"),
         "history": [{"stage": args.stage, "at": stamp}],
     }
+    if args.parent:
+        job["parent"] = args.parent
+    if depends:
+        job["depends_on"] = depends
+    if args.intent_from:
+        src = os.path.join(args.factory, "jobs", args.parent, "intent.md")
+        if os.path.isfile(src):
+            shutil.copyfile(src, os.path.join(args.factory, "jobs", job_id, "intent.md"))
+        parent.setdefault("children", []).append(job_id)
+        write_job(args.factory, args.parent, parent)
     write_job(args.factory, job_id, job)
     print(job_id)
 
@@ -215,9 +240,38 @@ def cmd_active(args):
         path = os.path.join(jobs_dir, name, "job.json")
         if os.path.isfile(path):
             job = json.load(open(path, encoding="utf-8"))
-            if job["stage"] not in ("merged", "needs-human", "intent", "spec-approval"):
+            if job["stage"] not in ("merged", "needs-human", "intent", "spec-approval", "split"):
                 rows.append({"id": name, "stage": job["stage"], "paused": bool(job.get("paused"))})
     print(json.dumps(rows, indent=2))
+
+
+def all_jobs(factory):
+    jobs_dir = os.path.join(factory, "jobs")
+    out = {}
+    for name in sorted(os.listdir(jobs_dir)) if os.path.isdir(jobs_dir) else []:
+        path = os.path.join(jobs_dir, name, "job.json")
+        if os.path.isfile(path):
+            out[name] = json.load(open(path, encoding="utf-8"))
+    return out
+
+
+def cmd_ready(args):
+    """Split children whose dependencies have all merged and that have no spec yet."""
+    jobs = all_jobs(args.factory)
+    rows, closed = [], []
+    for name, job in jobs.items():
+        if job.get("parent") and job["stage"] == "spec" and not os.path.isfile(os.path.join(args.factory, "jobs", name, "spec.md")):
+            waiting = [d for d in job.get("depends_on", []) if jobs.get(d, {}).get("stage") != "merged"]
+            rows.append({"id": name, "parent": job["parent"], "ready": not waiting, "waiting_on": waiting})
+    if args.close_parents:
+        for name, job in jobs.items():
+            kids = job.get("children") or []
+            if job["stage"] == "split" and kids and all(jobs.get(k, {}).get("stage") == "merged" for k in kids):
+                job["stage"] = "merged"
+                job["history"].append({"stage": "merged", "at": now()})
+                write_job(args.factory, name, job)
+                closed.append(name)
+    print(json.dumps({"jobs": rows, "parents_closed": closed}, indent=2))
 
 
 def cmd_show(args):
@@ -238,6 +292,9 @@ def main():
     c.add_argument("--ticket", default=None)
     c.add_argument("--stage", default="spec")
     c.add_argument("--waive-intent", default=None)
+    c.add_argument("--parent", default=None, help="the job this one was split from")
+    c.add_argument("--intent-from", default=None, help="inherit the parent's accepted intent")
+    c.add_argument("--depends", default=None, help="comma-separated job ids that must merge first")
     c.set_defaults(fn=cmd_create)
 
     s = sub.add_parser("set")
@@ -261,6 +318,10 @@ def main():
 
     ac = sub.add_parser("active")
     ac.set_defaults(fn=cmd_active)
+
+    rd = sub.add_parser("ready")
+    rd.add_argument("--close-parents", action="store_true", help="mark a split parent merged once every child merged")
+    rd.set_defaults(fn=cmd_ready)
 
     sh = sub.add_parser("show")
     sh.add_argument("job_id")

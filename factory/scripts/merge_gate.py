@@ -23,7 +23,10 @@ and the merge:
   6. The branch is merged into a throwaway copy of the base as it is right now, and
      merge_policy.verify_commands run there. This catches a branch that merges
      cleanly but no longer builds against a base that moved after it was tested.
-  7. Only then the real merge (--no-ff), then the worktree and branch are removed.
+     merge_policy.constraints (see constraints.py) are measured there too and must not
+     fall below the baselines in factory/constraints.json of the base checkout.
+  7. Only then the real merge (--no-ff), then the worktree and branch are removed, and a
+     spec's accepted Design section is committed as an ADR (policy.adr.dir, see adr.py).
 Nothing here pushes.
 """
 
@@ -40,6 +43,8 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from factory_lib import any_match, load_policy  # noqa: E402
+import constraints as ratchets  # noqa: E402
+import adr as adr_record  # noqa: E402
 
 
 def git(repo, *args, check=False):
@@ -171,6 +176,16 @@ def main():
             elif not os.path.isfile(os.path.join(factory, "jobs", args.job_id, "intent.md")):
                 refusals.append("intent_required is on and the job has no intent.md")
 
+        # 5b. a split job waits for the jobs it depends on
+        for dep in job.get("depends_on") or []:
+            try:
+                with open(os.path.join(factory, "jobs", dep, "job.json"), encoding="utf-8") as fh:
+                    dep_stage = json.load(fh).get("stage")
+            except (OSError, ValueError):
+                dep_stage = "missing"
+            if dep_stage != "merged":
+                refusals.append(f"depends on {dep}, which is {dep_stage}, not merged")
+
         if refusals:
             out(4, "refused", reasons=refusals)
         if needs_human:
@@ -198,6 +213,11 @@ def main():
                 if done.returncode != 0:
                     out(5, "verify-failed", command=cmd, exit_code=done.returncode,
                         output=(done.stdout + done.stderr).strip()[-600:])
+            if mp.get("constraints"):
+                failed, cnotes, measured = ratchets.check(mp["constraints"], factory, trial)
+                notes += cnotes
+                if failed:
+                    out(5, "constraint-failed", reasons=failed, measured=measured)
         finally:
             git(repo, "worktree", "remove", "--force", trial)
             shutil.rmtree(tmp, ignore_errors=True)
@@ -224,6 +244,12 @@ def main():
             cleanup.append("branch not deleted: " + r.stderr.strip()[:160])
         subprocess.run([sys.executable, "-I", os.path.join(HERE, "jobctl.py"), "--factory", factory,
                         "set", args.job_id, "stage=merged"], capture_output=True, check=False)
+        try:
+            adr_note = adr_record.record(repo, factory, args.job_id, policy, args.base, git)
+        except OSError as err:
+            adr_note = f"ADR not recorded: {err}"
+        if adr_note:
+            notes.append(adr_note)
         out(0, "merged", merged_commit=merged_sha, reviewed_sha=pinned, notes=notes, cleanup_problems=cleanup)
 
 

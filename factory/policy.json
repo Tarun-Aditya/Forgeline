@@ -13,7 +13,11 @@
     "factory/scripts/**",
     "factory/templates/**",
     "factory/REVIEW.md",
-    "factory/audit/**"
+    "factory/audit/**",
+    "factory/constraints.json",
+    "factory/out-of-scope.md",
+    "factory/DEFINITION_OF_DONE.md",
+    "factory/checklists/**"
   ],
   "escalate_paths": [
     ".github/**",
@@ -74,7 +78,7 @@
     "docker\\s+push",
     "curl[^|;&]*\\|\\s*(ba)?sh",
     "wget[^|;&]*\\|\\s*(ba)?sh",
-    "git(\\s+(-C|-c)\\s+\\S+|\\s+--[\\w-]+(=\\S+)?)*\\s+merge\\b[^\\n;&|]*\\bfactory/"
+    "git(\\s+(-C|-c)\\s+\\S+|\\s+--[\\w-]+(=\\S+)?)*\\s+merge(?![\\w-])[^\\n;&|]*\\bfactory/"
   ],
   "ticketing": {
     "system": null,
@@ -94,6 +98,10 @@
     ],
     "verify_commands": [],
     "require_verify": false,
-    "lock_stale_minutes": 60
+    "lock_stale_minutes": 60,
+    "constraints": []
+  },
+  "adr": {
+    "dir": "docs/adr"
   }
 }

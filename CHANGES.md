@@ -21,7 +21,7 @@ Gaps were taken from an audit against Anthropic's "The AI-Native SDLC Playbook".
 | Governance: audit trail | `snapshot_audit.py` commits job artifacts to the branch under `factory/audit/` |
 | Governance: human decisions on record | `spec-approval.md` and `human-approval.md` |
 | Metrics | Timestamped `history` in `job.json`, `metrics.py`, `/factory metrics` |
-| Test: evals gate config changes | `factory/evals/run_evals.py` (288 checks, needs Python 3.12+) and a CI workflow |
+| Test: evals gate config changes | `factory/evals/run_evals.py` (326 checks, needs Python 3.12+) and a CI workflow |
 | Test: agent behaviour | `factory/evals/agent_evals.py`: 17 live cases covering 12 of 14 agents |
 | Design: decision record | Spec `## Design` section (alternatives, consequences, interfaces), read by planner and approver |
 | Build: CLAUDE.md | `scripts/doctor.py`, `/factory doctor`, `onboarder` agent and `/factory init` |
@@ -29,6 +29,16 @@ Gaps were taken from an audit against Anthropic's "The AI-Native SDLC Playbook".
 | Build: auto mode | `install.py --default-mode auto`; hooks verified in auto mode |
 | Build: quality bar cannot be lowered quietly | `policy_check.py` flags added suppressions, skipped or deleted tests and stripped assertions (`weakened bar`); the approver escalates them. Idea from Osmani `constraint-driven-development` and pstack `encode-lessons-in-structure` |
 | Build/Deploy: excuses and proof | Builder and approver carry a short excuses-to-rules table, builder must observe the real artifact, approver tries to disprove before APPROVE, diagnoser lists competing hypotheses. Ideas from Osmani anti-rationalization tables and `doubt-driven-development`, pstack `prove-it-works`; nothing third-party was installed |
+| Standing bar, proof, merge danger | `factory/DEFINITION_OF_DONE.md` ticked in build.md and checked by reviewer-code and approver; planner labels each safety claim by how far it was checked; approver adds Door, Blast radius and Evidence; diagnoser checks the metric itself first |
+| Review file always written | Reviewers and approver state that their output file is the assigned deliverable (found when `reviewer-code` skipped it in an end-to-end run) |
+| Decisions not to build are remembered; framework APIs are checked | `factory/out-of-scope.md` read by intent-writer and spec-writer; planner and builder read the pinned library source before relying on an API |
+| Test: repeated mistakes become checks | `scripts/lessons.py` and `/factory lessons`: groups recurring CHANGES findings across jobs, suggests architecture, types, lint, test or rule, strongest first |
+| Test: written quality bar | `merge_policy.constraints` and `factory/constraints.json`: the gate measures a number on the merged result and refuses a drop below a person-set baseline; exceptions need an owner and an expiry within a year; the baseline is read from the base checkout so a branch cannot lower it |
+| Review: perf, accessibility, observability, testing, security | `factory/checklists/` (own wording), read by the reviewer whose pass it belongs to; a line that does not apply is skipped |
+| Test: UI reviewers can actually run the app | `factory/templates/verify-app.md`, `onboarder` drafts `VERIFY.proposed.md`, a person moves it to `.claude/skills/verify-app/`; builder and ux/ui reviewers call it when listed; `doctor` warns when an app with a dev server has none |
+| Design: decisions outlive the job | `adr.py` called by the merge gate: a spec's real Design section is committed as `docs/adr/NNNN-slug.md` after the merge (`policy.adr.dir`, empty turns it off); intent-writer, spec-writer and planner read `docs/GLOSSARY.md` and the ADRs |
+| Build: big work is split | A spec may carry a `## Split` section; `/factory approve-spec` then creates child jobs that inherit the intent and wait on their dependencies (`jobctl.py create --parent --intent-from --depends`, `jobctl.py ready`, `/factory ready`); the merge gate refuses a child whose dependencies have not merged |
+| Review: files always written, pages always opened | Reviewers write their file on every outcome and the orchestrator re-spawns a reviewer that returns without it once; reviewer-ux and reviewer-ui have the Skill tool, read `verify-app` and must open the page when the diff changes what it renders; the blocked-command rule for `git merge` no longer matches `merge-tree` or `merge-base` (found by end-to-end runs) |
 | Deploy: PR review loop | `scripts/review_branch.py`, `pr-reviewer` agent, `/factory review` |
 | Maintain: real metrics | `maintain/collect.py` and `collectors.json`; `maintain/schedule.py` writes the cron block |
 | Deploy: merge control | `scripts/merge_gate.py`: lock, commit-bound approval, policy re-check, size cap, verification on the current base; hook blocks hand merges |

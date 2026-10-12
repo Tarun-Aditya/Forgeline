@@ -1,8 +1,30 @@
-# Software Factory Plus
+# Forgeline
 
-The zazencodes software factory for Claude Code, extended to cover more of the
-AI-native SDLC. One orchestrator skill, five team skills, fourteen subagents, a policy file, hooks, evals and plain
-markdown. See `CHANGES.md` for exactly what was added and what is still missing.
+A software factory for Claude Code. It takes an idea through intent, spec, plan, build,
+review and a merge gate, with people deciding at the points that matter and hooks, a policy
+file and a dashboard keeping it honest. One orchestrator skill, five team skills, fourteen
+subagents, scripts, evals and plain markdown; it runs on a Claude subscription.
+
+- **Using it:** `USAGE.md` covers install, every command, parallel jobs and git worktrees,
+  models, the dashboard, policy and the guardrails.
+- **Project state and next steps:** `CONTEXT.md`.
+- **What was added over the base, and what is missing:** `CHANGES.md` and `AUDIT.md`.
+
+## Quick start
+
+```bash
+# in the repo you want the factory to work on
+cp -R <forgeline>/.claude <forgeline>/factory .          # then delete factory/jobs/* examples
+cat <forgeline>/.gitignore.factory >> .gitignore
+python3 factory/scripts/doctor.py                         # fix every FAIL (or /factory init)
+python3 factory/scripts/install_helper_skills.py --apply  # optional, read them first
+python3 factory/evals/run_evals.py                        # needs Python 3.12+
+claude                                                    # then: /factory intent <your idea>
+cd factory && python3 -m http.server                      # dashboard at localhost:8000/dashboard.html
+```
+
+Set `merge_policy.verify_commands` in `factory/policy.json` to your build and test commands
+before the first merge. Details are in `USAGE.md`.
 
 ```
 idea/ticket/incident → intent-writer → HUMAN accepts intent      (required)
@@ -33,8 +55,13 @@ This folder is laid out like a repo root, so you can copy it into yours.
 factory/
   policy.json                  the rules (frozen/escalate paths, blocked commands, autonomy)
   REVIEW.md                    what reviewers flag and what they skip
-  templates/intent.md          the intent template
-  scripts/                     jobctl, snapshot_audit, policy_check, metrics
+  templates/                   intent.md and verify-app.md
+  DEFINITION_OF_DONE.md        the standing bar the builder ticks and reviewers check
+  out-of-scope.md              decisions not to build something (people edit)
+  constraints.json             ratchet baselines and exceptions (people edit)
+  checklists/                  security, accessibility, performance, observability, testing
+  scripts/                     jobctl, merge_gate, policy_check, snapshot_audit, metrics, doctor,
+                               review_branch, install_helper_skills, lessons, constraints, adr
   evals/run_evals.py           deterministic evals (config, hooks, managed, maintain, scan)
   evals/agent_evals.py         runs the agents on fixture repos and checks their output
   maintain/                    detect, run, dismiss, scan, collect_factory, bands, runbooks
@@ -60,6 +87,8 @@ factory/
 /factory metrics                                    cycle time, first-pass rate, escalations
 /factory stop | resume [<job-id>]                  pause unfinished jobs, pick them up again
 /factory doctor                                     check the repo is ready (AGENTS.md, policy, hooks)
+/factory lessons                                    group repeated review findings and suggest a check for each
+/factory ready                                      start split children whose dependencies have merged
 /factory init                                       draft AGENTS.md for a new repo
 /factory review <branch | --pr N>                   review any branch or pull request
 /factory maintain collect|schedule|run|scan|triage  metrics, cron, bands, scans, triage
@@ -92,11 +121,28 @@ factory/
   `policy.ticketing.mcp_server` names a connector) read at the start and
   commented on at the end.
 
+- **Standing bar and proof**: `DEFINITION_OF_DONE.md` is ticked in `build.md`; the planner
+  labels how far each safety claim was checked; the approver tries to disprove its own
+  decision and writes a Door, Blast radius and Evidence block; `policy_check.py` flags
+  suppressions, skipped or deleted tests and stripped assertions.
+- **Checklists**: `factory/checklists/` gives each reviewer a short list for its pass.
+- **Verification skill**: `onboarder` drafts `VERIFY.proposed.md` (how to start the app and a
+  feature map); once a person installs it as `.claude/skills/verify-app/`, the builder and
+  the UX and UI reviewers use it.
+- **Ratchets**: `merge_policy.constraints` and `factory/constraints.json` make the merge gate
+  refuse a measured number (coverage, test count) that falls below a person-set baseline.
+- **Decisions that last**: a merged spec's Design section becomes `docs/adr/NNNN-slug.md`;
+  intent-writer, spec-writer and planner read `docs/GLOSSARY.md` and the ADRs; 
+  `out-of-scope.md` remembers what was decided against.
+- **Split jobs**: a spec too big for one change splits into dependent child jobs
+  (`/factory ready`); the gate refuses a child whose dependencies have not merged.
+- **Learning**: `/factory lessons` groups review findings that recur across jobs and suggests
+  a lint, type, test or rule for each.
+
 ## Use it in your repo
 
 1. Copy `.claude/`, `factory/` and `.github/workflows/factory-evals.yml` into your
-   repo root. Delete the example jobs in `factory/jobs/` and the checked backlog
-   items.
+   repo root. Start with an empty `factory/jobs/` and an empty backlog.
 2. Add the lines in `.gitignore.factory` to your `.gitignore`.
 3. Make sure `AGENTS.md` (or `CLAUDE.md`) says how to set up a fresh checkout,
    start the dev server on a given port, and run tests, build and lint. The
@@ -121,8 +167,9 @@ To authorize a push or deploy, start Claude Code yourself with
 cd factory && python3 -m http.server
 ```
 
-Open <http://localhost:8000/dashboard.html>. Jobs move across nine stages; a
-spec waiting for approval or a job needing you stands out. Click a card to read
+Open <http://localhost:8000/dashboard.html>. Jobs move across nine stages (a tenth,
+Split, appears when a big spec was split into child jobs, which show what they wait on);
+a spec waiting for approval or a job needing you stands out, with the command to run. Click a card to read
 its markdown files. It polls every two seconds.
 
 ## Maintain loop
@@ -191,7 +238,7 @@ edit to a protected path (checked live: `git push` was blocked in auto mode).
 ## Evals
 
 ```bash
-python3 factory/evals/run_evals.py      # 288 deterministic checks, no model, run on every change
+python3 factory/evals/run_evals.py      # 326 deterministic checks, no model, run on every change
 python3 factory/evals/agent_evals.py    # 17 live agent cases, uses your Claude login
 ```
 
@@ -218,8 +265,10 @@ turns on `allowManagedHooksOnly`. Also protect `.claude/` and
   products (Claude Tag on-call, Claude Code Review, Claude Security) are not files
   you can add here.
 
-## The upstream factory
+## Origin
 
-Based on the software factory from
-[zazencodes-season-3](https://github.com/zazencodes/zazencodes-season-3/tree/main/src/software-factory-claude-code).
-`BUILD_PROMPT.md` is the prompt that built the original, kept for reference.
+Forgeline started from the software factory in
+[zazencodes-season-3](https://github.com/zazencodes/zazencodes-season-3/tree/main/src/software-factory-claude-code),
+which had no licence file when it was copied, so keep this repository private and check
+with its author before sharing it further. `CHANGES.md` lists everything added since.
+`BUILD_PROMPT.md` is the prompt that built that original, kept for reference.

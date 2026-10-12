@@ -93,7 +93,8 @@ trail**).
 <repo>/factory/policy.json                     the rules
 <repo>/factory/REVIEW.md                       what reviewers flag and what they skip
 <repo>/factory/backlog.md                      queue for /factory next
-<repo>/factory/scripts/                        jobctl, snapshot_audit, policy_check, metrics
+<repo>/factory/scripts/                        jobctl, snapshot_audit, policy_check, metrics, lessons, constraints
+<repo>/factory/constraints.json                baselines and exceptions for merge_policy.constraints (a person edits)
 <repo>/factory/jobs/<job-id>/job.json          the job's state (jobctl writes it, the dashboard reads it)
 <repo>/factory/jobs/<job-id>/intent.md
 <repo>/factory/jobs/<job-id>/spec.md
@@ -214,7 +215,8 @@ spawning `intent-writer` again with the answers verbatim (it rewrites
 ## Spec approval
 
 1. Read the `Risk:` line in `spec.md`.
-2. If `policy.spec_approval` is `"auto"` and the risk is `low`: write
+2. If `policy.spec_approval` is `"auto"`, the risk is `low` and `spec.md` has no
+   `## Split` section (a split always waits for a person): write
    `spec-approval.md` with the line `Auto-approved: low risk, policy.spec_approval=auto`
    and the UTC time, snapshot, and go to **Plan**.
 3. Otherwise: `jobctl.py set <job-id> stage=spec-approval`. Tell the user the
@@ -225,7 +227,8 @@ spawning `intent-writer` again with the answers verbatim (it rewrites
 ## /factory approve-spec <job-id>
 
 The job must be at `spec-approval`. Write `spec-approval.md` (the user's words
-verbatim and the UTC time), snapshot (`"spec approved"`), and go to **Plan**.
+verbatim and the UTC time), snapshot (`"spec approved"`). If `spec.md` has a
+`## Split` section, go to **Split**; otherwise go to **Plan**.
 
 ## /factory respec <job-id> <note>
 
@@ -236,6 +239,34 @@ The job must be at `spec-approval`.
 2. `jobctl.py set <job-id> stage=spec`. Spawn `spec-writer` with
    `<paths> Feature: <feature>. Revise: read spec-feedback-<k>.md.`
 3. Snapshot (`"spec revised"`) and go to **Spec approval** again.
+
+## Split
+
+A spec with a `## Split` section is the overall design for work too big for one
+reviewable change. A person approved it; now each slice becomes its own job. Slices
+are lines of the form `- <slug>: <feature text>. Depends: none | <slug>, <slug>`.
+
+1. Read the slices in order. A `Depends:` may name only an earlier slice; if one
+   names a later or unknown slice, go to **Needs human** and say so.
+2. For each slice, in order, create a child that inherits the accepted intent:
+   `python3 -I factory/scripts/jobctl.py create --slug <slug> --feature "<slice text>"
+   --parent <job-id> --intent-from <job-id> [--depends <child-id>,<child-id>]`.
+   Map each `Depends:` slug to the child id you got for it.
+3. `jobctl.py set <job-id> stage=split`. The parent builds nothing and its worktree
+   stays as the audit record. Snapshot (`"split into N jobs"`).
+4. Tell the user the children, which depend on which, and that none has a worktree or
+   spec yet. Run `/factory ready` to start the ones that can start.
+
+## /factory ready
+
+Run `python3 -I factory/scripts/jobctl.py ready --close-parents` and read its JSON.
+For each child with `ready: true`, do steps 2 and 3 of `/factory <feature>` (worktree
+from `main` as it is now, then the spec) with the spec-writer prompt
+`<paths> Feature: <child feature>. Parent spec: <repo>/factory/jobs/<parent>/spec.md.`
+then **Spec approval**. A child's spec is written only after its dependencies have
+merged, so it reads their code. List the children still waiting and on which job.
+`parents_closed` names split parents whose children have all merged; say so. The merge
+gate also refuses a child whose dependencies have not merged.
 
 ## Plan
 
@@ -271,7 +302,11 @@ Read the first line of `build.md`.
    in as they land. The round is done only when all four `review-*.md` files
    exist in `round-<N>/`. Never resume the builder mid-round. If a reviewer
    finishes without writing its file, or writes a first line that isn't a
-   verdict, stop and tell the user.
+   verdict, re-spawn that one reviewer once with the same prompt plus "Write
+   `round-<N>/review-<name>.md` with the Write tool; a review that exists only in
+   your message does not count." Keep the verdicts already recorded. If the
+   second attempt also leaves no valid file, stop and tell the user. Never write
+   a review file yourself or take a verdict from a reviewer's message.
 4. Snapshot (`"review round N"`), then decide:
    - **All PASS**: go to **Approve**.
    - **Any CHANGES, resumes left**: `jobctl.py set <job-id> stage=build`, then
@@ -415,6 +450,15 @@ Reviews any branch or pull request, not only factory jobs. The read-only `pr-rev
 `--pr <n>`), then show `review.md` from the folder it names. Every comment is
 checked against the diff by the script. It never posts: for a pull request it
 writes `gh-review.sh`, which the user runs after reading the review.
+
+## /factory lessons
+
+Run `python3 -I factory/scripts/lessons.py` and show the output. It groups review
+findings that recurred across jobs and suggests where to fix each (architecture,
+types, lint, test, rule), strongest first. Read the groups, say which are real, and
+offer to turn the confirmed ones into a backlog item (`factory/backlog.md`) so the
+fix goes through the normal gates. Never edit `AGENTS.md`, `REVIEW.md` or a check
+yourself. `--write` saves the report as `factory/lessons.md`.
 
 ## /factory maintain [run | scan | triage]
 
