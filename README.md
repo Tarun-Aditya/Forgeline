@@ -199,8 +199,9 @@ continues the job from its files. Details are in `USAGE.md` section 7a.
 `web/` is an optional local web app (Next.js, Vercel AI SDK, AI Elements) over the same factory.
 It does not replace the orchestrator: each action launches `claude -p "/factory ..."` in the
 chosen repo. It gives you an input box for a task or ticket, the job board with approval buttons,
-a live run log, the shared activity feed, a Runs tab that replays any run, and cost and token
-metrics by model, job and day. Runs are detached processes, so closing the browser or crashing
+a live run log, the shared activity feed, a Runs tab that replays any run, an Agents view that
+animates how the agents hand work to each other (with replay, per-agent cost and a compare mode), code
+changes on each job, alerts, parallel runs, and cost and token metrics by model, job, agent and day. Runs are detached processes, so closing the browser or crashing
 the web server does not stop a job.
 
 ```bash

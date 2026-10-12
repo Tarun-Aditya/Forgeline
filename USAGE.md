@@ -194,7 +194,7 @@ Limits: it shows what agents do, not the model's streamed text, and each hook ca
 
 `web/` is an optional local web layer (Next.js, Vercel AI SDK, AI Elements) that starts
 `/factory` runs from a browser, streams the run live, shows the board with approval buttons,
-reads the activity log (7a) and reports cost and token usage. Runs are detached processes, so
+reads the activity log (7a), animates how the agents hand work to each other (Agents view), lets several runs go at once and reports cost and token usage. Runs are detached processes, so
 closing the browser or crashing the web server does not stop a job. It launches the same `claude -p "/factory ..."` commands;
 see `web/README.md`. It is not copied into other repos.
 When a web-started run stops to ask something (it ends with the job mid-loop, or a job command
