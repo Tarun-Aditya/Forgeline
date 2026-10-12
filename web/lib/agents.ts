@@ -82,3 +82,34 @@ export function handoffsAt(view: Lanes, t: number, window: number): { agent: str
   }
   return out;
 }
+
+export type JobStats = {
+  elapsed: number; // first to last event, waits for people included
+  agentTime: number; // time agents were actually working (the orchestrator is left out; it spans the whole job)
+  agents: number;
+  toolCalls: number;
+  perAgent: Record<string, { ms: number; tools: number; costUsd: number }>;
+  costUsd: number;
+};
+
+/** Numbers for comparing two jobs, from the same lanes the flow draws. */
+export function jobStats(view: Lanes, cost: Record<string, { costUsd: number }> = {}): JobStats {
+  const perAgent: JobStats["perAgent"] = {};
+  let agentTime = 0;
+  let toolCalls = 0;
+  for (const l of view.lanes) {
+    const ms = l.spans.reduce((n, s) => n + (s.end - s.start), 0);
+    perAgent[l.agent] = { ms, tools: l.tools, costUsd: cost[l.agent]?.costUsd ?? 0 };
+    toolCalls += l.tools;
+    if (l.agent !== "orchestrator") agentTime += ms;
+  }
+  for (const [agent, c] of Object.entries(cost)) if (!perAgent[agent]) perAgent[agent] = { ms: 0, tools: 0, costUsd: c.costUsd };
+  return {
+    elapsed: view.lanes.length ? view.t1 - view.t0 : 0,
+    agentTime,
+    agents: view.lanes.length,
+    toolCalls,
+    perAgent,
+    costUsd: Object.values(perAgent).reduce((n, a) => n + a.costUsd, 0),
+  };
+}

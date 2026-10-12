@@ -93,3 +93,20 @@ test("handoffsAt returns one hand-off per agent even when it started many times"
   assert.equal(h.length, 1);
   assert.ok(Math.abs(h[0].progress - 0.1) < 0.01);
 });
+
+import { jobStats } from "../lib/agents.ts";
+
+test("jobStats sums agent time without the orchestrator and totals cost", () => {
+  const events = [
+    ev("00.000", "prompt", "orchestrator"), ev("09.000", "tool_done", "orchestrator"),
+    ev("01.000", "subagent_start", "planner"), ev("03.000", "tool_done", "planner"), ev("05.000", "subagent_stop", "planner"),
+    ev("05.000", "subagent_start", "builder"), ev("08.000", "subagent_stop", "builder"),
+  ];
+  const s = jobStats(buildLanes(events), { planner: { costUsd: 1.5 }, builder: { costUsd: 2 }, approver: { costUsd: 0.5 } });
+  assert.equal(s.agentTime, 7000);
+  assert.equal(s.elapsed, 9000);
+  assert.equal(s.agents, 3);
+  assert.equal(s.toolCalls, 2);
+  assert.equal(s.costUsd, 4);
+  assert.equal(s.perAgent.approver.ms, 0); // a cost with no activity still shows
+});

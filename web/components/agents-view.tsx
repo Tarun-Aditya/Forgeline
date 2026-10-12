@@ -2,6 +2,7 @@
 import { Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AgentFlow } from "@/components/agent-flow";
+import { CompareView } from "@/components/compare-view";
 import { ReviewChips } from "@/components/board";
 import { Actions, isStuck, LastMessage, useJobCommand, WorkingBanner } from "@/components/job-drawer";
 import { QuestionBadge, QuestionBox } from "@/components/question-box";
@@ -28,7 +29,7 @@ type Props = {
 export function AgentsView({ notes, starting, repo, jobs, stages, busy, running, trouble, questions, onCommand, onOpen, onAnswer }: Props) {
   const [picked, setPicked] = useState<string | null>(null);
   const [agent, setAgent] = useState<string | null>(null);
-  const [mode, setMode] = useState<"flow" | "timeline">("flow");
+  const [mode, setMode] = useState<"flow" | "timeline" | "compare">("flow");
   // A job that appears after the page loaded (you just started it) becomes the selected one.
   const known = useRef<Set<string> | null>(null);
   const jobKey = jobs.map((j) => j.id).join("|");
@@ -74,13 +75,14 @@ export function AgentsView({ notes, starting, repo, jobs, stages, busy, running,
           {[...jobs].reverse().map((j) => <option key={j.id} value={j.id}>{j.id} · {j.stage}</option>)}
         </select>
         <div className="flex rounded-md border p-0.5 text-sm" role="group" aria-label="View">
-          {(["flow", "timeline"] as const).map((m) => (
+          {(["flow", "timeline", "compare"] as const).map((m) => (
             <button key={m} onClick={() => setMode(m)} aria-pressed={mode === m} className={cn("rounded px-3 py-0.5 capitalize", mode === m ? "bg-secondary" : "text-muted-foreground hover:text-foreground")}>{m}</button>
           ))}
         </div>
         {view && view.lanes.length > 0 && <span className="text-xs text-muted-foreground">{view.lanes.length} agents · {fmtDur(span)}{totalCost >= 0.005 && <> · about ${totalCost.toFixed(2)}</>}</span>}
       </div>
-      {current && (
+      {mode === "compare" && <CompareView repo={repo} jobs={jobs} first={job} />}
+      {current && mode !== "compare" && (
         <section className={cn("space-y-2 rounded-lg border bg-card p-3", (current.stage === "spec-approval" || current.stage === "needs-human" || question) && "border-call/60")}>
           <div className="flex flex-wrap items-center gap-2 text-xs">
             {(mine || running.has(current.id)) && <span className="size-2 animate-pulse rounded-full bg-ok" aria-label="agent running" />}
@@ -101,8 +103,8 @@ export function AgentsView({ notes, starting, repo, jobs, stages, busy, running,
           {question && !mine && <QuestionBox question={question} locked={locked} onSend={(t) => send(t, (x) => onAnswer(current.id, x))} />}
         </section>
       )}
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      {data && view && view.lanes.length === 0 && <p className="text-sm text-muted-foreground">No agent activity recorded for this job yet.</p>}
+      {error && mode !== "compare" && <p className="text-sm text-destructive">{error}</p>}
+      {mode !== "compare" && data && view && view.lanes.length === 0 && <p className="text-sm text-muted-foreground">No agent activity recorded for this job yet.</p>}
       {view && view.lanes.length > 0 && mode === "flow" && <AgentFlow view={view} events={data?.events ?? []} jobKey={job ?? ""} selected={agent} onSelect={setAgent} handoffs={summary?.handoffs} costs={costData?.cost} />}
       {view && view.lanes.length > 0 && mode === "timeline" && (
         <div className="rounded-lg border bg-card p-3">
@@ -137,7 +139,7 @@ export function AgentsView({ notes, starting, repo, jobs, stages, busy, running,
           </div>
         </div>
       )}
-      {selected && (
+      {selected && mode !== "compare" && (
         <section className="rounded-lg border bg-card p-3">
           <h3 className="mb-2 text-sm font-medium">{selected.agent}</h3>
           <ol className="space-y-0.5 font-mono text-xs">
