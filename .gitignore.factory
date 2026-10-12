@@ -2,3 +2,4 @@
 /factory/jobs/
 .factory-test-lock
 __pycache__/
+/factory/activity/
