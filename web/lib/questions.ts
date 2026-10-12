@@ -1,8 +1,11 @@
 // Which jobs are waiting on a person. A `claude -p` run cannot wait for input, so an
 // orchestrator that needs an answer ends the run; its final message is the question. Worked
-// out from the web app's own run files and job.json, so only web-started runs are covered.
+// out from the web app's own run files and job.json, plus sessions started elsewhere (terminal, VS Code,
+// desktop) that ended mid-loop, read from the activity log and the session transcript.
+import { loggedSessions } from "./activitylog.ts";
 import type { Job } from "./jobs.ts";
 import { alive, listMeta, loadRuns, parseLog, reconcile } from "./runs.ts";
+import { lastAssistantText } from "./transcripts.ts";
 
 export type Question = { job: string; runId: string; sessionId: string; text: string; askedAt: string };
 
@@ -38,6 +41,29 @@ export function pendingQuestions(repo: string, jobs: Job[]): Record<string, Ques
     }
     if (!text?.trim() || !sessionId) continue;
     out[J] = { job: J, runId: m.runId, sessionId, text, askedAt: rec.endedAt };
+  }
+  return { ...out, ...externalQuestions(repo, jobs, out, new Set([...records.values()].map((r) => r.sessionId).filter((s): s is string => !!s)), metas.some((m) => live.get(m.runId))) };
+}
+
+const RECENT_MS = 5 * 60_000; // a session that logged within this long and has not ended is taken to be working
+
+/** Sessions started outside the web app that ended mid-loop on a job. Only a clean end (session_end) counts: a killed session is "crashed", not a question. */
+function externalQuestions(repo: string, jobs: Job[], web: Record<string, Question>, webSids: Set<string>, webLive: boolean): Record<string, Question> {
+  const out: Record<string, Question> = {};
+  if (webLive) return out;
+  const sessions = loggedSessions(repo).filter((s) => !webSids.has(s.sid));
+  for (const job of jobs) {
+    if (job.paused || !MID_LOOP.has(job.stage)) continue;
+    const mine = sessions.filter((s) => s.job === job.id && s.lastTs).sort((a, b) => (b.lastTs! > a.lastTs! ? 1 : -1));
+    if (mine.length === 0) continue;
+    if (mine.some((s) => !s.ended && Date.now() - Date.parse(s.lastTs!) < RECENT_MS)) continue; // someone is on it
+    const newest = mine[0];
+    if (!newest.ended) continue;
+    const text = lastAssistantText(repo, newest.sid);
+    if (!text) continue;
+    const asked = web[job.id];
+    if (asked && asked.askedAt >= newest.lastTs!) continue; // a web run on the job is newer
+    out[job.id] = { job: job.id, runId: `session-${newest.sid}`, sessionId: newest.sid, text, askedAt: newest.lastTs! };
   }
   return out;
 }

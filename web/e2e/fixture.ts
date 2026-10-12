@@ -6,6 +6,7 @@ export const ROOT = path.join(os.tmpdir(), "forgeline-e2e");
 export const FIXTURE = path.join(ROOT, "repo");
 export const DATA = path.join(ROOT, "data");
 export const FAKE_LOG = path.join(ROOT, "fake-claude.log");
+export const PROJECTS = path.join(ROOT, "projects"); // stands in for ~/.claude/projects
 
 const write = (file: string, text: string) => {
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -34,6 +35,26 @@ export function buildFixture() {
   write(path.join(FIXTURE, "factory", "jobs", "002-dark-mode", "decision.md"), "APPROVE\n\n## Why\nfine\n");
 
   // Agent history for 002, ten minutes in total, every agent finishing before the next starts (reviewers overlap).
+  // Sessions the app did not start, as Claude Code would have written them: a terminal session that ran job 002,
+  // and a VS Code session that stopped on a question while job 003 was at plan.
+  const projectDir = path.join(PROJECTS, FIXTURE.replace(/[^a-zA-Z0-9]/g, "-"));
+  const msg = (id: string, text: string) => JSON.stringify({ type: "assistant", message: { id, model: "m", content: [{ type: "text", text }], usage: {} } });
+  write(path.join(projectDir, "s-demo.jsonl"), [
+    JSON.stringify({ type: "user", entrypoint: "cli", timestamp: new Date().toISOString(), message: { content: "/factory add dark mode" } }),
+    JSON.stringify({ type: "ai-title", aiTitle: "Add dark mode" }),
+    msg("a1", "All done."),
+  ].join("\n") + "\n");
+  write(path.join(projectDir, "s-ask.jsonl"), [
+    JSON.stringify({ type: "user", entrypoint: "claude-vscode", timestamp: new Date().toISOString(), message: { content: "/factory approve-spec 003-add-export" } }),
+    JSON.stringify({ type: "ai-title", aiTitle: "Add an export button" }),
+    msg("b1", "Which file format should the export use?"),
+  ].join("\n") + "\n");
+  write(path.join(FIXTURE, "factory", "jobs", "003-add-export", "job.json"), job("003-add-export", "plan", "Add an export button", [{ stage: "plan", at }]));
+  const askEvents = [["session_start", 120, "startup"], ["prompt", 119, "/factory approve-spec 003-add-export"], ["session_end", 100, ""]].map(([e, ago, text]) =>
+    JSON.stringify({ ts: new Date(Date.now() - Number(ago) * 1000).toISOString(), sid: "s-ask", ev: e, agent: "orchestrator", tool: "", text, job: "003-add-export", pid: 1 }));
+  write(path.join(FIXTURE, "factory", "activity", "s-ask.jsonl"), askEvents.join("\n") + "\n");
+  write(path.join(FIXTURE, "factory", "activity", "s-ask.job"), "003-add-export");
+
   const sid = "s-demo";
   const t0 = Date.now() - 1800_000;
   const events: object[] = [];

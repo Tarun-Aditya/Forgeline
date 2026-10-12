@@ -20,6 +20,7 @@ import type { McpServer } from "@/lib/mcp";
 import type { Question } from "@/lib/questions";
 import type { Repo } from "@/lib/repos";
 import type { Warning } from "@/lib/repocheck";
+import type { ExternalSession } from "@/lib/external";
 
 export function AppShell() {
   const { data: repoData } = usePoll<{ repos: Repo[] }>("/api/repos", 30000);
@@ -56,6 +57,8 @@ function Shell({ repo, repos, onPick }: { repo: string | null; repos: Repo[]; on
   const questions = jobData?.questions ?? {};
 
   const { data: checkData } = usePoll<{ warnings: Warning[] }>(q && `/api/repos/check?repo=${q}`, 10000);
+
+  const { data: sessData } = usePoll<{ sessions: ExternalSession[] }>(q && `/api/sessions?repo=${q}`, 5000, "activity");
 
   // Runs are independent processes, so any number can go at once. This panel just follows one of them.
   const { data: runData } = usePoll<{ runs: Run[] }>("/api/runs", 2000, "runs");
@@ -126,7 +129,7 @@ function Shell({ repo, repos, onPick }: { repo: string | null; repos: Repo[]; on
   const alerts = useAttention(repo, jobs, trouble, new Set(Object.keys(questions).filter((id) => !running.has(id))), needMe);
 
   const panel = (
-    <RunsPanel warnings={checkData?.warnings ?? []} runs={runs} selected={selectedRun} onSelect={setSelectedRun} error={submitError} posting={posting} servers={servers} options={options} onOptions={setOptions} onSubmit={submit} onStop={stop} />
+    <RunsPanel repo={repo ?? ""} sessions={sessData?.sessions ?? []} warnings={checkData?.warnings ?? []} runs={runs} selected={selectedRun} onSelect={setSelectedRun} error={submitError} posting={posting} servers={servers} options={options} onOptions={setOptions} onSubmit={submit} onStop={stop} />
   );
 
   return (

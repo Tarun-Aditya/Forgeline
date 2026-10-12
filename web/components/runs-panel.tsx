@@ -3,25 +3,33 @@ import { useState } from "react";
 import { PromptInput, PromptInputBody, PromptInputFooter, PromptInputSubmit, PromptInputTextarea, PromptInputTools } from "@/components/ai-elements/prompt-input";
 import type { Options } from "@/components/run-panel";
 import { RunViewer } from "@/components/run-viewer";
+import { SessionView, STATE_DOT } from "@/components/session-view";
 import { RUN_STYLE, type Run } from "@/components/runs-view";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { ExternalSession } from "@/lib/external";
 import type { McpServer } from "@/lib/mcp";
 import type { Warning } from "@/lib/repocheck";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  warnings: Warning[]; runs: Run[]; selected: string | null; onSelect: (id: string) => void; error: string | null; posting: boolean;
+  repo: string; sessions: ExternalSession[]; warnings: Warning[]; runs: Run[]; selected: string | null; onSelect: (id: string) => void; error: string | null; posting: boolean;
   servers: McpServer[]; options: Options; onOptions: (o: Options) => void;
   onSubmit: (text: string) => void; onStop: (runId: string) => void;
 };
 
 /** The right-hand panel. Any number of runs can go at once: pick one to follow, type to start another. */
-export function RunsPanel({ warnings, runs, selected, onSelect, error, posting, servers, options, onOptions, onSubmit, onStop }: Props) {
+export function RunsPanel({ repo, sessions, warnings, runs, selected, onSelect, error, posting, servers, options, onOptions, onSubmit, onStop }: Props) {
   const [text, setText] = useState("");
   const current = runs.find((r) => r.runId === selected);
-  const running = runs.filter((r) => r.status === "running").length;
+  const currentSession = sessions.find((x) => `session:${x.sid}` === selected);
+  const running = runs.filter((r) => r.status === "running").length + sessions.filter((x) => x.state === "running").length;
+  // Web runs and sessions from the terminal or VS Code in one list, newest first.
+  const items = [
+    ...runs.map((r) => ({ kind: "run" as const, id: r.runId, at: r.startedAt, run: r })),
+    ...sessions.map((x) => ({ kind: "session" as const, id: `session:${x.sid}`, at: x.lastAt ?? x.startedAt ?? "", session: x })),
+  ].sort((a, b) => b.at.localeCompare(a.at));
   const toggle = (name: string) =>
     onOptions({ ...options, mcpOff: options.mcpOff.includes(name) ? options.mcpOff.filter((n) => n !== name) : [...options.mcpOff, name] });
 
@@ -32,21 +40,27 @@ export function RunsPanel({ warnings, runs, selected, onSelect, error, posting, 
           <span>Runs</span>
           {running > 0 && <span className="flex items-center gap-1 text-claude"><span className="size-1.5 animate-pulse rounded-full bg-claude" />{running} running</span>}
         </div>
-        {runs.length === 0 ? (
-          <p className="px-1 pb-1 text-xs text-muted-foreground">Nothing yet. Runs you start show up here and keep going when you start another.</p>
+        {items.length === 0 ? (
+          <p className="px-1 pb-1 text-xs text-muted-foreground">Nothing yet. Runs you start show up here and keep going when you start another. Sessions from the terminal or VS Code show up too.</p>
         ) : (
           <ul className="max-h-36 space-y-0.5 overflow-y-auto">
-            {runs.slice(0, 12).map((r) => (
-              <li key={r.runId}>
+            {items.slice(0, 14).map((it) => (
+              <li key={it.id}>
                 <button
-                  onClick={() => onSelect(r.runId)}
-                  className={cn("flex w-full items-center gap-2 rounded px-2 py-1 text-left text-xs hover:bg-accent", r.runId === selected && "bg-accent")}
+                  onClick={() => onSelect(it.id)}
+                  className={cn("flex w-full items-center gap-2 rounded px-2 py-1 text-left text-xs hover:bg-accent", it.id === selected && "bg-accent")}
                 >
-                  <Badge className={cn("rounded-full px-1.5 text-[10px]", RUN_STYLE[r.status])}>
-                    {r.status === "running" && <span className="mr-1 size-1.5 animate-pulse rounded-full bg-current" />}{r.status}
-                  </Badge>
-                  <span className="min-w-0 flex-1 truncate">{r.prompt.replace(/^\/factory\s+/, "")}</span>
-                  {r.jobIds[0] && <span className="shrink-0 font-mono text-[10px] text-muted-foreground">{r.jobIds[0].split("-")[0]}</span>}
+                  {it.kind === "run" ? (
+                    <Badge className={cn("rounded-full px-1.5 text-[10px]", RUN_STYLE[it.run.status])}>
+                      {it.run.status === "running" && <span className="mr-1 size-1.5 animate-pulse rounded-full bg-current" />}{it.run.status}
+                    </Badge>
+                  ) : (
+                    <Badge variant="secondary" className="rounded-full px-1.5 text-[10px]">
+                      <span className={cn("mr-1 size-1.5 rounded-full", STATE_DOT[it.session.state])} />{it.session.source}
+                    </Badge>
+                  )}
+                  <span className="min-w-0 flex-1 truncate">{it.kind === "run" ? it.run.prompt.replace(/^\/factory\s+/, "") : it.session.title}</span>
+                  {(it.kind === "run" ? it.run.jobIds[0] : it.session.job) && <span className="shrink-0 font-mono text-[10px] text-muted-foreground">{(it.kind === "run" ? it.run.jobIds[0] : it.session.job)!.split("-")[0]}</span>}
                 </button>
               </li>
             ))}
@@ -54,7 +68,9 @@ export function RunsPanel({ warnings, runs, selected, onSelect, error, posting, 
         )}
       </div>
 
-      {current ? (
+      {currentSession ? (
+        <SessionView key={currentSession.sid} repo={repo} session={currentSession} />
+      ) : current ? (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex items-center gap-2 border-b px-3 py-1.5 text-xs">
             <span className="min-w-0 flex-1 truncate text-muted-foreground" title={current.prompt}>{current.prompt}</span>

@@ -21,6 +21,11 @@ What changed in `web/`, newest first. Each item is one commit on `main`.
 - The orchestrator's closing message on the job card, and a one-click "Rebase onto main".
 - Resume button for a job with no agent running.
 
+**Terminal, VS Code and desktop sessions**
+- Listed in the side panel with a source badge; opening one shows its recorded steps and the resume command.
+- "Needs your answer" now covers a session that ended mid-loop, and the answer resumes that session.
+- Cost per agent includes them, estimated from their transcripts (and only for sessions that ran the factory).
+
 **Fixes**
 - The Activity tab failed on Python 3.9 (timestamps had four fractional digits); evals added.
 - Buttons now lock after one click and say an agent is working; polling no longer shows the previous

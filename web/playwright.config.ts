@@ -1,6 +1,6 @@
 import { defineConfig } from "@playwright/test";
 import path from "node:path";
-import { DATA, FAKE_LOG, FIXTURE } from "./e2e/fixture.ts";
+import { DATA, FAKE_LOG, FIXTURE, PROJECTS } from "./e2e/fixture.ts";
 
 // Two kinds of test:
 //  - "fixture": offline and free. A throwaway repo and a fake `claude`, on port 3100. Always runs.
@@ -28,11 +28,11 @@ export default defineConfig({
     trace: "on",
   },
   projects: [
-    { name: "fixture", testMatch: ["answer-question.spec.ts", "agents-replay.spec.ts"], use: { baseURL: "http://127.0.0.1:3100" } },
+    { name: "fixture", testMatch: ["answer-question.spec.ts", "agents-replay.spec.ts", "terminal-sessions.spec.ts"], use: { baseURL: "http://127.0.0.1:3100" } },
     ...(real ? [{ name: "real", testMatch: "feature-to-spec.spec.ts", timeout: 25 * 60_000, use: { baseURL: "http://127.0.0.1:3101" } }] : []),
   ],
   webServer: [
-    server(3100, FIXTURE, `FORGELINE_WEB_DATA='${DATA}' CLAUDE_BIN='${FAKE}' FAKE_CLAUDE_LOG='${FAKE_LOG}'`),
+    server(3100, FIXTURE, `FORGELINE_WEB_DATA='${DATA}' CLAUDE_BIN='${FAKE}' FAKE_CLAUDE_LOG='${FAKE_LOG}' CLAUDE_PROJECTS_DIR='${PROJECTS}'`),
     ...(real ? [server(3101, real)] : []),
   ],
 });

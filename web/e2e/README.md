@@ -15,6 +15,8 @@ Nothing touches your jobs, run history or subscription.
 
 - `answer-question.spec.ts`: an agent stops to ask "which repo?", the question shows on the job card, the
   answer on the card resumes the same session (`--resume`), and the job moves on.
+- `terminal-sessions.spec.ts`: sessions started in the terminal and VS Code (fixture transcripts and activity
+  log) are listed with their source, and a question from one can be answered on the job card.
 - `agents-replay.spec.ts`: the Agents tab replays a finished job, draws the hand-off labels (for example
   "spec: 2 acceptance criteria") and is not "Live".
 

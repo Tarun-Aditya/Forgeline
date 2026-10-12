@@ -102,7 +102,7 @@ export function MetricsView({ repo }: { repo: string }) {
         <Stat label="Escalation rate" value={pct(f?.escalation_rate_pct)} sub={`median cycle ${dur(f?.median_cycle_seconds)}`} />
         <Stat label="Total cost" value={money(u.total.costUsd)} sub={`${u.total.runs} runs · ${u.failed} failed · ${compact(tok(u.total))} tokens`} />
       </div>
-      <p className="text-xs text-muted-foreground">Cost and tokens cover runs started from this web app. On a subscription login these are API-equivalent figures, not a bill.</p>
+      <p className="text-xs text-muted-foreground">Totals, model, job and day cover runs started from this web app. "By agent" also includes sessions from the terminal and VS Code (estimated from their transcripts). On a subscription login these are API-equivalent figures, not a bill.</p>
       <div className="grid gap-8 xl:grid-cols-2">
         <Table title="By model" rows={sorted(u.byModel)} />
         <Table title="By job" rows={sorted(u.byJob)} />

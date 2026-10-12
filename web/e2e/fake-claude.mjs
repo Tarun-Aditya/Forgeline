@@ -18,16 +18,13 @@ const say = (text) => {
 };
 
 if (resume) {
-  // The answer: move the one job still at intent on to spec.
-  const dir = path.join(process.cwd(), "factory", "jobs");
-  for (const id of fs.readdirSync(dir)) {
-    const file = path.join(dir, id, "job.json");
-    const j = JSON.parse(fs.readFileSync(file, "utf8"));
-    if (j.stage !== "intent") continue;
-    j.stage = "spec";
-    j.history = [...(j.history ?? []), { stage: "spec", at: new Date().toISOString() }];
-    fs.writeFileSync(file, JSON.stringify(j));
-  }
+  // The answer moves the job on: the session that stopped at plan is job 003 (to build); the other one was at intent (to spec).
+  const [job, to] = resume === "s-ask" ? ["003-add-export", "build"] : ["001-add-search", "spec"];
+  const file = path.join(process.cwd(), "factory", "jobs", job, "job.json");
+  const j = JSON.parse(fs.readFileSync(file, "utf8"));
+  j.stage = to;
+  j.history = [...(j.history ?? []), { stage: to, at: new Date().toISOString() }];
+  fs.writeFileSync(file, JSON.stringify(j));
   setTimeout(() => say("Thanks, continuing with that repo."), 200);
 } else {
   setTimeout(() => say("Which repo should this job target? Reply with a path."), 300);

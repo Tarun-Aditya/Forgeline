@@ -88,17 +88,30 @@ Needs Node 22+ and the `claude` CLI logged in. It binds to `127.0.0.1` only.
 - The browser gets changes pushed over one server-sent-events connection (`/api/events`, watching
   `factory/jobs`, `factory/activity` and the run folder) and refetches at once. If it drops, polling
   resumes every 2 to 3 seconds. The header shows "live" or "polling".
-- Cost per agent is an estimate: each model's real cost for a run is split across agents by their
-  token use. It adds up to the run's cost, but it is not billed per agent.
+- Cost per agent is an estimate: each model's real cost for a web run is split across agents by their
+  token use. It adds up to the run's cost, but it is not billed per agent. Sessions from elsewhere are
+  added from their transcripts (see above).
 - An agent whose session is no longer running is never shown as live, and a merged job is never
   shown as running (the activity log tags any session that touches a job's files).
-- A job "needs your answer" when the latest web run on it ended with a result and either left
-  the job mid-loop (`spec`, `plan`, `build`, `review`, `approve`) or was a job command that did
-  not move it. Only runs started here are covered. There is no dismiss; a newer run on the job
-  clears it. An answer run's prompt in Runs is the answer text.
-- The streamed run log and cost exist only for runs started here. Jobs driven from a terminal,
-  the desktop app or VS Code still appear on the board and in Activity, through their files
-  and the hook-written log (see USAGE.md 7a).
+- A job "needs your answer" when the latest run or session on it ended with a final message and either
+  left the job mid-loop (`spec`, `plan`, `build`, `review`, `approve`) or, for a web run, was a job command
+  that did not move it. This covers web runs and sessions started in the terminal, VS Code or desktop: those
+  count when they ended cleanly (a `session_end` in the activity log) on text rather than a tool call,
+  with nobody else working on the job. A killed session is "crashed", not a question. Answering resumes
+  that session with `claude -p --resume <session-id>`, so only answer a session you are not still using.
+  There is no dismiss; a newer run or session on the job clears it.
+- **Sessions from elsewhere**: the activity log (hooks) names the sessions and their jobs, and Claude Code's own
+  transcripts (`~/.claude/projects/<repo>/<session>.jsonl`, with each subagent in `<session>/subagents/`) say
+  where each ran, what it was about and what it spent. They are listed in the side panel with a source badge
+  (terminal, VS Code, desktop). The web app has no text log of them, so opening one shows the steps the hooks
+  recorded and the `claude --resume` command. Their cost is an estimate: tokens from the transcript, priced
+  per model from what web runs of that model cost. Against web runs it lands at roughly 70 to 100 percent of
+  the real cost, usually a little low. A session counts toward a job only if it began with `/factory` or ran
+  factory subagents, because the activity log ties any session that mentions a job to it. A person's own
+  `claude -p` run is marked like a web run (`sdk-cli`) and is not listed.
+- The live streamed log exists only for runs started here. Jobs driven from a terminal, the desktop app or VS
+  Code appear on the board, in Activity and in the Agents view through their files and the hook-written log
+  (see USAGE.md 7a).
 - The API answers only to `localhost` and refuses cross-origin writes, because it can start agents.
 - Agents still never merge, push or deploy on their own; "Approve merge" runs `/factory approve`.
 - Cost on a subscription login is API-equivalent, not a bill.

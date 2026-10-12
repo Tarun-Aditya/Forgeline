@@ -2,6 +2,8 @@ import { fail, json, repoFrom } from "@/lib/http";
 import { listJobFiles, readJobFile } from "@/lib/jobs";
 import { jobDiff, validationSection } from "@/lib/jobdiff";
 import { jobHandoffs } from "@/lib/jobsummary";
+import { externalCost } from "@/lib/external";
+import { mergeCosts } from "@/lib/agentcost";
 import { repoCost } from "@/lib/runcost";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +19,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     const repo = repoFrom(req);
     const params = new URL(req.url).searchParams;
     if (params.get("diff")) return json({ diff: await jobDiff(repo, id), validation: validationSection(readJobFile(repo, id, "build.md")) });
-    if (params.get("cost")) return json({ cost: repoCost(repo, id) });
+    if (params.get("cost")) return json({ cost: mergeCosts(repoCost(repo, id), await externalCost(repo, id)) });
     if (params.get("handoffs")) return json({ handoffs: jobHandoffs(repo, id) });
     const file = params.get("file");
     if (!file) return json({ files: listJobFiles(repo, id) });
