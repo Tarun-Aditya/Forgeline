@@ -8,6 +8,7 @@ type Data = {
     first_pass_rate_pct: number | null; avg_review_rounds: number | null;
     escalation_rate_pct: number | null; median_cycle_seconds: number | null;
   };
+  byAgent?: Record<string, { costUsd: number; tokens: number }>;
   usage: { total: Bucket; failed: number; durationMs: number; byModel: Record<string, Bucket>; byDay: Record<string, Bucket>; byJob: Record<string, Bucket> };
 };
 
@@ -59,6 +60,34 @@ function Table({ title, rows }: { title: string; rows: [string, Bucket][] }) {
   );
 }
 
+function AgentTable({ rows }: { rows: [string, { costUsd: number; tokens: number }][] }) {
+  const max = Math.max(0.01, ...rows.map(([, c]) => c.costUsd));
+  return (
+    <section>
+      <h3 className="mb-2 text-sm font-medium">By agent <span className="font-normal text-muted-foreground">(estimated from each agent's share of the tokens)</span></h3>
+      {rows.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No finished runs yet.</p>
+      ) : (
+        <table className="w-full text-sm">
+          <thead className="text-left text-xs text-muted-foreground"><tr><th className="py-1 font-normal">Agent</th><th className="font-normal">Tokens</th><th className="w-1/2 text-right font-normal">Cost</th></tr></thead>
+          <tbody>
+            {rows.map(([name, c]) => (
+              <tr key={name} className="border-t">
+                <td className="py-1.5 pr-2 font-mono text-xs">{name}</td>
+                <td className="tabular-nums">{compact(c.tokens)}</td>
+                <td className="text-right">
+                  <span className="inline-block h-1.5 rounded bg-claude/70 align-middle" style={{ width: `${(c.costUsd / max) * 60}%` }} />
+                  <span className="ml-2 tabular-nums">{money(c.costUsd)}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </section>
+  );
+}
+
 export function MetricsView({ repo }: { repo: string }) {
   const { data, error } = usePoll<Data>(`/api/metrics?repo=${encodeURIComponent(repo)}`, 5000, "runs");
   if (error) return <p className="p-6 text-sm text-destructive">{error}</p>;
@@ -78,6 +107,7 @@ export function MetricsView({ repo }: { repo: string }) {
         <Table title="By model" rows={sorted(u.byModel)} />
         <Table title="By job" rows={sorted(u.byJob)} />
       </div>
+      <AgentTable rows={Object.entries(data.byAgent ?? {}).sort((a, b) => b[1].costUsd - a[1].costUsd)} />
       <Table title="By day" rows={Object.entries(u.byDay).sort((a, b) => b[0].localeCompare(a[0]))} />
     </div>
   );

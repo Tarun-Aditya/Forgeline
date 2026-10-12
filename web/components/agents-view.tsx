@@ -44,6 +44,8 @@ export function AgentsView({ notes, starting, repo, jobs, stages, busy, running,
   useEffect(() => setAgent(null), [job]);
   const { data, error } = usePoll<{ events: ActivityEvent[]; sessions: SessionState[] }>(job ? `/api/activity?repo=${encodeURIComponent(repo)}&job=${encodeURIComponent(job)}&limit=1000` : null, 2000, "activity");
   const current = jobs.find((j) => j.id === job);
+  const { data: costData } = usePoll<{ cost: Record<string, { costUsd: number; tokens: number }> }>(job ? `/api/jobs/${encodeURIComponent(job)}?repo=${encodeURIComponent(repo)}&cost=1` : null, 10000, "runs");
+  const totalCost = Object.values(costData?.cost ?? {}).reduce((n, c) => n + c.costUsd, 0);
   const { data: summary } = usePoll<{ handoffs: Record<string, string> }>(job ? `/api/jobs/${encodeURIComponent(job)}?repo=${encodeURIComponent(repo)}&handoffs=1` : null, 5000, "jobs");
   const { locked, mine, send, reset } = useJobCommand(current, busy, !!job && running.has(job), onCommand);
   useEffect(reset, [job]);
@@ -76,7 +78,7 @@ export function AgentsView({ notes, starting, repo, jobs, stages, busy, running,
             <button key={m} onClick={() => setMode(m)} aria-pressed={mode === m} className={cn("rounded px-3 py-0.5 capitalize", mode === m ? "bg-secondary" : "text-muted-foreground hover:text-foreground")}>{m}</button>
           ))}
         </div>
-        {view && view.lanes.length > 0 && <span className="text-xs text-muted-foreground">{view.lanes.length} agents · {fmtDur(span)}</span>}
+        {view && view.lanes.length > 0 && <span className="text-xs text-muted-foreground">{view.lanes.length} agents · {fmtDur(span)}{totalCost >= 0.005 && <> · about ${totalCost.toFixed(2)}</>}</span>}
       </div>
       {current && (
         <section className={cn("space-y-2 rounded-lg border bg-card p-3", (current.stage === "spec-approval" || current.stage === "needs-human" || question) && "border-call/60")}>
@@ -101,7 +103,7 @@ export function AgentsView({ notes, starting, repo, jobs, stages, busy, running,
       )}
       {error && <p className="text-sm text-destructive">{error}</p>}
       {data && view && view.lanes.length === 0 && <p className="text-sm text-muted-foreground">No agent activity recorded for this job yet.</p>}
-      {view && view.lanes.length > 0 && mode === "flow" && <AgentFlow view={view} events={data?.events ?? []} jobKey={job ?? ""} selected={agent} onSelect={setAgent} handoffs={summary?.handoffs} />}
+      {view && view.lanes.length > 0 && mode === "flow" && <AgentFlow view={view} events={data?.events ?? []} jobKey={job ?? ""} selected={agent} onSelect={setAgent} handoffs={summary?.handoffs} costs={costData?.cost} />}
       {view && view.lanes.length > 0 && mode === "timeline" && (
         <div className="rounded-lg border bg-card p-3">
           <div className="flex">
@@ -109,7 +111,7 @@ export function AgentsView({ notes, starting, repo, jobs, stages, busy, running,
               {view.lanes.map((l) => (
                 <button key={l.agent} onClick={() => setAgent(l.agent)} className={cn("flex w-full flex-col justify-center rounded px-1 text-left hover:bg-accent", agent === l.agent && "bg-accent")} style={{ height: ROW }}>
                   <span className="truncate text-sm">{l.agent}</span>
-                  <span className="text-[11px] text-muted-foreground">{l.tools} tool calls · {fmtDur(l.spans.reduce((n, s) => n + s.end - s.start, 0))}</span>
+                  <span className="text-[11px] text-muted-foreground">{l.tools} tool calls · {fmtDur(l.spans.reduce((n, s) => n + s.end - s.start, 0))}{(costData?.cost[l.agent]?.costUsd ?? 0) >= 0.005 && <> · ${costData!.cost[l.agent].costUsd.toFixed(2)}</>}</span>
                 </button>
               ))}
             </div>

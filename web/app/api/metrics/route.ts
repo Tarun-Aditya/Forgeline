@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { fail, json, repoFrom } from "@/lib/http";
 import { runMetrics } from "@/lib/metrics";
+import { repoCost } from "@/lib/runcost";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ export function GET(req: Request) {
     } catch {
       /* repo without metrics.py: usage numbers still work */
     }
-    return json({ factory, usage: runMetrics() });
+    return json({ factory, usage: runMetrics(), byAgent: repoCost(repo) });
   } catch (e) {
     return fail(e);
   }

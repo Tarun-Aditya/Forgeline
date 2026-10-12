@@ -49,7 +49,7 @@ const edgePath = (a: Role, b: Role) => {
 };
 
 /** Agents as role icons. The one working glows and shows its current action; hand-offs travel along the lines. */
-export function AgentFlow({ view, events, jobKey, selected, onSelect, handoffs = {} }: { view: Lanes; events: AgentEvent[]; jobKey: string; selected: string | null; onSelect: (a: string) => void; handoffs?: Record<string, string> }) {
+export function AgentFlow({ view, events, jobKey, selected, onSelect, handoffs = {}, costs = {} }: { view: Lanes; events: AgentEvent[]; jobKey: string; selected: string | null; onSelect: (a: string) => void; handoffs?: Record<string, string>; costs?: Record<string, { costUsd: number }> }) {
   const live = view.lanes.some((l) => l.spans.some((s) => s.open));
   const [t, setT] = useState<number>(view.t1);
   const [playing, setPlaying] = useState(true);
@@ -201,7 +201,10 @@ export function AgentFlow({ view, events, jobKey, selected, onSelect, handoffs =
                   <Icon className={big ? "size-7" : "size-6"} />
                   {s.status === "done" && <span className="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full bg-ok text-background"><Check className="size-3" /></span>}
                 </span>
-                <span className={cn("text-xs font-medium", s.status === "idle" && !big && "text-muted-foreground")}>{r.label}</span>
+                <span className={cn("text-xs font-medium", s.status === "idle" && !big && "text-muted-foreground")}>
+                  {r.label}
+                  {costs[a] && costs[a].costUsd >= 0.005 && <span className="ml-1 font-normal tabular-nums text-muted-foreground" title="Estimated cost of this agent's work on the job">· ${costs[a].costUsd.toFixed(2)}</span>}
+                </span>
                 {s.status !== "active" && handoffs[a] && at >= startedAt(a) && <span className="max-w-full truncate text-[10px] text-muted-foreground">{handoffs[a]}</span>}
                 {s.status === "active" && s.doing && (
                   <span className="max-w-full truncate rounded-full border border-claude/40 bg-claude/10 px-2 py-0.5 text-[10px] text-claude" title={s.doing}>{short(s.doing)}</span>
