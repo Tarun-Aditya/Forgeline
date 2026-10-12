@@ -92,11 +92,13 @@ export function AppShell() {
   const starting = runs.filter((r) => r.status === "running" && r.jobIds.length === 0 && !NOT_A_NEW_JOB.test(r.prompt)).map((r) => r.prompt.replace(/^\/factory\s+/, ""));
   // "Running" comes from the shared activity log, so it is true for jobs driven from any surface.
   const sessions = activity?.sessions ?? [];
-  const running = new Set([
+  const finished = new Set(jobs.filter((j) => j.stage === "merged").map((j) => j.id)); // nothing can be working on these
+  const runningAll = new Set([
     ...(jobData?.active ?? []).map((a) => a.jobKey).filter((k): k is string => !!k),
     ...runs.filter((r) => r.status === "running").flatMap((r) => r.jobIds),
     ...sessions.filter((s) => s.state === "running" && s.job).map((s) => s.job as string),
   ]);
+  const running = new Set([...runningAll].filter((id) => !finished.has(id)));
   const trouble = new Map<string, "stalled" | "crashed">(
     sessions.flatMap((s) => (s.job && (s.state === "stalled" || s.state === "crashed") ? [[s.job, s.state] as [string, "stalled" | "crashed"]] : [])),
   );
