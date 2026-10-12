@@ -36,7 +36,7 @@ Needs Node 22+ and the `claude` CLI logged in. It binds to `127.0.0.1` only.
   for `approve-spec`, `respec`, `approve`, `rework`, `accept` and `resume`. A card whose
   agent stopped to ask something shows a "needs your answer" badge, the agent's last message
   and a reply box (also in the job dialog and the Agents view); the answer resumes that same
-  session with `claude -p "<answer>" --resume <session-id>` and shows in the chat.
+  session with `claude -p "<answer>" --resume <session-id>` and opens in the Runs panel.
 - **Repo picker**: repos listed in `FORGELINE_REPOS` (path-separated), or `web/.data/repos.json`,
   or this repo by default. A repo needs `factory/policy.json` and `.claude/agents/`.
 - **MCP servers**: names from your existing Claude config (`~/.claude.json`, `.mcp.json`)
