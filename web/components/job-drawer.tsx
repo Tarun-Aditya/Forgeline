@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { JobActivity } from "@/components/activity-view";
+import { DiffView } from "@/components/diff-view";
 import { QuestionBadge, QuestionBox } from "@/components/question-box";
 import { usePoll } from "@/components/use-poll";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,7 @@ import type { Job } from "@/lib/jobs";
 import type { Question } from "@/lib/questions";
 
 const ACTIVITY = "activity";
+const CHANGES = "changes";
 const FIRST = ["intent.md", "spec.md", "plan.md", "build.md", "decision.md"];
 const rank = (f: string) => (FIRST.includes(f) ? FIRST.indexOf(f) : f.startsWith("round-") ? 10 : 20);
 
@@ -108,9 +110,10 @@ export function JobDrawer({ job, repo, busy, working, note, question, onClose, o
   const { data: list } = usePoll<{ files: string[] }>(id ? `/api/jobs/${id}?repo=${q}` : null, 3000, "jobs");
   const files = [...(list?.files ?? [])].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
   const [picked, setPicked] = useState<string | null>(null);
-  const file = picked && picked !== ACTIVITY && files.includes(picked) ? picked : (files.at(-1) ?? null);
+  const file = picked && picked !== ACTIVITY && picked !== CHANGES && files.includes(picked) ? picked : (files.at(-1) ?? null);
   const showActivity = picked === ACTIVITY;
-  const { data: doc } = usePoll<{ text: string }>(id && file && !showActivity ? `/api/jobs/${id}?repo=${q}&file=${encodeURIComponent(file)}` : null, 3000, "jobs");
+  const showChanges = picked === CHANGES;
+  const { data: doc } = usePoll<{ text: string }>(id && file && !showActivity && !showChanges ? `/api/jobs/${id}?repo=${q}&file=${encodeURIComponent(file)}` : null, 3000, "jobs");
 
   const { locked, mine, send, reset } = useJobCommand(job, busy, working, onCommand, () => setPicked(ACTIVITY)); // show what the agent is doing right away
   useEffect(() => { setPicked(null); reset(); }, [id]);
@@ -134,15 +137,18 @@ export function JobDrawer({ job, repo, busy, working, note, question, onClose, o
                 <button onClick={() => setPicked(ACTIVITY)} className={cn("block w-full truncate rounded px-2 py-1 text-left hover:bg-accent", showActivity && "bg-accent")}>
                   activity (live)
                 </button>
+                <button onClick={() => setPicked(CHANGES)} className={cn("block w-full truncate rounded px-2 py-1 text-left hover:bg-accent", showChanges && "bg-accent")}>
+                  code changes
+                </button>
                 {list && files.length === 0 && <p className="text-muted-foreground">No files yet.</p>}
                 {files.map((f) => (
-                  <button key={f} onClick={() => setPicked(f)} className={cn("block w-full truncate rounded px-2 py-1 text-left hover:bg-accent", !showActivity && f === file && "bg-accent")}>
+                  <button key={f} onClick={() => setPicked(f)} className={cn("block w-full truncate rounded px-2 py-1 text-left hover:bg-accent", !showActivity && !showChanges && f === file && "bg-accent")}>
                     {f}
                   </button>
                 ))}
               </nav>
               <article className="min-w-0 flex-1 overflow-y-auto rounded-md border p-4 text-sm">
-                {showActivity ? <JobActivity repo={repo} job={job.id} /> : doc ? <MessageResponse>{doc.text}</MessageResponse> : <p className="text-muted-foreground">Select a file.</p>}
+                {showChanges ? <DiffView repo={repo} job={job.id} /> : showActivity ? <JobActivity repo={repo} job={job.id} /> : doc ? <MessageResponse>{doc.text}</MessageResponse> : <p className="text-muted-foreground">Select a file.</p>}
               </article>
             </div>
           </>
