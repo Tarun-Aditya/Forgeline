@@ -1,0 +1,30 @@
+{
+  "id": "003-agent-questions-badge",
+  "feature": "Show agent questions on the job. When an agent stops to ask something, like the \"which repo?\" refusal, it shows only in the right-hand chat, so the job looks stuck. A \"needs your answer\" badge and a reply box on the job card would fix that. This is the biggest gap.",
+  "type": "feature",
+  "ticket": null,
+  "branch": "factory/003-agent-questions-badge",
+  "worktree": "/Users/tarunaditya/workspace/software-factory-plus-factory/003-agent-questions-badge",
+  "stage": "spec",
+  "round": 0,
+  "reviews": {
+    "security": "pending",
+    "ux": "pending",
+    "ui": "pending",
+    "code": "pending"
+  },
+  "respecs": 0,
+  "reworks": 0,
+  "created": "2026-10-12T15:18:49Z",
+  "intent_waived": null,
+  "history": [
+    {
+      "stage": "intent",
+      "at": "2026-10-12T15:18:49Z"
+    },
+    {
+      "stage": "spec",
+      "at": "2026-10-12T15:19:28Z"
+    }
+  ]
+}
