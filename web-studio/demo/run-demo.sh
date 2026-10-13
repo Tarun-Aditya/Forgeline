@@ -7,6 +7,7 @@
 #
 # Needs: the web app built (npm run build in web/), python3, node 22, and a Chromium
 # (set CHROME_BIN, or run `npx playwright install chromium`).
+# Optional voice-over: VO_PY=<python with piper-tts> VO_MODEL=<voice.onnx> (see README).
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 WEB="$(cd "$HERE/.." && pwd)"
@@ -25,9 +26,11 @@ SERVER=$!
 trap 'kill -- -$SERVER 2>/dev/null || true' EXIT
 for _ in $(seq 1 40); do curl -sf "http://127.0.0.1:$PORT/api/repos" >/dev/null && break; sleep 0.5; done
 
+rm -rf "$HERE/out/vo" "$HERE/out/vo.json"
 node "$HERE/record.mjs"
 
+# Voice-over: set VO_PY (a python with piper-tts) and VO_MODEL (a Piper .onnx voice) to narrate the video.
 if command -v ffmpeg >/dev/null; then
-  ffmpeg -y -loglevel error -i "$HERE/out/forgeline-demo.webm" -c:v libx264 -pix_fmt yuv420p -crf 23 -preset medium "$HERE/out/forgeline-demo.mp4"
+  python3 "$HERE/mux-vo.py"
 fi
 ls -lh "$HERE/out"

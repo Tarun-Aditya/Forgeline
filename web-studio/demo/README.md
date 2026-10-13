@@ -18,3 +18,16 @@ Needs Node 22, python3, ffmpeg (for the mp4) and a Chromium: set `CHROME_BIN`, o
 
 To record a different job, run a real job from the web app against a repo, then
 `python3 web/demo/build-fixtures.py <repo> <FORGELINE_WEB_DATA dir>` and edit the captions in `record.mjs`.
+
+## Voice-over
+
+Every caption and title card can be narrated with [Piper](https://github.com/OHF-Voice/piper1-gpl) (offline text to speech).
+Install `piper-tts` in a venv, download a voice (for example `en_US-lessac-medium.onnx` and its `.json`
+from `rhasspy/piper-voices` on Hugging Face), then:
+
+```
+VO_PY=/path/to/venv/bin/python VO_MODEL=/path/to/voice.onnx web/demo/run-demo.sh
+```
+
+`record.mjs` waits for each line to finish before the next caption appears and writes `out/vo.json`;
+`mux-vo.py` lays the lines onto the video. Without those two variables the video is silent.
