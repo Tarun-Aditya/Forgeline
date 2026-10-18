@@ -26,7 +26,7 @@ SERVER=$!
 trap 'kill -- -$SERVER 2>/dev/null || true' EXIT
 for _ in $(seq 1 40); do curl -sf "http://127.0.0.1:$PORT/api/repos" >/dev/null && break; sleep 0.5; done
 
-rm -rf "$HERE/out/vo" "$HERE/out/vo.json"
+rm -f "$HERE/out/vo.json"   # narration clips in out/vo are cached by text
 node "$HERE/record.mjs"
 
 # Voice-over: set VO_PY (a python with piper-tts) and VO_MODEL (a Piper .onnx voice) to narrate the video.
