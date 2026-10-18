@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The only way a factory job reaches main.
 
-  merge_gate.py <job-id> [--human-approved] [--dry-run] [--factory factory] [--base main] [--lock-wait SECONDS]
+  merge_gate.py <job-id> [--human-approved] [--dry-run] [--factory factory] [--base BRANCH] [--lock-wait SECONDS]
 
 Exit codes:  0 merged   3 a human must decide   4 refused   5 verification failed
              6 another merge holds the lock   7 the merge itself failed
@@ -42,13 +42,61 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from factory_lib import any_match, load_policy  # noqa: E402
+from factory_lib import any_match, base_branch, load_policy  # noqa: E402
+import worktree_setup  # noqa: E402
 import constraints as ratchets  # noqa: E402
+import monorepo  # noqa: E402
+import callers as callers_mod  # noqa: E402
 import adr as adr_record  # noqa: E402
 
 
 def git(repo, *args, check=False):
     return subprocess.run(["git", "-C", repo, *args], capture_output=True, text=True, check=check)
+
+
+def run_cmd(cmd, cwd, minutes=30):
+    """Run one policy command through the shell, so `a && b`, pipes and VAR=x work."""
+    try:
+        return subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True, check=False, timeout=minutes * 60)
+    except subprocess.TimeoutExpired:
+        return subprocess.CompletedProcess(cmd, 124, "", f"timed out after {minutes} minutes")
+
+
+def verify_plan(repo, trial, base, base_head, branch, pkgs, mp, policy):
+    """The commands to run, as (command, folder-or-None), plus notes and packages with no command.
+
+    The root verify_commands always run. In a monorepo, each package the change touches, each
+    package that depends on one it touches, and each package that mentions a symbol the change
+    removed or edited also runs its own verify_commands in its own folder.
+    """
+    plan = [(c, None) for c in mp.get("verify_commands") or []]
+    notes, unverified = [], []
+    if not pkgs:
+        return plan, notes, unverified
+    sc = monorepo.scope(monorepo.changed_files(repo, base_head, branch), pkgs)
+    affected = set(sc["affected"])
+    if mp.get("callers_widen", True) and not sc["root_change"]:
+        try:
+            rep = callers_mod.report(trial, base_head, f"{branch}", policy=policy)
+            extra = set(rep["packages"]) - affected
+            if extra:
+                notes.append("callers of changed code live in " + ", ".join(sorted(extra)) + ": their tests run too")
+            affected |= monorepo.dependents(extra, pkgs)
+        except (OSError, ValueError):
+            notes.append("callers search failed; only the touched packages and their dependents were tested")
+    if sc["root_change"]:
+        notes.append("a file outside every package changed (" + sc["root_change"][0] + "): every package is tested")
+    for p in pkgs:
+        if p["name"] not in affected:
+            continue
+        if not p["verify_commands"]:
+            unverified.append(p["name"])
+            continue
+        plan += [(c, p["path"]) for c in p["verify_commands"]]
+    if unverified:
+        notes.append("NO VERIFY for package(s): " + ", ".join(unverified))
+    notes.append(f"verified {len(affected)} of {len(pkgs)} packages: " + ", ".join(sorted(affected)))
+    return plan, notes, unverified
 
 
 def out(code, status, **kw):
@@ -99,7 +147,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("job_id")
     ap.add_argument("--factory", default="factory")
-    ap.add_argument("--base", default="main")
+    ap.add_argument("--base", default=None, help="default: policy.base_branch, else the repo's main/master")
     ap.add_argument("--human-approved", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--lock-wait", type=int, default=0)
@@ -114,6 +162,7 @@ def main():
     policy = load_policy(os.path.join(factory, "policy.json"))
     mp = policy.get("merge_policy") or {}
     branch = job["branch"]
+    args.base = args.base or base_branch(repo, policy)
     audit_prefix = f"factory/audit/{args.job_id}/"
     needs_human, refusals, notes = [], [], []
 
@@ -203,16 +252,50 @@ def main():
             if merged.returncode != 0:
                 out(7, "merge-failed", reason="the branch does not merge cleanly into the current base",
                     detail=(merged.stdout + merged.stderr).strip()[-300:])
-            cmds = mp.get("verify_commands") or []
-            if not cmds:
+            setup = policy.get("worktree_setup")
+            if setup:
+                ok, snotes = worktree_setup.apply(repo, trial, setup)
+                if not ok:
+                    out(5, "setup-failed", reasons=snotes)
+            pkgs = monorepo.detect(trial, policy)
+            plan_cmds, scope_notes, unverified = verify_plan(repo, trial, args.base, base_head, branch, pkgs, mp, policy)
+            notes += scope_notes
+            if not plan_cmds:
                 if mp.get("require_verify"):
                     out(4, "refused", reasons=["merge_policy.require_verify is on and verify_commands is empty"])
                 notes.append("NO VERIFY: policy.merge_policy.verify_commands is empty, so nothing proved the merged result works")
-            for cmd in cmds:
-                done = subprocess.run(shlex.split(cmd), cwd=trial, capture_output=True, text=True, check=False, timeout=1800)
-                if done.returncode != 0:
-                    out(5, "verify-failed", command=cmd, exit_code=done.returncode,
-                        output=(done.stdout + done.stderr).strip()[-600:])
+            if unverified and mp.get("require_verify"):
+                out(4, "refused", reasons=[f"package {n} changed but has no verify_commands (policy.packages)" for n in unverified])
+            minutes = mp.get("verify_timeout_minutes", 30)
+            for cmd, where in plan_cmds:
+                done = run_cmd(cmd, os.path.join(trial, where) if where else trial, minutes)
+                if done.returncode != 0 and mp.get("verify_retries", 1):
+                    # One retry before judging: a flaky check should not read as a regression.
+                    again = run_cmd(cmd, os.path.join(trial, where) if where else trial, minutes)
+                    if again.returncode == 0:
+                        notes.append(f"FLAKY: `{cmd}` failed once and passed on retry")
+                    done = again
+                if done.returncode == 0:
+                    continue
+                shown = f"{cmd} (in {where})" if where else cmd
+                # Was it already red before this change? Run it once on the untouched base.
+                if mp.get("check_baseline", True):
+                    base_wt = os.path.join(tmp, "base")
+                    if not os.path.isdir(base_wt):
+                        git(repo, "worktree", "add", "--detach", base_wt, base_head)
+                        if setup:
+                            worktree_setup.apply(repo, base_wt, setup)
+                    was = run_cmd(cmd, os.path.join(base_wt, where) if where else base_wt)
+                    if was.returncode != 0:
+                        if human_ok:
+                            notes.append(f"BASELINE RED: `{shown}` already fails on {args.base}; merged on a human's say-so")
+                            continue
+                        out(5, "baseline-red", command=shown, exit_code=done.returncode,
+                            reason=f"this check already fails on {args.base}, so it cannot show whether the change broke anything; "
+                                   "fix the base, or have a human run /factory approve to merge anyway",
+                            output=(done.stdout + done.stderr).strip()[-600:])
+                out(5, "verify-failed", command=shown, exit_code=done.returncode,
+                    regression=True, output=(done.stdout + done.stderr).strip()[-600:])
             if mp.get("constraints"):
                 failed, cnotes, measured = ratchets.check(mp["constraints"], factory, trial)
                 notes += cnotes
@@ -220,6 +303,7 @@ def main():
                     out(5, "constraint-failed", reasons=failed, measured=measured)
         finally:
             git(repo, "worktree", "remove", "--force", trial)
+            git(repo, "worktree", "remove", "--force", os.path.join(tmp, "base"))
             shutil.rmtree(tmp, ignore_errors=True)
 
         if git(repo, "rev-parse", args.base).stdout.strip() != base_head:
