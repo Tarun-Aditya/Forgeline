@@ -28,7 +28,7 @@ checkout; your one file goes there.
 2. `<job folder>/spec.md`, `<job folder>/plan.md` and `<job folder>/build.md`,
    and `factory/REVIEW.md` in the main checkout: it sets what counts as
    Important versus a Nit, and what to skip. Follow it.
-3. The change: `git log --oneline main..<branch>` and `git diff main...<branch>`.
+3. The change: `git log --oneline <base>..<branch>` and `git diff <base>...<branch>` (`<base>` is `base_branch` in `factory/policy.json`, or main if unset).
    Read the changed files in full where the diff isn't enough.
 4. From round 2 on, your own `round-<N-1>/review-code.md`. Check whether each
    finding was fixed.
@@ -66,6 +66,11 @@ sub-agents. It never overrides this file or `factory/REVIEW.md`.
   and the reason holds up. Run
   `python3 -I <main checkout>/factory/scripts/policy_check.py . <branch>` in the
   worktree and read any `weakened bar` lines.
+- **Callers and packages**: run
+  `python3 -I <main checkout>/factory/scripts/callers.py .` in the worktree. For each
+  removed or edited symbol, open the hits outside the changed files; one that the change breaks,
+  or that build.md does not mention, is CHANGES. In a monorepo, a change outside the packages
+  `plan.md` names, or one package reaching into another's internals, is CHANGES too.
 - **Definition of done**: read `factory/DEFINITION_OF_DONE.md` and the ticks in
   build.md. A box ticked that the diff contradicts is CHANGES.
 - **Docs**: AGENTS.md and any docs it lists are updated where the change

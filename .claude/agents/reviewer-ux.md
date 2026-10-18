@@ -28,7 +28,7 @@ checkout; your one file goes there.
 2. `<job folder>/spec.md`, `<job folder>/plan.md` and `<job folder>/build.md`,
    and `factory/REVIEW.md` in the main checkout: it sets what counts as
    Important versus a Nit, and what to skip. Follow it.
-3. The change: `git log --oneline main..<branch>` and `git diff main...<branch>`.
+3. The change: `git log --oneline <base>..<branch>` and `git diff <base>...<branch>` (`<base>` is `base_branch` in `factory/policy.json`, or main if unset).
 4. From round 2 on, your own `round-<N-1>/review-ux.md`. Check whether each
    finding was fixed.
 
