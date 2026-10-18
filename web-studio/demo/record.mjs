@@ -45,16 +45,24 @@ await page.addInitScript(() => {
   @keyframes __out{to{opacity:0;transform:translateX(-50%) translateY(18px) scale(.94)}}
   @keyframes __bar{to{transform:scaleX(1)}}
   @keyframes __pulse{50%{box-shadow:0 14px 48px rgba(0,0,0,.6),inset 0 0 0 2px var(--ac),0 0 34px rgba(255,122,184,.5)}}
-  #__title{position:fixed;inset:0;pointer-events:none;z-index:100000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0e1411;color:#e6ede9;font:var(--font-body,system-ui);text-align:center;padding:40px}
-  #__title h1{margin:0;font:600 54px/1.1 var(--font-display,system-ui);letter-spacing:-.02em}
-  #__title p{margin:0;font:400 22px/1.45 var(--font-body,system-ui);color:#9aaaa2;max-width:900px}
+  #__fade{position:fixed;inset:0;z-index:99996;background:#070c0a;opacity:0;pointer-events:none;transition:opacity .2s ease}
+  #__title.out{animation:__tout .45s ease forwards}
+  @keyframes __tout{to{opacity:0}}
+  #__title{position:fixed;inset:0;pointer-events:none;z-index:100000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(900px 520px at 50% 38%,#133326 0%,#0b1511 55%,#070c0a 100%);color:#eef5f1;font:var(--font-body,system-ui);text-align:center;padding:56px;overflow:hidden}
+  #__title::before{content:"";position:absolute;inset:-20%;background:conic-gradient(from 210deg at 50% 50%,rgba(61,220,158,.0),rgba(61,220,158,.16),rgba(255,122,184,.12),rgba(61,220,158,0));filter:blur(70px);animation:__spin 14s linear infinite}
+  #__title>*{position:relative;animation:__rise .7s cubic-bezier(.2,.9,.3,1) both}
+  #__title em{font-style:normal;font:600 14px/1 var(--font-body,system-ui);letter-spacing:.22em;text-transform:uppercase;color:#3ddc9e;border:1px solid rgba(61,220,158,.5);border-radius:999px;padding:8px 16px;background:rgba(61,220,158,.08)}
+  #__title h1{margin:0;font:700 66px/1.05 var(--font-display,system-ui);letter-spacing:-.03em;max-width:1100px;background:linear-gradient(180deg,#fff,#b5cfc3);-webkit-background-clip:text;background-clip:text;color:transparent;animation-delay:.08s}
+  #__title p{margin:0;font:400 25px/1.45 var(--font-body,system-ui);color:#a9bdb3;max-width:900px;animation-delay:.18s}
+  @keyframes __rise{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
+  @keyframes __spin{to{transform:rotate(360deg)}}
   `;
   const mount = () => {
     if (document.getElementById("__cursor")) return;
     const style = document.createElement("style");
     style.textContent = css;
     document.head.appendChild(style);
-    for (const [id, tag] of [["__cursor", "div"], ["__cap", "div"], ["__title", "div"]]) {
+    for (const [id, tag] of [["__fade", "div"], ["__cursor", "div"], ["__cap", "div"], ["__title", "div"]]) {
       const el = document.createElement(tag);
       el.id = id;
       document.body.appendChild(el);
@@ -73,13 +81,15 @@ await page.addInitScript(() => {
     void el.offsetWidth;
     el.classList.add("show");
   };
-  window.__title = (h, p) => {
+  window.__title = (h, p, eyebrow) => {
     mount();
     const el = document.getElementById("__title");
-    if (!h) { el.style.display = "none"; return; }
-    el.innerHTML = `<h1>${h}</h1><p>${p ?? ""}</p>`;
+    if (!h) { el.classList.add("out"); setTimeout(() => { el.style.display = "none"; el.innerHTML = ""; el.classList.remove("out"); }, 460); return; }
+    el.classList.remove("out");
+    el.innerHTML = `${eyebrow ? `<em>${eyebrow}</em>` : ""}<h1>${h}</h1><p>${p ?? ""}</p>`;
     el.style.display = "flex";
   };
+  window.__fade = (on) => { mount(); document.getElementById("__fade").style.opacity = on ? ".94" : "0"; };
   window.__ripple = (x, y) => {
     const r = document.createElement("div");
     r.className = "__ripple";
@@ -97,10 +107,10 @@ const voEvents = [];
 let voBusyUntil = 0, step = 0;
 function speak(text) {
   if (!VO_PY || !VO_MODEL) return null;
-  const clean = text.replace(/<[^>]+>/g, "").replace(/\s*·\s*/g, ", ").replace(/\b(\d) of (\d)\b/g, "$1 of $2").replace(/\.md\b/g, " dot M D").replace(/\s+/g, " ").trim();
+  const clean = text.replace(/<[^>]+>/g, "").replace(/[ \t]+/g, " ").trim();
   const file = path.join(VO_DIR, createHash("sha1").update(clean).digest("hex").slice(0, 12) + ".wav");
   fs.mkdirSync(VO_DIR, { recursive: true });
-  if (!fs.existsSync(file)) execFileSync(VO_PY, ["-m", "piper", "-m", VO_MODEL, "-f", file], { input: clean, stdio: ["pipe", "ignore", "ignore"] });
+  if (!fs.existsSync(file)) execFileSync("python3", [path.join(HERE, "tts.py"), VO_MODEL, file], { input: clean, env: process.env, stdio: ["pipe", "ignore", "inherit"] });
   const dur = parseFloat(execFileSync("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", file]).toString()) * 1000;
   return { file, dur };
 }
@@ -109,22 +119,39 @@ async function say(text) {
   const v = speak(text);
   const wait = voBusyUntil - Date.now();
   if (wait > 0) await hold(wait);
-  if (v) { voEvents.push({ at: Date.now() - T0 + 120, file: v.file, ms: v.dur }); voBusyUntil = Date.now() + v.dur + 450; }
+  if (v) {
+    // Sync flash: a magenta square in the corner of the video marks the frame where this line starts, so the
+    // muxer can place the audio on the video's own timeline (the recording runs slower than the wall clock).
+    await page.evaluate(() => {
+      let el = document.getElementById("__sync");
+      if (!el) { el = document.createElement("div"); el.id = "__sync"; el.style.cssText = "position:fixed;left:0;top:0;width:12px;height:12px;background:#f0f;z-index:2147483647;display:none;pointer-events:none"; document.documentElement.appendChild(el); }
+      el.style.display = "block"; setTimeout(() => { el.style.display = "none"; }, 600);
+    });
+    voEvents.push({ at: Date.now() - T0 + 120, file: v.file, ms: v.dur }); voBusyUntil = Date.now() + v.dur + 200; }
   return v;
 }
-const cap = async (title, text, kind = "info") => {
+// Let the current narration line finish (plus a beat) before the next action.
+const finish = async (extra = 300) => {
+  const w = voBusyUntil - Date.now();
+  if (w > 0) await hold(w);
+  await hold(extra);
+};
+// `vo` is the spoken line; without it the title and text are read.
+const cap = async (title, text, vo, kind = "info") => {
   if (!title) return page.evaluate(() => window.__cap());
-  const v = await say(title + ". " + (text ?? ""));
+  const v = await say(vo ?? title + ". " + (text ?? ""));
   await page.evaluate(() => window.__cap());      // old caption leaves with its own exit animation
-  await hold(280);                                // a visible gap so two captions never read as one
+  await hold(140);                                // a short gap so two captions never read as one
   step += 1;
   await page.evaluate(([k, t, x, n, d]) => window.__cap(k, t, x, n, d), [kind, title, text, step, v ? v.dur : 4000]);
 };
-const capTop = (title, text) => cap(title, text, "info top");
-const card = async (h, p) => {
-  if (h) await say(h + ". " + (p ?? ""));
-  await page.evaluate(([a, b]) => window.__title(a, b), [h, p]);
+const capTop = (title, text, vo) => cap(title, text, vo, "info top");
+const card = async (h, p, vo, eyebrow) => {
+  if (h) await say(vo ?? h + ". " + (p ?? ""));
+  await page.evaluate(([a, b, c]) => window.__title(a, b, c), [h, p, eyebrow]);
+  if (!h) await hold(450);
 };
+const agentTile = (name) => page.getByRole("button", { name: new RegExp(name) }).first();
 
 async function glide(locator) {
   await locator.scrollIntoViewIfNeeded();
@@ -137,7 +164,18 @@ async function glide(locator) {
   return locator;
 }
 const click = async (locator) => { await glide(locator); await locator.click(); };
-const nav = (name) => click(page.getByRole("button", { name: new RegExp("^" + name) }).first());
+// Navigation dips through a quick fade instead of cutting: the cursor arrives, the screen eases down,
+// the page changes underneath, and it eases back up.
+const nav = async (name) => {
+  const btn = page.getByRole("button", { name: new RegExp("^" + name) }).first();
+  await glide(btn);
+  await page.evaluate(() => window.__fade(1));
+  await hold(190);
+  await btn.click();
+  await hold(120);
+  await page.evaluate(() => window.__fade(0));
+  await hold(260);
+};
 const jobs = () => page.evaluate(async (r) => (await (await fetch("/api/jobs?repo=" + encodeURIComponent(r))).json()).jobs ?? [], REPO);
 const runs = () => page.evaluate(async () => (await (await fetch("/api/runs")).json()).runs ?? []);
 
@@ -166,116 +204,194 @@ async function viewFiles(pickName) {
 const closeDialog = async () => { await page.keyboard.press("Escape"); await hold(500); };
 
 // ---- the demo ------------------------------------------------------------------------------
+// Captions are short and visual; `vo` is what the narrator says. In `vo`, a line break is a short
+// pause and a blank line is a long one (see tts.py). Each scene waits for its line to finish
+// (finish()) so picture and voice stay together, and ends on a phrase that leads into the next.
 try {
   await page.goto(BASE);
-  await hold(1500);
-  await card("Forgeline", "A web view over the software factory. Describe the work, watch agents do it, and approve the two points that matter.");
-  await hold(4200);
+  await hold(1000);
+
+  // ============ Cold open ============
+  await card("Reviewed. Tested. Merged.", "And all you did was say yes, twice.",
+    "What if a feature request came back reviewed, tested, and merged...\nand all you did was say yes, twice?");
+  await finish(250);
+  await card("Forgeline", "The software factory you can watch.",
+    "This is Forgeline.\n\nA software factory you can actually watch.", "Introducing");
+  await finish(250);
+  await card("Who read it? Who tested it?", "AI can write code. Trust is the hard part.",
+    "AI can write code now. The hard part is trusting it.\nWho read it? Who tested it?\nWhat did it touch, and why?");
+  await finish(250);
+  await card("Describe. Approve. Ship.", "Fourteen agents. Two decisions. All of it visible.",
+    "Forgeline answers all of that.\n\nYou describe the work. Fourteen specialist agents do it, in the open.\nAnd you make the two calls that matter.");
+  await finish(300);
   await card();
-  await hold(600);
+  await hold(250);
 
-  // 1. Tour
-  await cap("Six pages, one app", "Board, New job, Agents, Activity, Runs and Metrics. The same factory the terminal, desktop app and VS Code drive.");
-  for (const n of ["New job", "Agents", "Activity", "Runs", "Metrics", "Board"]) { await nav(n); await hold(1500); }
-
-  // 2. Describe the work
+  // ============ Workspace ============
+  await nav("Board");
+  await cap("Board", "Every job. Every stage. At a glance.",
+    "Let's look around.\n\nThis is the Board. Every job is a card, moving from intent, to merged.\nYou see what's running, and what's waiting on you.");
+  await finish(200);
   await nav("New job");
-  await capTop("Step 1 · Describe the work", "A sentence, a Jira key or a bug report. Feature or bug fix, and the MCP servers it may use.");
-  await hold(2200);
+  await cap("New job", "A sentence, a ticket, or a bug.",
+    "New job is how you ask.\nA sentence, a ticket key, a bug report. That's all it takes.");
+  await finish(200);
+  await nav("Agents");
+  await cap("Agents", "The team, laid out as a pipeline.",
+    "Agents is the team. We'll meet them in a minute.");
+  await finish(200);
+  await nav("Activity");
+  await cap("Activity · Runs · Metrics", "The record of everything.",
+    "And Activity, Runs and Metrics...\nkeep the record. Let's put something through, and watch them fill up.");
+  await hold(500);
+  await nav("Runs");
+  await hold(500);
+  await nav("Metrics");
+  await finish(200);
+
+  // ============ One job ============
+  await nav("New job");
+  await capTop("Describe the work", "Plain English. No template.",
+    "Say I need a function that turns any text into a clean web address. With tests.\nI'll just type it.");
+  await finish(100);
   const task = page.getByLabel("Task");
   await glide(task);
   await task.click();
-  await task.pressSequentially(TASK, { delay: 28 });
-  await hold(900);
+  await task.pressSequentially(TASK, { delay: 26 });
+  await hold(500);
   await click(page.getByRole("button", { name: "Send", exact: true }));
-  await capTop("The factory starts", "The orchestrator creates a job and the intent-writer drafts intent.md. Everything streams live.");
+  await capTop("The factory starts", "An orchestrator opens a job.",
+    "I hit send.\n\nAn agent restates the request in plain words, and lists any open questions.");
   await until("intent stage", stageIs("intent"));
   await until("first run to finish", runDone);
-  await hold(1500);
+  await finish(300);
 
-  // 3. Intent: first acceptance
   await selectJob();
-  await cap("What it produced · intent.md", "Your request in your own words, with open questions.");
+  await cap("Your call · 1 of 2", "Read the intent. Accept it. Nothing moves until you do.",
+    "Here's what it understood.\nRead it. If it's right, accept.\n\nThat's your first call.", "action");
   await viewFiles();
-  await hold(5200);
+  await finish(300);
   await closeDialog();
-  await cap("Needs your acceptance · 1 of 2", "Read the intent, then accept it. Nothing moves until you do.", "action");
-  await hold(2800);
   await click(page.getByRole("button", { name: "Accept intent", exact: true }));
-  await hold(1500);
+  await hold(800);
 
-  // 4. Spec: agent view while spec-writer works
-  await cap("Spec", "The spec-writer turns the intent into spec.md. Watch the stream.");
-  await hold(4500);
   await nav("Agents");
-  await cap("Agents page · scoped to this job", "intent-writer is done. spec-writer is working now, so its tile pulses. The link to the next lane animates.");
+  await cap("Spec · live", "spec-writer is working. Its tile pulses.",
+    "Now watch the Agents page.\nThe first agent is done. The spec writer is working, and the link to the next stage lights up.");
   await until("spec-approval", stageIs("spec-approval"));
-  await hold(2500);
+  await finish(200);
 
-  // 5. Spec: second acceptance
   await selectJob();
-  await cap("What it produced · spec.md", "Testable acceptance criteria and a risk tier.");
+  await cap("Your call · 2 of 2", "Approve the spec, or send it back with a note.",
+    "Next, a spec. Criteria a test can check, and a risk level.\n\nApprove it, and you can step back.", "action");
   await viewFiles("spec.md");
-  await hold(6000);
+  await finish(300);
   await closeDialog();
-  await cap("Needs your acceptance · 2 of 2", "Approve the spec, or send it back with a note. The belt up top says Waiting on you.", "action");
-  await hold(3200);
   await click(page.getByRole("button", { name: "Approve spec", exact: true }));
-  await hold(1200);
+  await hold(800);
 
-  // 6. Agents transitions
   await nav("Agents");
-  await cap("Plan", "The planner reads the real code and writes plan.md: files to change, tests, blast radius, rollback.");
+  await cap("Plan → Build", "The builder is the only agent that can edit code.",
+    "The planner reads the real code, and writes the plan.\nThen the builder, the only agent allowed to edit files, builds it, and runs the tests.");
   await until("plan to finish", stageIs("build", "review", "approve", "merged"));
-  await cap("Build", "The builder works on its own branch, runs the tests and writes build.md.");
-  await hold(5000);
+  await finish(200);
   await nav("Activity");
-  await cap("Activity · the same feed as the terminal", "Every tool call and agent start, from hooks that run in every Claude Code surface.");
-  await hold(4500);
-  await selectJob();
-  await cap("What it produced · plan.md", "Open any stage's file from the job panel.");
-  await viewFiles("plan.md");
-  await hold(4500);
-  await closeDialog();
+  await cap("Activity", "Every tool call, live.",
+    "Everything lands in this feed, as it happens.\nSame as the terminal. Nothing hidden.");
+  await finish(200);
   await nav("Agents");
   await until("review", stageIs("review", "approve", "merged"));
-  await cap("Review", "Four reviewers run in parallel: security, UX, UI and code. Each writes a verdict.");
-  await hold(5500);
+  await cap("Review", "Security. UX. UI. Code. In parallel.",
+    "Then four reviewers check the branch at once.\nSecurity, user experience, interface design, and code.");
   await until("approve", stageIs("approve", "merged"));
-  await cap("Approve", "The approver reads the four verdicts and decides: merge, or hand it back to you.");
-  await hold(3500);
+  await finish(100);
+  await cap("Approve", "Merge, or hand it back to a person.",
+    "And the approver makes the call. Merge, or hand it back to a human.");
+  await finish(200);
   await selectJob();
-  await cap("What it produced · a review", "Findings and a PASS or CHANGES verdict, with the evidence.");
+  await cap("A review, up close", "Findings. Evidence. A verdict.",
+    "Every review is a plain document. Findings, evidence, and a clear verdict.");
   await viewFiles("review-security");
-  await hold(4500);
+  await finish(300);
   await closeDialog();
   await until("merged", stageIs("merged"), 120000);
   await until("last run to finish", runDone, 120000);
-
-  // 7. Result
   await nav("Board");
-  await hold(1200);
-  await cap("Merged", "The merge gate landed the branch on main after the tests passed. Agents never push or merge by themselves.");
-  await hold(4500);
-  await selectJob();
-  await cap("The finished job", "Every stage done, four PASS verdicts, one review round.");
-  await hold(4500);
+  await hold(500);
+  await cap("Merged", "Tests passed. Landed on main.",
+    "Merged.\n\nThe merge gate landed it on main, and only after the tests passed.\nThe agents never merge on their own.");
+  await finish(300);
+
+  // ============ Agents ============
   await nav("Agents");
   await click(page.getByRole("tab", { name: "All jobs" }));
-  await cap("Agents · all jobs", "Every agent that worked, with its event count. All are idle now.");
-  await hold(4500);
+  await hold(300);
+  await cap("The team", "Fourteen agents. One job each.",
+    "So who did all that?\n\nFourteen agents, and each one has exactly one job.\nFive stages across the top. And underneath, two support groups.");
+  await finish(200);
+
+  await click(agentTile("intent-writer"));
+  await cap("intent-writer", "Turns a raw idea into a clear intent.",
+    "The intent writer turns a rough idea into a clear one.\n\nClick any agent, and you see its model, its tools, and its full prompt.\nIt's just a markdown file. Read it. Change it.");
+  await finish(200);
+  await click(agentTile("planner"));
+  await cap("planner", "Reads the real code, then plans.",
+    "The planner reads the real code, before it plans.");
+  await finish(150);
+  await click(agentTile("builder"));
+  await cap("builder", "The only agent with edit access.",
+    "The builder is the only one with the edit tool.\nIt builds on its own branch, and tests as it goes.");
+  await finish(150);
+  await click(agentTile("reviewer-security"));
+  await cap("Reviewers", "Read-only. Nobody grades their own work.",
+    "Reviewers are read-only.\nSo nobody grades their own work.");
+  await finish(150);
+  await click(agentTile("approver"));
+  await cap("approver", "The final gate.",
+    "The approver is the final gate.\nIt writes down why, either way.");
+  await finish(150);
+  await click(agentTile("scanner-security"));
+  await cap("Maintain loop", "Scanners find. A diagnoser explains.",
+    "Underneath, scanners watch the codebase, and try to disprove their own findings.\nA diagnoser explains what drifted.\nThey report. They never change anything.");
+  await finish(200);
+  await click(page.getByLabel("Search agents"));
+  await page.getByLabel("Search agents").pressSequentially("review", { delay: 90 });
+  await cap("Search · Table view", "Find any agent. Compare them side by side.",
+    "Search finds any agent in a keystroke.\nAnd the table view lines them up, side by side.");
+  await hold(500);
+  await click(page.getByRole("button", { name: "Table view" }));
+  await finish(300);
+  await page.getByLabel("Search agents").fill("");
+  await click(page.getByRole("button", { name: "Pipeline view" }));
+  await hold(300);
+
+  // ============ The record ============
+  await nav("Board");
+  await selectJob();
+  await cap("Everything is kept", "Documents. History. Cost.",
+    "And afterwards, you keep everything.\n\nOn the Board, the finished job. Every stage ticked, four reviews passed.");
+  await finish(200);
+  await nav("Activity");
+  await cap("Activity", "Every tool call. In order.",
+    "Activity is the full story, in order.\nWhen you want to know why something happened, start here.");
+  await finish(200);
   await nav("Runs");
-  await cap("Runs", "Every run is kept and can be replayed, or resumed in Claude Code.");
-  await hold(2500);
+  await cap("Runs", "Replay any run. Or resume it.",
+    "Runs keeps every run, so you can replay it, or pick it up in Claude Code.");
+  await hold(600);
   await click(page.getByRole("button", { name: /approve-spec/ }).first());
-  await hold(5000);
+  await finish(600);
   await closeDialog();
   await nav("Metrics");
-  await cap("Metrics", "Jobs merged, first-pass rate, cost and tokens by model and by job.");
-  await hold(6000);
+  await cap("Metrics", "Cost. Tokens. First-pass rate.",
+    "And Metrics. What it cost, and how often the first attempt was good enough.");
+  await finish(300);
+
   await cap();
-  await card("Two approvals, one merged change", "You accepted the intent and the spec. Fourteen agents planned, built, reviewed and merged it, and everything is on disk and visible from every surface.");
-  await hold(6000);
+  await card("Describe it. Approve it twice. Ship it.", "Forgeline runs on your machine, with the Claude Code you already use.",
+    "Describe it.\nApprove it twice.\nShip it.\n\nForgeline. It runs on your machine, with the Claude Code you already use.",
+    "Forgeline");
+  await finish(2200);
   log("demo finished");
 } catch (e) {
   log("FAILED", e.message);
