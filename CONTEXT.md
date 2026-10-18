@@ -86,7 +86,7 @@ dashboard that shows split jobs.
 ## What is proven, and what is not
 
 Proven:
-- Offline evals: 357 checks pass with no model (Python 3.12+).
+- Offline evals: 411 checks pass with no model (Python 3.12+).
 - Live agent evals on Sonnet 5.5: 17 cases. The first run passed 16 (the one failure,
   `pr-reviewer`, passed 2 of 2 on re-run, so a flake). After all later prompt changes a full re-run
   passed 17 of 17.
@@ -128,6 +128,7 @@ Proven:
 Not proven (built and covered by offline evals only):
 - Parallel runs with real `claude` (checked with a fake CLI that sleeps), push updates on Linux
   (`fs.watch` recursive), and alerts in a truly backgrounded tab (checked with a simulated hidden tab).
+- Monorepo and existing-repo support (`monorepo.py`, `callers.py`, per-package verify, baseline-red check, cross-package and no-tests escalations; see USAGE "Existing repos and monorepos"). Also `worktree_setup`, configurable base branch, shell verify commands, flaky retry, destructive-git blocks. Evals use small fixtures; no real monorepo has run a job.
 - The web layer in the desktop app and VS Code (only the CLI was run), MCP toggles against a real
   server, `status --line` as a status line, Remote Control, and `managed/install.py` with the
   activity hooks installed for real (the eval checks the files).
