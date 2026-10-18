@@ -220,7 +220,44 @@ Agents cannot edit it, and neither `factory/scripts/`, `templates/`, `checklists
 | `merge_policy.auto_max_lines` | A change over this needs a human even after APPROVE (default 400). |
 | `merge_policy.verify_commands`, `require_verify` | Run on the merged result before the real merge; `require_verify` refuses if none are set. |
 | `merge_policy.constraints` | Ratchets (section 11). Empty by default. |
+| `packages` | Monorepo packages (name, path, `verify_commands`, `depends_on`). Detected from workspaces, `go.work` and Cargo; entries here add to or override them. |
+| `merge_policy.max_auto_packages` | A change that directly touches more packages than this needs a human (default 3). |
+| `merge_policy.check_baseline` | When a verify command fails, run it on the untouched base; if it fails there too the gate says `baseline-red` (default true). |
+| `merge_policy.callers_widen` | Also test packages that mention a symbol the change removed or edited (default true). |
+| `base_branch` | The branch jobs start from and merge to. Default: the repo's own (origin's default, else main, master, trunk, develop). |
+| `worktree_setup` | `link`, `copy` and `commands` that make a fresh worktree usable (node_modules, a virtualenv, `.env.test`, an install step). Runs for the builder's worktree and the gate's trial checkout. |
+| `merge_policy.verify_retries`, `verify_timeout_minutes` | A failing verify command is retried once (flaky checks are marked `FLAKY`); each command times out after 30 minutes by default. |
 | `adr.dir` | Where merged Design sections are recorded (default `docs/adr`; empty turns it off). |
+
+### Existing repos and monorepos
+
+The factory learns a repo from `AGENTS.md` and from the code its agents read, then checks the
+result with your tests. For a repo that already has code:
+
+0. If your default branch is not `main`, nothing to do (it is detected); to pin it set `base_branch`.
+   Verify commands run through the shell, so `npm test && npm run lint` is fine.
+1. `/factory init` drafts `AGENTS.md`. In a monorepo it also lists the packages and what
+   depends on what. Fix every `UNKNOWN:` line, and give each package its test command.
+2. `python3 factory/scripts/monorepo.py detect --snippet` prints a `packages` block. Put it in
+   `policy.json` with the real test command per package, and set `merge_policy.require_verify`.
+3. Set `worktree_setup` so a fresh worktree has what the tests need, for example
+   `{"link": ["node_modules", "packages/*/node_modules"], "copy": [".env.test"], "commands": []}`.
+4. `/factory doctor` flags a package with no command and a missing `worktree_setup`.
+
+What it does about breaking existing behaviour:
+- The planner and `reviewer-code` run `callers.py`, a whole-word search for who uses the code a
+  change touches. It over-reports and misses dynamic use, so they read the hits.
+- At the merge gate, only the packages the change touches, the packages that depend on them,
+  and the packages that mention a removed or edited symbol run their `verify_commands`, each in
+  its own folder. A change outside every package (root config, lockfile) runs all of them.
+- A failing check is run again on the untouched base. Red on both is `baseline-red`: the check
+  cannot show whether the change broke anything, so a human must decide. Green before and red
+  after is reported as a regression.
+- A change across more packages than `max_auto_packages`, or to source in a package with no
+  test files, goes to a human.
+
+It cannot find use that text search cannot see (reflection, string lookups, generated code,
+other repos), and it cannot test what your tests do not cover.
 
 ## 9. The guardrails
 
@@ -302,7 +339,7 @@ whose dependencies have not merged. The parent closes when every child has merge
 ## 14. Verifying the factory itself
 
 ```bash
-python3 factory/evals/run_evals.py      # 353 offline checks, no model; needs Python 3.12+
+python3 factory/evals/run_evals.py      # 411 offline checks, no model; needs Python 3.12+
 python3 factory/evals/agent_evals.py    # 17 live agent cases; about 15 minutes of subscription use
 ```
 
