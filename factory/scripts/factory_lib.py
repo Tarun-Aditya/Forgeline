@@ -80,3 +80,33 @@ def changed_line_count(repo, base, branch, exclude):
             continue
         total += (int(added) if added.isdigit() else 0) + (int(deleted) if deleted.isdigit() else 0)
     return total
+
+
+def base_branch(repo, policy=None):
+    """The branch jobs start from and merge to: policy.base_branch, else origin's default,
+    else the first of main, master, trunk, develop that exists, else main."""
+    import subprocess
+    if (policy or {}).get("base_branch"):
+        return policy["base_branch"]
+
+    def git(*a):
+        return subprocess.run(["git", "-C", repo, *a], capture_output=True, text=True, check=False)
+    head = git("symbolic-ref", "--short", "refs/remotes/origin/HEAD")
+    name = head.stdout.strip().removeprefix("origin/") if head.returncode == 0 else ""
+    if name and git("rev-parse", "--verify", "--quiet", name).returncode == 0:
+        return name
+    for cand in ("main", "master", "trunk", "develop"):
+        if git("rev-parse", "--verify", "--quiet", cand).returncode == 0:
+            return cand
+    return "main"
+
+
+if __name__ == "__main__":
+    import os
+    import sys
+    if sys.argv[1:2] == ["base"]:
+        repo = os.path.abspath(sys.argv[2] if len(sys.argv) > 2 else ".")
+        pol = os.path.join(repo, "factory", "policy.json")
+        print(base_branch(repo, load_policy(pol) if os.path.isfile(pol) else None))
+    else:
+        sys.exit("usage: factory_lib.py base [repo]")

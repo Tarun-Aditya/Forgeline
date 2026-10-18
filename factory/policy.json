@@ -78,7 +78,13 @@
     "docker\\s+push",
     "curl[^|;&]*\\|\\s*(ba)?sh",
     "wget[^|;&]*\\|\\s*(ba)?sh",
-    "git(\\s+(-C|-c)\\s+\\S+|\\s+--[\\w-]+(=\\S+)?)*\\s+merge(?![\\w-])[^\\n;&|]*\\bfactory/"
+    "git(\\s+(-C|-c)\\s+\\S+|\\s+--[\\w-]+(=\\S+)?)*\\s+merge(?![\\w-])[^\\n;&|]*\\bfactory/",
+    "git(\\s+(-C|-c)\\s+\\S+|\\s+--[\\w-]+(=\\S+)?)*\\s+reset\\s+(\\S+\\s+)*--hard",
+    "git(\\s+(-C|-c)\\s+\\S+|\\s+--[\\w-]+(=\\S+)?)*\\s+clean\\s+-\\w*f",
+    "git(\\s+(-C|-c)\\s+\\S+|\\s+--[\\w-]+(=\\S+)?)*\\s+branch\\s+(\\S+\\s+)*-D\\b",
+    "git(\\s+(-C|-c)\\s+\\S+|\\s+--[\\w-]+(=\\S+)?)*\\s+(checkout|restore)\\s+(\\S+\\s+)*\\.(\\s|$)",
+    "git(\\s+(-C|-c)\\s+\\S+|\\s+--[\\w-]+(=\\S+)?)*\\s+stash\\s+(drop|clear)",
+    "\\brm\\s+-\\w*[rR]\\w*\\s+(-\\w+\\s+)*(/|~|\\$HOME)(\\s|/?$)"
   ],
   "ticketing": {
     "system": null,
@@ -99,9 +105,13 @@
     "verify_commands": [],
     "require_verify": false,
     "lock_stale_minutes": 60,
-    "constraints": []
+    "constraints": [],
+    "max_auto_packages": 3,
+    "check_baseline": true,
+    "callers_widen": true
   },
   "adr": {
     "dir": "docs/adr"
-  }
+  },
+  "packages": []
 }
