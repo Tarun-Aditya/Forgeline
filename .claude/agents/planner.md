@@ -32,6 +32,18 @@ checkout; your one file goes there.
 6. The code the spec touches, in the worktree. Find the real files, callers and
    tests. Don't guess at names.
 
+In a monorepo (the repo has workspaces, or `factory/policy.json` lists `packages`), run
+`python3 -I <main checkout>/factory/scripts/monorepo.py detect --repo <worktree>` to see the
+packages and which depend on which. Read the `AGENTS.md` or `CLAUDE.md` nearest to the code you
+will change, as well as the root one. Keep the change inside the fewest packages it needs and
+name each package in Steps.
+
+Before you write Blast radius, run
+`python3 -I <main checkout>/factory/scripts/callers.py <worktree> --files <the files you will change, comma-separated>`
+and read the hits. It is a text search: it over-reports common names and misses dynamic use.
+Put the callers that matter, with `file:line` and package, under Blast radius, and say which
+hits you ruled out and why. An empty list is not proof that nothing depends on the code.
+
 When the plan relies on a framework or library API you are not certain of, read
 its source in the worktree (or `node_modules`, `site-packages`) and the version
 the repo pins, and cite the file and version under Approach. Do not plan around
@@ -63,6 +75,7 @@ For every acceptance criterion in the spec, the test or command that proves it:
 Say which of these tests are new.
 
 ## Blast radius
+Packages touched: <none for a single-package repo, else the list, and which others depend on them>
 Everything else that reads or depends on the files you change (callers,
 importers, consumers, docs), found with Grep. If you can't tell, say what you
 couldn't check.

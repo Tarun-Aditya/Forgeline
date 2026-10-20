@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Review any branch or pull request with the pr-reviewer agent.
 
-  review_branch.py [--base main] [--head HEAD | --pr NUMBER] [--claude claude]
+  review_branch.py [--base BRANCH] [--head HEAD | --pr NUMBER] [--claude claude]
                    [--title T] [--body-file F] [--name N]
 
 Writes factory/reviews/<name>/review.json (validated), review.md, and, when the
@@ -23,6 +23,9 @@ import os
 import re
 import subprocess
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from factory_lib import base_branch  # noqa: E402
 
 TOOLS = "Read,Grep,Glob,Bash(git diff *),Bash(git log *),Bash(git show *),Bash(git ls-files *),Write(factory/reviews/**),Edit(factory/reviews/**)"
 HUNK = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@")
@@ -99,7 +102,7 @@ def render(review, bad, name):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
-    ap.add_argument("--base", default="main")
+    ap.add_argument("--base", default=None)
     ap.add_argument("--head", default="HEAD")
     ap.add_argument("--pr", type=int)
     ap.add_argument("--claude", default="claude")
@@ -110,6 +113,7 @@ def main():
     ap.add_argument("--timeout", type=int, default=1800)
     args = ap.parse_args()
     repo = os.path.abspath(args.repo)
+    args.base = args.base or base_branch(repo)
 
     head = args.head
     if args.pr:

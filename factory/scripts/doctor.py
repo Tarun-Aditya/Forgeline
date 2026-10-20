@@ -16,6 +16,10 @@ import re
 import subprocess
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import monorepo  # noqa: E402
+from factory_lib import base_branch  # noqa: E402
+
 TOPICS = [  # (name, level if missing, regexes any of which satisfies it)
     ("setup for a fresh checkout", "FAIL", [r"\binstall\b", r"\bsetup\b", r"\bnpm (ci|install)\b", r"pip install", r"\bbundle install\b", r"\bgo mod\b", r"\bmake\b"]),
     ("how to run the tests", "FAIL", [r"\btests?\b.*(`|:)", r"\bpytest\b", r"\bnpm (run )?test\b", r"\bunittest\b", r"\bgo test\b", r"\bcargo test\b", r"\bmvn test\b"]),
@@ -59,8 +63,14 @@ def main():
     git_ok = run(repo, "git", "rev-parse", "--git-dir").returncode == 0
     add("PASS" if git_ok else "FAIL", "repo is a git repository")
     if git_ok:
-        branch = run(repo, "git", "rev-parse", "--verify", "main").returncode == 0
-        add("PASS" if branch else "FAIL", "branch 'main' exists", "jobs branch from and merge to main")
+        try:
+            pol_base = json.load(open(os.path.join(repo, "factory", "policy.json")))
+        except (OSError, ValueError):
+            pol_base = {}
+        base = base_branch(repo, pol_base)
+        branch = run(repo, "git", "rev-parse", "--verify", base).returncode == 0
+        add("PASS" if branch else "FAIL", f"base branch '{base}' exists",
+            f"jobs branch from and merge to {base}; set base_branch in policy.json if that is wrong")
         dirty = run(repo, "git", "status", "--porcelain", "--untracked-files=no").stdout.strip()
         add("PASS" if not dirty else "WARN", "main checkout has no uncommitted tracked changes", dirty[:120])
 
@@ -75,6 +85,35 @@ def main():
     except (OSError, ValueError) as err:
         add("FAIL", "factory/policy.json is valid JSON", str(err))
 
+    try:
+        pol_doc = json.load(open(pol))
+    except (OSError, ValueError):
+        pol_doc = {}
+    pkgs = monorepo.detect(repo, pol_doc)
+    if pkgs:
+        mp = pol_doc.get("merge_policy") or {}
+        add("PASS", "monorepo detected", f"{len(pkgs)} packages: " + ", ".join(p["path"] for p in pkgs[:6]) + ("..." if len(pkgs) > 6 else ""))
+        bare = [p["path"] for p in pkgs if not p["verify_commands"]]
+        if bare:
+            add("WARN" if not mp.get("require_verify") else "FAIL", "every package has verify_commands in policy.packages",
+                "missing for: " + ", ".join(bare[:6]) + "; run monorepo.py detect --snippet")
+        else:
+            add("PASS", "every package has verify_commands in policy.packages")
+        add("PASS" if mp.get("require_verify") else "WARN", "merge_policy.require_verify is on",
+            "without it a package with no tests merges unchecked")
+        if doc and not re.search(r"\bpackages?\b|\bworkspaces?\b|\bmonorepo\b", text, re.I):
+            add("WARN", "project doc describes the packages", "say which package to run commands from and how they depend on each other")
+        undoc = [p["path"] for p in pkgs if not any(os.path.isfile(os.path.join(repo, p["path"], n)) for n in ("AGENTS.md", "CLAUDE.md"))]
+        if undoc and len(undoc) == len(pkgs):
+            add("WARN", "packages have their own AGENTS.md", "none do; agents read the nearest one, so add one where a package's commands differ")
+    manifests = [m for m in ("package.json", "pyproject.toml", "requirements.txt", "go.mod", "Cargo.toml", "Gemfile", "pom.xml")
+                 if os.path.isfile(os.path.join(repo, m))] or ([p["path"] for p in pkgs][:1])
+    if manifests:
+        setup = pol_doc.get("worktree_setup") or {}
+        has = any(setup.get(k) for k in ("link", "copy", "commands"))
+        add("PASS" if has else "WARN", "policy.worktree_setup prepares a fresh worktree (dependencies, .env)",
+            "" if has else "a new worktree has no node_modules, virtualenv or .env; the builder and the merge gate's trial checkout "
+                           "need them. Add link/copy/commands to policy.json")
     settings = os.path.join(repo, ".claude", "settings.json")
     try:
         cfg = json.dumps(json.load(open(settings)))

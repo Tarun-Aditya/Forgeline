@@ -28,11 +28,12 @@ checkout; your one file goes there.
 2. Everything in the job folder: `intent.md` if present, `spec.md`, `plan.md`,
    `build.md`, any `rework-*.md` and `spec-feedback-*.md`, and every
    `round-*/review-*.md`.
-3. The change: `git log --oneline main..<branch>` and `git diff main...<branch>`.
+3. The change: `git log --oneline <base>..<branch>` and `git diff <base>...<branch>` (`<base>` is `base_branch` in `factory/policy.json`, or main if unset).
 4. The deterministic policy check. Run
    `cd <worktree> && python3 -I <main checkout>/factory/scripts/policy_check.py . <branch>`
    and read every line it prints. It matches the changed files against
-   `factory/policy.json`, so you don't have to judge path rules by eye.
+   `factory/policy.json`, so you don't have to judge path rules by eye. A
+   `cross-package change` or `no tests cover` line means a human decides: ESCALATE.
 
 ## Decide
 
@@ -42,7 +43,7 @@ APPROVE only if all of these hold:
   you find convincing. Spot-check at least one criterion yourself.
 - All four reviews in the final round are `VERDICT: PASS`, and no Note in them
   describes a real problem.
-- `git merge-tree --write-tree main <branch>` reports no conflicts.
+- `git merge-tree --write-tree <base> <branch>` reports no conflicts.
 - The merged diff matches `plan.md`: no file outside the plan unless build.md
   explains it, and no plan step missing.
 - `policy_check.py` printed no `ESCALATE-TRIGGER` and no `VIOLATION` line.
