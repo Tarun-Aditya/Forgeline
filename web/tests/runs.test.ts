@@ -88,3 +88,25 @@ test("a second run for the same job is refused while one is alive", async () => 
   assert.equal(runner.stopRun(id), true);
   await drain(runner.followRun(id));
 });
+
+test("finalize stores the last result's text as finalText, clipped to 8000 characters", () => {
+  meta("a-4", deadPid());
+  const res = (text: string) => JSON.stringify({ type: "result", session_id: "s4", result: text, usage: {} });
+  fs.writeFileSync(runs.eventLogPath("a-4"), [res("first"), res("second")].join("\n") + "\n");
+  assert.equal(runs.finalize("a-4")?.finalText, "second");
+  meta("a-5", deadPid());
+  fs.writeFileSync(runs.eventLogPath("a-5"), res("x".repeat(9000)) + "\n");
+  assert.equal(runs.finalize("a-5")?.finalText?.length, 8000);
+});
+
+test("a run on a job records the job's stage and history length at launch", async () => {
+  const job = path.join(repo, "factory", "jobs", "009-y");
+  fs.mkdirSync(job, { recursive: true });
+  fs.writeFileSync(path.join(job, "job.json"), JSON.stringify({ id: "009-y", stage: "intent", history: [{ stage: "intent", at: "t" }] }));
+  process.env.CLAUDE_BIN = script("res.sh", `echo '${RESULT}'`);
+  const id = runner.launchRun({ repo, text: "/factory accept 009-y" });
+  const m = runs.readMeta(id)!;
+  assert.deepEqual(m.at, { job: "009-y", stage: "intent", history: 1 });
+  assert.equal(m.answers, undefined);
+  await drain(runner.followRun(id));
+});

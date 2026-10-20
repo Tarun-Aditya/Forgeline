@@ -18,6 +18,13 @@ Read the manifests and config (`package.json`, `pyproject.toml`, `requirements*.
 `git ls-files`. Run only read commands. If you cannot tell something (for example
 the dev server port), write `UNKNOWN: ask the owner` instead of inventing it.
 
+Look for a monorepo: `workspaces` in `package.json`, `pnpm-workspace.yaml`, `lerna.json`,
+`go.work`, a Cargo `[workspace]`, or several folders that each hold their own manifest. If
+you find one, run `python3 -I factory/scripts/monorepo.py detect --snippet` and put its output
+in `AGENTS.md` under "Packages": the packages, what depends on what, and the real test command
+for each one (read it from that package's own scripts or CI file; write `UNKNOWN` if you
+cannot). Say in `AGENTS.md` which package to run commands from.
+
 ## Write
 
 Short, under 150 lines, in these sections:

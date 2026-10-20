@@ -2,15 +2,18 @@
 import { Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AgentFlow } from "@/components/agent-flow";
+import { CompareView } from "@/components/compare-view";
 import { ReviewChips } from "@/components/board";
-import { Actions, useJobCommand, WorkingBanner } from "@/components/job-drawer";
+import { Actions, isStuck, LastMessage, useJobCommand, WorkingBanner } from "@/components/job-drawer";
+import { QuestionBadge, QuestionBox } from "@/components/question-box";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { usePoll } from "@/components/use-poll";
 import { buildLanes, fmtDur } from "@/lib/agents";
-import type { ActivityEvent } from "@/lib/activity";
+import type { ActivityEvent, SessionState } from "@/lib/activity";
 import type { Job } from "@/lib/jobs";
+import type { Question } from "@/lib/questions";
 import { cn } from "@/lib/utils";
 
 const ROW = 44;
@@ -18,14 +21,15 @@ const LABEL = 150;
 
 /** How each agent worked on one job: who ran when, who ran together, and what each one did. */
 type Props = {
-  starting: string | null; repo: string; jobs: Job[]; stages: { key: string; label: string }[]; busy: boolean; running: Set<string>;
-  trouble: Map<string, "stalled" | "crashed">; onCommand: (text: string) => void; onOpen: (id: string) => void;
+  notes: Map<string, string>; starting: string[]; repo: string; jobs: Job[]; stages: { key: string; label: string }[]; busy: boolean; running: Set<string>;
+  trouble: Map<string, "stalled" | "crashed">; questions: Record<string, Question>; onCommand: (text: string) => void; onOpen: (id: string) => void;
+  onAnswer: (jobId: string, text: string) => void;
 };
 
-export function AgentsView({ starting, repo, jobs, stages, busy, running, trouble, onCommand, onOpen }: Props) {
+export function AgentsView({ notes, starting, repo, jobs, stages, busy, running, trouble, questions, onCommand, onOpen, onAnswer }: Props) {
   const [picked, setPicked] = useState<string | null>(null);
   const [agent, setAgent] = useState<string | null>(null);
-  const [mode, setMode] = useState<"flow" | "timeline">("flow");
+  const [mode, setMode] = useState<"flow" | "timeline" | "compare">("flow");
   // A job that appears after the page loaded (you just started it) becomes the selected one.
   const known = useRef<Set<string> | null>(null);
   const jobKey = jobs.map((j) => j.id).join("|");
@@ -39,13 +43,23 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
   }, [jobKey]); // eslint-disable-line react-hooks/exhaustive-deps
   const job = picked && jobs.some((j) => j.id === picked) ? picked : (jobs.at(-1)?.id ?? null);
   useEffect(() => setAgent(null), [job]);
-  const { data, error } = usePoll<{ events: ActivityEvent[] }>(job ? `/api/activity?repo=${encodeURIComponent(repo)}&job=${encodeURIComponent(job)}&limit=1000` : null, 2000);
+  const { data, error } = usePoll<{ events: ActivityEvent[]; sessions: SessionState[] }>(job ? `/api/activity?repo=${encodeURIComponent(repo)}&job=${encodeURIComponent(job)}&limit=1000` : null, 2000, "activity");
   const current = jobs.find((j) => j.id === job);
+  const { data: costData } = usePoll<{ cost: Record<string, { costUsd: number; tokens: number }> }>(job ? `/api/jobs/${encodeURIComponent(job)}?repo=${encodeURIComponent(repo)}&cost=1` : null, 10000, "runs");
+  const totalCost = Object.values(costData?.cost ?? {}).reduce((n, c) => n + c.costUsd, 0);
+  const { data: summary } = usePoll<{ handoffs: Record<string, string> }>(job ? `/api/jobs/${encodeURIComponent(job)}?repo=${encodeURIComponent(repo)}&handoffs=1` : null, 5000, "jobs");
   const { locked, mine, send, reset } = useJobCommand(current, busy, !!job && running.has(job), onCommand);
   useEffect(reset, [job]);
-  const view = useMemo(() => (data ? buildLanes(data.events) : null), [data]);
+  const question = current && !running.has(current.id) ? questions[current.id] : undefined; // hidden while the job runs
+  // Only agents in a session that is still running can be live; a merged job has nothing running.
+  const merged = current?.stage === "merged";
+  const view = useMemo(() => {
+    if (!data) return null;
+    const alive = new Set(merged ? [] : data.sessions.filter((s) => s.state === "running").map((s) => s.session));
+    return buildLanes(data.events, Date.now(), alive);
+  }, [data, merged]);
 
-  if (starting && jobs.length === 0) return <Starting text={starting} />;
+  if (starting.length > 0 && jobs.length === 0) return <div className="space-y-2">{starting.map((t, i) => <Starting key={i} text={t} />)}</div>;
   if (jobs.length === 0) return <p className="p-8 text-center text-sm text-muted-foreground">No jobs yet. Start one from the panel on the right and its agents will show up here.</p>;
   const span = view ? view.t1 - view.t0 : 1;
   const pct = (t: number) => `${((t - (view?.t0 ?? 0)) / span) * 100}%`;
@@ -55,25 +69,27 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
 
   return (
     <div className="space-y-4">
-      {starting && <Starting text={starting} />}
+      {starting.map((t, i) => <Starting key={i} text={t} />)}
       <div className="flex flex-wrap items-center gap-3">
         <select className="rounded-md border bg-background px-2 py-1 text-sm" value={job ?? ""} onChange={(e) => setPicked(e.target.value)} aria-label="Job">
           {[...jobs].reverse().map((j) => <option key={j.id} value={j.id}>{j.id} · {j.stage}</option>)}
         </select>
         <div className="flex rounded-md border p-0.5 text-sm" role="group" aria-label="View">
-          {(["flow", "timeline"] as const).map((m) => (
+          {(["flow", "timeline", "compare"] as const).map((m) => (
             <button key={m} onClick={() => setMode(m)} aria-pressed={mode === m} className={cn("rounded px-3 py-0.5 capitalize", mode === m ? "bg-secondary" : "text-muted-foreground hover:text-foreground")}>{m}</button>
           ))}
         </div>
-        {view && view.lanes.length > 0 && <span className="text-xs text-muted-foreground">{view.lanes.length} agents · {fmtDur(span)}</span>}
+        {view && view.lanes.length > 0 && <span className="text-xs text-muted-foreground">{view.lanes.length} agents · {fmtDur(span)}{totalCost >= 0.005 && <> · about ${totalCost.toFixed(2)}</>}</span>}
       </div>
-      {current && (
-        <section className={cn("space-y-2 rounded-lg border bg-card p-3", (current.stage === "spec-approval" || current.stage === "needs-human") && "border-call/60")}>
+      {mode === "compare" && <CompareView repo={repo} jobs={jobs} first={job} />}
+      {current && mode !== "compare" && (
+        <section className={cn("space-y-2 rounded-lg border bg-card p-3", (current.stage === "spec-approval" || current.stage === "needs-human" || question) && "border-call/60")}>
           <div className="flex flex-wrap items-center gap-2 text-xs">
             {(mine || running.has(current.id)) && <span className="size-2 animate-pulse rounded-full bg-ok" aria-label="agent running" />}
             <span className="font-mono text-muted-foreground">{current.id}</span>
             <Badge variant="secondary">{stages.find((s) => s.key === current.stage)?.label ?? current.stage}</Badge>
             {(current.stage === "spec-approval" || current.stage === "needs-human") && <Badge className="bg-call text-white">your call</Badge>}
+            {question && <QuestionBadge />}
             {trouble.get(current.id) && <Badge className="bg-destructive text-white">{trouble.get(current.id)}</Badge>}
             <Badge variant="secondary">{current.type}</Badge>
             {current.ticket && <Badge variant="secondary">{current.ticket}</Badge>}
@@ -82,13 +98,14 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
             <Button size="sm" variant="ghost" onClick={() => onOpen(current.id)}>Open files</Button>
           </div>
           <p className="text-sm">{current.feature}</p>
-          {mine && <WorkingBanner />}
-          <Actions job={current} busy={locked} onCommand={send} />
+          {mine ? <WorkingBanner /> : current.stage !== "merged" && !question && <LastMessage text={notes.get(current.id)} />}
+          <Actions job={current} busy={locked} stuck={isStuck(current, running.has(current.id))} onCommand={send} />
+          {question && !mine && <QuestionBox question={question} locked={locked} onSend={(t) => send(t, (x) => onAnswer(current.id, x))} />}
         </section>
       )}
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      {data && view && view.lanes.length === 0 && <p className="text-sm text-muted-foreground">No agent activity recorded for this job yet.</p>}
-      {view && view.lanes.length > 0 && mode === "flow" && <AgentFlow view={view} events={data?.events ?? []} jobKey={job ?? ""} selected={agent} onSelect={setAgent} />}
+      {error && mode !== "compare" && <p className="text-sm text-destructive">{error}</p>}
+      {mode !== "compare" && data && view && view.lanes.length === 0 && <p className="text-sm text-muted-foreground">No agent activity recorded for this job yet.</p>}
+      {view && view.lanes.length > 0 && mode === "flow" && <AgentFlow view={view} events={data?.events ?? []} jobKey={job ?? ""} selected={agent} onSelect={setAgent} handoffs={summary?.handoffs} costs={costData?.cost} />}
       {view && view.lanes.length > 0 && mode === "timeline" && (
         <div className="rounded-lg border bg-card p-3">
           <div className="flex">
@@ -96,7 +113,7 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
               {view.lanes.map((l) => (
                 <button key={l.agent} onClick={() => setAgent(l.agent)} className={cn("flex w-full flex-col justify-center rounded px-1 text-left hover:bg-accent", agent === l.agent && "bg-accent")} style={{ height: ROW }}>
                   <span className="truncate text-sm">{l.agent}</span>
-                  <span className="text-[11px] text-muted-foreground">{l.tools} tool calls · {fmtDur(l.spans.reduce((n, s) => n + s.end - s.start, 0))}</span>
+                  <span className="text-[11px] text-muted-foreground">{l.tools} tool calls · {fmtDur(l.spans.reduce((n, s) => n + s.end - s.start, 0))}{(costData?.cost[l.agent]?.costUsd ?? 0) >= 0.005 && <> · ${costData!.cost[l.agent].costUsd.toFixed(2)}</>}</span>
                 </button>
               ))}
             </div>
@@ -122,7 +139,7 @@ export function AgentsView({ starting, repo, jobs, stages, busy, running, troubl
           </div>
         </div>
       )}
-      {selected && (
+      {selected && mode !== "compare" && (
         <section className="rounded-lg border bg-card p-3">
           <h3 className="mb-2 text-sm font-medium">{selected.agent}</h3>
           <ol className="space-y-0.5 font-mono text-xs">

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { McpServer } from "@/lib/mcp";
 import type { RunResult } from "@/lib/stream";
+import { isRetry, retryNote } from "@/lib/tools";
 
 export type Options = { type: "feature" | "bugfix"; ticket: string; mcpOff: string[] };
 
@@ -36,6 +37,8 @@ function Part({ part, streaming }: { part: UIMessage["parts"][number]; streaming
         <ReasoningContent>{part.text}</ReasoningContent>
       </Reasoning>
     );
+  if (part.type === "dynamic-tool" && part.state === "output-error" && isRetry(part.errorText))
+    return <p className="text-xs text-muted-foreground">↻ {retryNote(part.errorText ?? "")}</p>; // the agent recovered by itself
   if (part.type === "dynamic-tool")
     return (
       <Tool>
@@ -68,57 +71,4 @@ export function Messages({ messages, busy }: { messages: UIMessage[]; busy: bool
       </MessageContent>
     </Message>
   ));
-}
-
-export function RunPanel({ messages, status, error, servers, options, onOptions, onSubmit, onStop }: Props) {
-  const [text, setText] = useState("");
-  const busy = status === "submitted" || status === "streaming";
-  const toggle = (name: string) =>
-    onOptions({ ...options, mcpOff: options.mcpOff.includes(name) ? options.mcpOff.filter((n) => n !== name) : [...options.mcpOff, name] });
-
-  return (
-    <div className="flex h-full min-h-0 flex-col">
-      <Conversation className="min-h-0 flex-1">
-        <ConversationContent>
-          {messages.length === 0 ? (
-            <ConversationEmptyState title="Start a job" description="Describe a task, paste a ticket, or type a Jira key like ABC-123. Anything starting with /factory runs as typed." />
-          ) : (
-            <Messages messages={messages} busy={busy} />
-          )}
-          {error && <p className="text-sm text-destructive">{error.message}</p>}
-        </ConversationContent>
-        <ConversationScrollButton />
-      </Conversation>
-
-      <div className="space-y-2 border-t p-3">
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <Button size="sm" variant={options.type === "bugfix" ? "default" : "secondary"} onClick={() => onOptions({ ...options, type: options.type === "bugfix" ? "feature" : "bugfix" })}>
-            {options.type === "bugfix" ? "Bug fix" : "Feature"}
-          </Button>
-          <Input className="h-8 w-28" placeholder="Ticket" value={options.ticket} onChange={(e) => onOptions({ ...options, ticket: e.target.value })} />
-          {servers.length > 0 && <span className="text-muted-foreground">MCP:</span>}
-          {servers.map((s) => (
-            <Button key={s.name} size="sm" variant={options.mcpOff.includes(s.name) ? "outline" : "secondary"} title={`${s.type} · ${s.scope}`} onClick={() => toggle(s.name)}>
-              <span className={options.mcpOff.includes(s.name) ? "line-through opacity-60" : ""}>{s.name}</span>
-            </Button>
-          ))}
-        </div>
-        <PromptInput
-          onSubmit={(msg) => {
-            if (!msg.text.trim()) return;
-            onSubmit(msg.text);
-            setText("");
-          }}
-        >
-          <PromptInputBody>
-            <PromptInputTextarea value={text} onChange={(e) => setText(e.currentTarget.value)} placeholder="Describe a task, paste a ticket, or type /factory …" />
-          </PromptInputBody>
-          <PromptInputFooter>
-            <PromptInputTools />
-            <PromptInputSubmit status={status} onStop={onStop} disabled={!busy && !text.trim()} />
-          </PromptInputFooter>
-        </PromptInput>
-      </div>
-    </div>
-  );
 }

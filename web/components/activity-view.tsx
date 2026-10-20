@@ -59,7 +59,7 @@ export function Feed({ events }: { events: ActivityEvent[] }) {
 
 /** Job-scoped feed, used in the job dialog. */
 export function JobActivity({ repo, job }: { repo: string; job: string }) {
-  const { data, error } = usePoll<ActivityData>(`/api/activity?repo=${encodeURIComponent(repo)}&job=${encodeURIComponent(job)}`, 2000);
+  const { data, error } = usePoll<ActivityData>(`/api/activity?repo=${encodeURIComponent(repo)}&job=${encodeURIComponent(job)}`, 2000, "activity");
   if (error) return <p className="text-sm text-destructive">{error}</p>;
   return data ? <div className="space-y-4"><Sessions sessions={data.sessions.filter((s) => s.job === job)} /><Feed events={data.events} /></div> : null;
 }

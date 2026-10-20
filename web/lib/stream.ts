@@ -69,6 +69,8 @@ const HIDDEN_TOOLS = new Set(["SubagentHandback"]);
 export class EventMapper {
   result: RunResult | undefined;
   sessionId: string | undefined;
+  /** The last result event's text: the run's final message. */
+  finalText: string | undefined;
   private seq = 0;
   private hidden = new Set<string>();
   // A run can emit several result events (a second turn starts when a background subagent
@@ -130,6 +132,7 @@ export class EventMapper {
     if (ev.type === "result") {
       this.results.push(ev);
       this.result = aggregate(this.results);
+      this.finalText = typeof ev.result === "string" ? ev.result : undefined;
       // One data part with a fixed id: each later result replaces the earlier one on screen.
       const out: UIMessageChunk[] = [{ type: "data-result", id: "result", data: this.result } as UIMessageChunk];
       if (ev.is_error) out.push({ type: "error", errorText: ev.result || "The run failed." });

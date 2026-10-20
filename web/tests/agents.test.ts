@@ -20,8 +20,9 @@ test("pairs subagent start and stop into spans, ordered by pipeline", () => {
   assert.equal(planner.spans[0].open, false);
 });
 
-test("an agent that has started but not stopped is an open span", () => {
-  const l = buildLanes([ev("00.000", "subagent_start", "builder"), ev("03.000", "tool_done", "builder")]);
+test("an agent that has started but not stopped is an open span while the log is fresh", () => {
+  const now = Date.parse("2026-01-01T00:00:10.000Z");
+  const l = buildLanes([ev("00.000", "subagent_start", "builder"), ev("03.000", "tool_done", "builder")], now);
   assert.equal(l.lanes[0].spans[0].open, true);
   assert.equal(l.t1, Date.parse("2026-01-01T00:00:03.000Z"));
 });
@@ -64,4 +65,48 @@ test("handoffsAt only returns hand-offs inside the window", () => {
   const t0 = Date.parse("2026-01-01T00:00:00.000Z");
   assert.equal(handoffsAt(view, t0 + 300, 900).length, 1);
   assert.equal(handoffsAt(view, t0 + 1500, 900).length, 0);
+});
+
+test("an agent that never stopped and went quiet is treated as dead, not live", () => {
+  const events = [ev("00.000", "subagent_start", "builder"), ev("03.000", "tool_done", "builder")];
+  const l = buildLanes(events, Date.parse("2026-01-01T00:10:00.000Z"));
+  assert.equal(l.lanes[0].spans[0].open, false);
+  assert.equal(stateAt(l, events, Date.parse("2026-01-01T00:09:00.000Z")).get("builder")?.status, "done");
+});
+
+test("an agent whose session is no longer running is not live even while others keep logging", () => {
+  const events = [
+    { ...ev("00.000", "subagent_start", "builder"), sid: "dead" },
+    { ...ev("02.000", "tool_done", "builder"), sid: "dead" },
+    { ...ev("09.000", "tool_done", "orchestrator"), sid: "other" },
+  ];
+  const now = Date.parse("2026-01-01T00:00:10.000Z");
+  assert.equal(buildLanes(events, now, new Set(["other"])).lanes.find((l) => l.agent === "builder")!.spans[0].open, false);
+  assert.equal(buildLanes(events, now, new Set(["dead"])).lanes.find((l) => l.agent === "builder")!.spans[0].open, true);
+  assert.equal(buildLanes(events, now, new Set()).lanes.find((l) => l.agent === "builder")!.spans[0].open, false);
+});
+
+test("handoffsAt returns one hand-off per agent even when it started many times", () => {
+  const events = ["01", "02", "03"].flatMap((n) => [ev(`${n}.000`, "subagent_start", "builder"), ev(`${n}.200`, "subagent_stop", "builder")]);
+  const view = buildLanes(events);
+  const h = handoffsAt(view, Date.parse("2026-01-01T00:00:03.500Z"), 5000);
+  assert.equal(h.length, 1);
+  assert.ok(Math.abs(h[0].progress - 0.1) < 0.01);
+});
+
+import { jobStats } from "../lib/agents.ts";
+
+test("jobStats sums agent time without the orchestrator and totals cost", () => {
+  const events = [
+    ev("00.000", "prompt", "orchestrator"), ev("09.000", "tool_done", "orchestrator"),
+    ev("01.000", "subagent_start", "planner"), ev("03.000", "tool_done", "planner"), ev("05.000", "subagent_stop", "planner"),
+    ev("05.000", "subagent_start", "builder"), ev("08.000", "subagent_stop", "builder"),
+  ];
+  const s = jobStats(buildLanes(events), { planner: { costUsd: 1.5 }, builder: { costUsd: 2 }, approver: { costUsd: 0.5 } });
+  assert.equal(s.agentTime, 7000);
+  assert.equal(s.elapsed, 9000);
+  assert.equal(s.agents, 3);
+  assert.equal(s.toolCalls, 2);
+  assert.equal(s.costUsd, 4);
+  assert.equal(s.perAgent.approver.ms, 0); // a cost with no activity still shows
 });

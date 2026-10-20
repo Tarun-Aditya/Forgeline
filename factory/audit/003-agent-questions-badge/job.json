@@ -1,0 +1,80 @@
+{
+  "id": "003-agent-questions-badge",
+  "feature": "Show agent questions on the job. When an agent stops to ask something, like the \"which repo?\" refusal, it shows only in the right-hand chat, so the job looks stuck. A \"needs your answer\" badge and a reply box on the job card would fix that. This is the biggest gap.",
+  "type": "feature",
+  "ticket": null,
+  "branch": "factory/003-agent-questions-badge",
+  "worktree": "/Users/tarunaditya/workspace/software-factory-plus-factory/003-agent-questions-badge",
+  "stage": "needs-human",
+  "round": 3,
+  "reviews": {
+    "security": "PASS",
+    "ux": "PASS",
+    "ui": "PASS",
+    "code": "PASS"
+  },
+  "respecs": 0,
+  "reworks": 1,
+  "created": "2026-10-12T15:18:49Z",
+  "intent_waived": null,
+  "history": [
+    {
+      "stage": "intent",
+      "at": "2026-10-12T15:18:49Z"
+    },
+    {
+      "stage": "spec",
+      "at": "2026-10-12T15:19:28Z"
+    },
+    {
+      "stage": "spec-approval",
+      "at": "2026-10-12T15:24:01Z"
+    },
+    {
+      "stage": "plan",
+      "at": "2026-10-12T15:24:20Z"
+    },
+    {
+      "stage": "build",
+      "at": "2026-10-12T15:27:42Z"
+    },
+    {
+      "stage": "review",
+      "at": "2026-10-12T15:55:46Z"
+    },
+    {
+      "stage": "build",
+      "at": "2026-10-12T15:58:03Z"
+    },
+    {
+      "stage": "review",
+      "at": "2026-10-12T16:00:35Z"
+    },
+    {
+      "stage": "approve",
+      "at": "2026-10-12T16:01:18Z"
+    },
+    {
+      "stage": "needs-human",
+      "at": "2026-10-12T16:02:16Z"
+    },
+    {
+      "stage": "build",
+      "at": "2026-10-12T16:12:35Z"
+    },
+    {
+      "stage": "review",
+      "at": "2026-10-12T16:18:29Z"
+    },
+    {
+      "stage": "approve",
+      "at": "2026-10-12T16:20:53Z"
+    },
+    {
+      "stage": "needs-human",
+      "at": "2026-10-12T16:21:41Z"
+    }
+  ],
+  "reviewed_sha": "954edd8f618a6a3a5b1e14d473668914254b4fc6",
+  "reviewed_at": "2026-10-12T16:20:53Z"
+}

@@ -176,13 +176,18 @@ gets `5102 + 10n`, appended as ` Port: <port>.`
    `jobctl.py create` (no `--stage`; it starts at `spec`). It claims the next
    number safely, works out the worktree path itself, and prints the job id. If the job has a ticket, follow the
    ticketing rule in **Policy**.
-2. **Worktree.** Create the branch and its worktree from `main`:
+2. **Worktree.** Find the base branch with `python3 -I factory/scripts/factory_lib.py base`
+   (policy `base_branch`, else the repo's default: main, master, trunk or develop), then create
+   the branch and its worktree from it:
    ```bash
-   git worktree add -b factory/<job-id> <worktree> main
+   git worktree add -b factory/<job-id> <worktree> <base>
    ```
-   The worktree path is in `job.json`. Then, in the worktree, run the setup
-   AGENTS.md gives for a fresh checkout (installing dependencies, for example).
-   If any of it fails, stop and tell the user.
+   The worktree path is in `job.json`. Then run
+   `python3 -I factory/scripts/worktree_setup.py <worktree>`: it links or copies what git does
+   not carry (node_modules, a virtualenv, `.env.test`) and runs the install commands from
+   `policy.worktree_setup`. If that policy is empty, run the setup AGENTS.md gives for a fresh
+   checkout in the worktree instead. If any of it fails, stop and tell the user. Everywhere
+   below, `<base>` is that branch where the text says `main`.
 3. **Spec.** Spawn `spec-writer` with `<paths> Feature: <feature, verbatim>`.
    Wait, check that `spec.md` exists, then snapshot (`"spec written"`) and go to
    **Spec approval**.
@@ -261,7 +266,7 @@ are lines of the form `- <slug>: <feature text>. Depends: none | <slug>, <slug>`
 
 Run `python3 -I factory/scripts/jobctl.py ready --close-parents` and read its JSON.
 For each child with `ready: true`, do steps 2 and 3 of `/factory <feature>` (worktree
-from `main` as it is now, then the spec) with the spec-writer prompt
+from `<base>` as it is now, then the spec) with the spec-writer prompt
 `<paths> Feature: <child feature>. Parent spec: <repo>/factory/jobs/<parent>/spec.md.`
 then **Spec approval**. A child's spec is written only after its dependencies have
 merged, so it reads their code. List the children still waiting and on which job.
@@ -446,7 +451,7 @@ Spawn `onboarder` with `Repo: <repo root>`. It writes `AGENTS.md`, or
 ## /factory review <branch | --pr NUMBER>
 
 Reviews any branch or pull request, not only factory jobs. The read-only `pr-reviewer` agent does the review. Run
-`python3 -I factory/scripts/review_branch.py --base main --head <branch>` (or
+`python3 -I factory/scripts/review_branch.py --head <branch>` (or
 `--pr <n>`), then show `review.md` from the folder it names. Every comment is
 checked against the diff by the script. It never posts: for a pull request it
 writes `gh-review.sh`, which the user runs after reading the review.

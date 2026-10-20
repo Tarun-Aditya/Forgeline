@@ -86,7 +86,7 @@ dashboard that shows split jobs.
 ## What is proven, and what is not
 
 Proven:
-- Offline evals: 357 checks pass with no model (Python 3.12+).
+- Offline evals: 411 checks pass with no model (Python 3.12+).
 - Live agent evals on Sonnet 5.5: 17 cases. The first run passed 16 (the one failure,
   `pr-reviewer`, passed 2 of 2 on re-run, so a flake). After all later prompt changes a full re-run
   passed 17 of 17.
@@ -115,8 +115,20 @@ Proven:
   CLI and the run finished and was recorded; a real session killed with `kill -9` showed
   `crashed`. Found by that run and fixed: a real run emits several `result` events (cost and
   per-model usage are cumulative and include subagents; turns and time add up).
+- Web layer, second round (2026-10-12): three more jobs on a small JS library and one on this repo
+  (job 003, agent questions on the job card, which the factory built and merged here) were driven from
+  the web app. Found and fixed: `claude -p` kills background agents 10 minutes after its last turn, so a
+  long build died mid-way (runs now set `CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=0`); the merge gate refuses
+  a dirty main checkout and a branch that conflicts with main (exit 4, exit 7), and the UI hid both
+  reasons (the card now shows the orchestrator's last message and has a Rebase button). Checked in a
+  real browser: push updates (3 requests in 20 s idle, a new job in about 0.2 s), per-agent cost
+  (adds up to the run costs), the Agents flow and replay on real job logs, and the diff view.
+  `web/` has 58 unit tests and two offline Playwright tests with a fake `claude`.
 
 Not proven (built and covered by offline evals only):
+- Parallel runs with real `claude` (checked with a fake CLI that sleeps), push updates on Linux
+  (`fs.watch` recursive), and alerts in a truly backgrounded tab (checked with a simulated hidden tab).
+- Monorepo and existing-repo support (`monorepo.py`, `callers.py`, per-package verify, baseline-red check, cross-package and no-tests escalations; see USAGE "Existing repos and monorepos"). Also `worktree_setup`, configurable base branch, shell verify commands, flaky retry, destructive-git blocks. Evals use small fixtures; no real monorepo has run a job.
 - The web layer in the desktop app and VS Code (only the CLI was run), MCP toggles against a real
   server, `status --line` as a status line, Remote Control, and `managed/install.py` with the
   activity hooks installed for real (the eval checks the files).

@@ -16,6 +16,8 @@ export type RunMeta = {
   startedAt: string;
   before: string[];
   mcpFile?: string;
+  answers?: string; // the job whose question this run answers
+  at?: { job: string; stage: string; history: number }; // that job when the run started
 };
 
 export type RunStatus = "running" | "ok" | "failed" | "lost";
@@ -29,6 +31,7 @@ export type RunRecord = {
   endedAt: string;
   ok: boolean;
   lost?: boolean;
+  finalText?: string;
 } & Partial<RunResult>;
 
 const dir = () => ensureDir(path.join(DATA_DIR, "runs"));
@@ -99,6 +102,35 @@ export function parseLog(id: string) {
   return mapper;
 }
 
+const messageCache = new Map<string, { size: number; text: string }>();
+
+/** What the orchestrator said at the end of a run (the gate's reason, a question, the summary). Cached by file size. */
+export function lastMessage(id: string, max = 1500): string {
+  let size = 0;
+  try {
+    size = fs.statSync(eventLogPath(id)).size;
+  } catch {
+    return "";
+  }
+  const hit = messageCache.get(id);
+  if (hit && hit.size === size) return hit.text;
+  let text = "";
+  for (const line of fs.readFileSync(eventLogPath(id), "utf8").split("\n")) {
+    if (!line.includes('"result"') && !line.includes('"assistant"')) continue;
+    try {
+      const ev = JSON.parse(line);
+      if (ev.type === "result" && typeof ev.result === "string" && ev.result.trim()) text = ev.result;
+      else if (ev.type === "assistant")
+        for (const c of ev.message?.content ?? []) if (c.type === "text" && c.text?.trim()) text = c.text;
+    } catch {
+      /* a partial line while the run is still writing */
+    }
+  }
+  text = text.trim().slice(0, max);
+  messageCache.set(id, { size, text });
+  return text;
+}
+
 export const errorTail = (id: string) => {
   try {
     return fs.readFileSync(errLogPath(id), "utf8").slice(-4000).trim();
@@ -114,7 +146,7 @@ export function finalize(id: string): RunRecord | null {
   if (existing) return existing;
   const meta = readMeta(id);
   if (!meta || alive(meta.pid)) return null;
-  const { result } = parseLog(id);
+  const { result, finalText } = parseLog(id);
   const created = listJobs(meta.repo).map((j) => j.id).filter((j) => !meta.before.includes(j));
   const rec: RunRecord = {
     runId: id,
@@ -126,6 +158,7 @@ export function finalize(id: string): RunRecord | null {
     ok: !!result && !result.isError,
     lost: !result,
     ...result,
+    finalText: finalText?.slice(0, 8000),
   };
   saveRun(rec);
   if (meta.mcpFile) fs.rmSync(meta.mcpFile, { force: true });

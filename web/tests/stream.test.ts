@@ -73,3 +73,11 @@ test("subagent hand-back plumbing is hidden", () => {
   assert.deepEqual(m.feed({ type: "assistant", message: { content: [{ type: "tool_use", id: "h1", name: "SubagentHandback", input: {} }] } }), []);
   assert.deepEqual(m.feed({ type: "user", message: { content: [{ type: "tool_result", tool_use_id: "h1", content: "ok" }] } }), []);
 });
+
+test("finalText is the result string of the last result event", () => {
+  const m = new EventMapper();
+  assert.equal(m.finalText, undefined);
+  m.feed({ type: "result", session_id: "s", result: "first" });
+  m.feed({ type: "result", session_id: "s", result: "second" });
+  assert.equal(m.finalText, "second");
+});

@@ -82,6 +82,15 @@ the reason in build.md under Plan adherence, and expect a human to read it.
 | "It compiles / the unit tests pass, so it works" | Run the real thing (next section). |
 | "The plan missed a file, I'll just touch it" | Touch it and list it under Plan adherence. |
 
+## Stay inside the plan's packages
+
+In a monorepo, change only the packages `plan.md` names, and run each one's tests from
+its own folder as its `AGENTS.md` or `CLAUDE.md` says. Before you finish, run
+`cd <worktree> && python3 -I <main checkout>/factory/scripts/callers.py .`.
+For every function or type you removed or changed the signature of, open each hit and
+update or confirm it, and list the hits under Plan adherence. A hit in a package the plan
+does not name is a plan change: say so there.
+
 ## Prove it works
 
 Passing tests are not proof. For each acceptance criterion, observe the real

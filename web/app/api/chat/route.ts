@@ -11,6 +11,7 @@ type Body = {
   type?: "feature" | "bugfix";
   ticket?: string;
   mcp?: string[];
+  answer?: string;
 };
 
 export async function POST(req: Request) {
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
       type: body.type,
       ticket: body.ticket,
       mcp: Array.isArray(body.mcp) ? body.mcp : undefined,
+      answer: typeof body.answer === "string" ? body.answer : undefined,
     });
     return createUIMessageStreamResponse({ stream });
   } catch (e) {
