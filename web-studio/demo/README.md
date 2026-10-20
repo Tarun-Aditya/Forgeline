@@ -31,3 +31,14 @@ VO_PY=/path/to/venv/bin/python VO_MODEL=/path/to/voice.onnx web/demo/run-demo.sh
 
 `record.mjs` waits for each line to finish before the next caption appears and writes `out/vo.json`;
 `mux-vo.py` lays the lines onto the video. Without those two variables the video is silent.
+
+- **Pauses:** `tts.py` speaks each line. In a `vo` string in `record.mjs`, a line break is a short
+  pause and a blank line is a long one; sentences get a small pause of their own.
+- **Sync:** the recording plays slower than the wall clock, so `record.mjs` flashes a magenta square
+  in the top-left corner at the start of every line. `mux-vo.py` finds those frames, starts each clip
+  on its frame, then paints the corner over. If it cannot match every flash it warns and falls back
+  to wall-clock times, which drift.
+- **Music:** `mux-vo.py` adds a quiet synthesised pad (nothing to license) that ducks under the
+  voice. `NO_MUSIC=1` gives voice only.
+- **Length:** `DEMO_SPEED=10` shortens the waits on the replayed job (about 5:40 in total instead of 8).
+  The voice used for the shipped cut was `en_US-hfc_female-medium`.
