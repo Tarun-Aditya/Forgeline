@@ -7,10 +7,10 @@ pad), so there is nothing to license. Set NO_MUSIC=1 for voice only.
 import json, os, subprocess, sys
 
 out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "out")
-video = os.path.join(out, "forgeline-demo.webm")
+video = os.path.join(out, os.environ.get("DEMO_NAME", "forgeline-demo") + ".webm")
 vo = os.path.join(out, "vo.json")
 events = json.load(open(vo)) if os.path.exists(vo) else []
-dst = os.path.join(out, "forgeline-demo.mp4")
+dst = os.path.join(out, os.environ.get("DEMO_NAME", "forgeline-demo") + ".mp4")
 enc = ["-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "22", "-preset", "medium"]
 
 if not events:

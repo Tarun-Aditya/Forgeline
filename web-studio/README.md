@@ -64,7 +64,18 @@ Needs Node 22+ and the `claude` CLI logged in. It binds to `127.0.0.1` only.
   and the hook-written log (see USAGE.md 7a).
 - The API answers only to `localhost` and refuses cross-origin writes, because it can start agents.
 - Agents still never merge, push or deploy on their own; "Approve merge" runs `/factory approve`.
+- The agent process gets the web server's environment **minus** `ANTHROPIC_API_KEY`, `NODE_ENV` and Next's own variables
+  (`agentEnv()` in `lib/runner.ts`). The server runs with `NODE_ENV=production`; passed on, it made a repo's tests fail
+  differently from a normal shell (React's `act()` fails under production), so the merge gate saw a red baseline.
 - Cost on a subscription login is API-equivalent, not a bill.
+
+## Demo videos
+
+`demo/` records narrated Playwright videos of this app. `demo/record-sample.mjs` (run with `demo/run-sample-demo.sh`) is the
+feature demo: a small GraphQL + React app before, Forgeline building a feature in it (a replay of a real job), the app
+after, then a code walkthrough of the real diffs. See `demo/README.md` for how the script, the Piper voice-over, the
+sync and the gaps work, and `.claude/skills/record-demo/SKILL.md` for the full procedure and lessons. The final cut is
+`demo/videos/forgeline-sample-demo.mp4`.
 
 ## UI structure
 

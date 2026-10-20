@@ -83,9 +83,18 @@ merge-danger block, ADRs and glossary, split jobs, measurement check, read-the-s
 out-of-scope memory. Also a weakened-bar scan, deliverable-file wording in the reviewers, and a
 dashboard that shows split jobs.
 
+A sample app for demos lives outside this repo, in `forgeline-sample` (npm workspaces: `server/` graphql-yoga, `web/` React,
+its own git history, the factory installed). One real job (task priority: GraphQL enum, field and optional argument, a select
+and a badge, tests in both packages) ran from intent to merge through the web app, and `web-studio/demo/` turns it into a
+narrated video (`demo/videos/forgeline-sample-demo.mp4`). Procedure and lessons: `web-studio/.claude/skills/record-demo/SKILL.md`.
+
 ## What is proven, and what is not
 
 Proven:
+- One real job on a small npm-workspaces repo (`forgeline-sample`), driven from the web app: intent, spec, plan, build,
+  four reviews and approver in round 1, per-package verification at the gate ("verified 2 of 2 packages"), merged by a person.
+  It stopped at needs-human because the web app leaked `NODE_ENV=production` into the agents and the gate saw a red baseline;
+  fixed in `agentEnv()` (not re-run since). One small example, not a proof for large monorepos.
 - Offline evals: 411 checks pass with no model (Python 3.12+).
 - Live agent evals on Sonnet 5.5: 17 cases. The first run passed 16 (the one failure,
   `pr-reviewer`, passed 2 of 2 on re-run, so a flake). After all later prompt changes a full re-run

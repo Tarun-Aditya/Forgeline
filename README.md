@@ -211,6 +211,11 @@ cd web && npm install && npm run dev      # http://127.0.0.1:3000, needs Node 22
 It listens on `127.0.0.1` only and refuses cross-origin writes. See `web/README.md` for settings
 and `USAGE.md` section 7b.
 
+**Demo video.** `web-studio/demo/videos/forgeline-sample-demo.mp4` shows a small GraphQL + React sample app before and after a
+feature that Forgeline built (a real job: intent, spec, plan, build, four reviews, approver, merge gate), a tour of the web app,
+and a walkthrough of the code it wrote. How it was made, including the voice-over, is in `web-studio/demo/README.md`; the
+procedure and lessons are the `record-demo` skill in `web-studio/.claude/skills/record-demo/SKILL.md`.
+
 ## Maintain loop
 
 ```bash

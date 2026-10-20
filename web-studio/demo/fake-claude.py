@@ -13,13 +13,13 @@ import json, os, shutil, sys, time
 from datetime import datetime, timezone
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-FIX = os.path.join(HERE, "fixtures")
+FIX = os.path.join(HERE, os.environ.get("DEMO_FIXTURES", "fixtures"))
 SPEED = float(os.environ.get("DEMO_SPEED", "3"))
 repo = os.getcwd()
 
 args = sys.argv[1:]
 prompt = args[args.index("-p") + 1] if "-p" in args else ""
-key = "accept" if "factory accept" in prompt else "approve" if "approve-spec" in prompt else "start"
+key = "accept" if "factory accept" in prompt else "approve" if "approve-spec" in prompt else "merge" if "factory approve" in prompt else "start"
 
 data = json.load(open(os.path.join(FIX, "timeline.json")))
 meta, timeline = data["meta"], data["timeline"][key]

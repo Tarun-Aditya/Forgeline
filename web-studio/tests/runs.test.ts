@@ -88,3 +88,9 @@ test("a second run for the same job is refused while one is alive", async () => 
   assert.equal(runner.stopRun(id), true);
   await drain(runner.followRun(id));
 });
+
+test("the agent process does not inherit the web server's NODE_ENV, Next variables or API key", () => {
+  const env = runner.agentEnv({ NODE_ENV: "production", NEXT_RUNTIME: "nodejs", __NEXT_PRIVATE_ORIGIN: "x", ANTHROPIC_API_KEY: "k", PATH: "/bin", HOME: "/h" });
+  assert.deepEqual(env, { PATH: "/bin", HOME: "/h" });
+  assert.equal(runner.agentEnv({ ANTHROPIC_API_KEY: "k", FORGELINE_ALLOW_API_KEY: "1" }).ANTHROPIC_API_KEY, "k");
+});

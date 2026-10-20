@@ -13,6 +13,18 @@ import { DATA_DIR, ensureDir } from "./paths.ts";
 import { alive, errorTail, errLogPath, eventLogPath, finalize, listMeta, readMeta, reconcile, writeMeta } from "./runs.ts";
 import { EventMapper, LineParser } from "./stream.ts";
 
+/** The environment for the agent process. The web server runs with NODE_ENV=production and Next's own
+ *  variables; passed on, they make the target repo's tests behave differently from a normal shell
+ *  (React's act() fails under production, for one), so the merge gate sees a red baseline. */
+export function agentEnv(base: Record<string, string | undefined>): NodeJS.ProcessEnv {
+  const env: Record<string, string | undefined> = { ...base };
+  if (base.FORGELINE_ALLOW_API_KEY !== "1") delete env.ANTHROPIC_API_KEY; // use the subscription
+  delete env.NODE_ENV;
+  delete env.NEXT_RUNTIME;
+  for (const k of Object.keys(env)) if (k.startsWith("__NEXT") || k.startsWith("NEXT_PRIVATE")) delete env[k];
+  return env as NodeJS.ProcessEnv;
+}
+
 export type StartInput = {
   repo: string;
   text: string;
@@ -71,8 +83,7 @@ export function launchRun(input: StartInput): string {
     "--permission-mode", process.env.FORGELINE_PERMISSION_MODE ?? "auto",
     ...mcpArgs(input.repo, input.mcp, mcpFile),
   ];
-  const env = { ...process.env };
-  if (process.env.FORGELINE_ALLOW_API_KEY !== "1") delete env.ANTHROPIC_API_KEY; // use the subscription
+  const env = agentEnv(process.env);
 
   const out = fs.openSync(eventLogPath(runId), "w");
   const err = fs.openSync(errLogPath(runId), "w");
