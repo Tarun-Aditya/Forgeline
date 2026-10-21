@@ -5,16 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { JobActivity } from "@/components/activity-view";
+import { CodeChanges } from "@/components/code-changes";
 import { Pipeline } from "@/components/pipeline";
 import { usePoll } from "@/components/use-poll";
 import { navItemClasses } from "@/lib/ds/sidebar-nav-item-classes";
+import { cn } from "@/lib/utils";
 import type { Job } from "@/lib/jobs";
 
 const ACTIVITY = "activity";
+const CODE = "code changes";
 const FIRST = ["intent.md", "spec.md", "plan.md", "build.md", "decision.md"];
 const rank = (f: string) => (FIRST.includes(f) ? FIRST.indexOf(f) : f.startsWith("round-") ? 10 : 20);
 
-type Props = { job: Job | undefined; stages: { key: string; label: string; who: string }[]; running: boolean; repo: string; busy: boolean; onClose: () => void; onCommand: (text: string) => void };
+type Props = { job: Job | undefined; stages: { key: string; label: string; who: string }[]; running: boolean; repo: string; busy: boolean; view?: "docs" | "code"; onClose: () => void; onCommand: (text: string) => void };
 
 /** Buttons that map to the exact /factory commands for the job's stage. */
 export function Actions({ job, busy, onCommand }: Pick<Props, "busy" | "onCommand"> & { job: Job }) {
@@ -47,7 +50,7 @@ export function Actions({ job, busy, onCommand }: Pick<Props, "busy" | "onComman
   return null;
 }
 
-export function JobDrawer({ job, stages, running, repo, busy, onClose, onCommand }: Props) {
+export function JobDrawer({ job, stages, running, repo, busy, view, onClose, onCommand }: Props) {
   const id = job?.id;
   const q = encodeURIComponent(repo);
   const { data: list } = usePoll<{ files: string[] }>(id ? `/api/jobs/${id}?repo=${q}` : null, 3000);
@@ -55,13 +58,15 @@ export function JobDrawer({ job, stages, running, repo, busy, onClose, onCommand
   const [picked, setPicked] = useState<string | null>(null);
   const file = picked && picked !== ACTIVITY && files.includes(picked) ? picked : (files.at(-1) ?? null);
   const showActivity = picked === ACTIVITY;
-  const { data: doc } = usePoll<{ text: string }>(id && file && !showActivity ? `/api/jobs/${id}?repo=${q}&file=${encodeURIComponent(file)}` : null, 3000);
+  const showCode = picked === CODE;
+  const { data: changed } = usePoll<{ files: unknown[] }>(id ? `/api/jobs/${id}?repo=${q}&changes=1` : null, 5000);
+  const { data: doc } = usePoll<{ text: string }>(id && file && !showActivity && !showCode ? `/api/jobs/${id}?repo=${q}&file=${encodeURIComponent(file)}` : null, 3000);
 
-  useEffect(() => setPicked(null), [id]);
+  useEffect(() => setPicked(view === "code" ? CODE : null), [id, view]);
 
   return (
     <Dialog open={!!job} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="flex h-[85vh] max-w-5xl flex-col gap-3 sm:max-w-5xl">
+      <DialogContent className={cn("flex flex-col gap-3", showCode ? "h-[92vh] max-w-[96vw] sm:max-w-[min(96vw,1500px)]" : "h-[85vh] max-w-5xl sm:max-w-5xl")}>
         {job && (
           <>
             <DialogHeader>
@@ -73,18 +78,21 @@ export function JobDrawer({ job, stages, running, repo, busy, onClose, onCommand
             <Actions job={job} busy={busy} onCommand={onCommand} />
             <div className="flex min-h-0 flex-1 gap-3">
               <nav className="w-52 shrink-0 space-y-1 overflow-y-auto text-sm">
+                <button onClick={() => setPicked(CODE)} className={navItemClasses({ isActive: showCode, size: "sm" })}>
+                  {CODE}{changed ? ` · ${changed.files.length}` : ""}
+                </button>
                 <button onClick={() => setPicked(ACTIVITY)} className={navItemClasses({ isActive: showActivity, size: "sm" })}>
                   activity (live)
                 </button>
                 {files.length === 0 && <p className="text-muted-foreground">No files yet.</p>}
                 {files.map((f) => (
-                  <button key={f} onClick={() => setPicked(f)} className={navItemClasses({ isActive: !showActivity && f === file, size: "sm" })}>
+                  <button key={f} onClick={() => setPicked(f)} className={navItemClasses({ isActive: !showActivity && !showCode && f === file, size: "sm" })}>
                     {f}
                   </button>
                 ))}
               </nav>
-              <article className="min-w-0 flex-1 overflow-y-auto rounded-xl bg-background p-4 text-body-sm shadow-inset">
-                {showActivity ? <JobActivity repo={repo} job={job.id} /> : doc ? <MessageResponse>{doc.text}</MessageResponse> : <p className="text-muted-foreground">Select a file.</p>}
+              <article className={cn("min-w-0 flex-1 rounded-xl bg-background text-body-sm shadow-inset", showCode ? "overflow-hidden p-3" : "overflow-y-auto p-4")}>
+                {showCode ? <CodeChanges repo={repo} job={job.id} /> : showActivity ? <JobActivity repo={repo} job={job.id} /> : doc ? <MessageResponse>{doc.text}</MessageResponse> : <p className="text-muted-foreground">Select a file.</p>}
               </article>
             </div>
           </>

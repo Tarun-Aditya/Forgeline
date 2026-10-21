@@ -1,5 +1,5 @@
 "use client";
-import { XIcon } from "lucide-react";
+import { CodeXmlIcon, XIcon } from "lucide-react";
 import { Actions } from "@/components/job-drawer";
 import { Pipeline } from "@/components/pipeline";
 import { StatusBadge } from "@/components/status";
@@ -20,7 +20,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 /** Context for the selected job, docked on the right like Studio's agent overview panel. */
-export function JobPanel({ job, stages, running, busy, onClose, onFiles, onCommand }: { job: Job; stages: Stage[]; running: boolean; busy: boolean; onClose: () => void; onFiles: () => void; onCommand: (text: string) => void }) {
+export function JobPanel({ job, stages, running, busy, onClose, onFiles, onCode, onCommand }: { job: Job; stages: Stage[]; running: boolean; busy: boolean; onClose: () => void; onFiles: () => void; onCode: () => void; onCommand: (text: string) => void }) {
   const human = job.stage === "spec-approval" || job.stage === "needs-human";
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -54,7 +54,10 @@ export function JobPanel({ job, stages, running, busy, onClose, onFiles, onComma
             </Row>
           )}
         </dl>
-        <Button variant="default" onClick={onFiles}>View files and activity</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="default" onClick={onFiles}>View files and activity</Button>
+          <Button variant="default" onClick={onCode}><CodeXmlIcon className="size-4" />Code changes</Button>
+        </div>
       </div>
     </div>
   );

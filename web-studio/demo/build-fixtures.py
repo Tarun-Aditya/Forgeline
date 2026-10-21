@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 
 repo, data = sys.argv[1], sys.argv[2]
 here = os.path.dirname(os.path.abspath(__file__))
-out = os.path.join(here, "fixtures")
+out = os.path.join(here, os.environ.get("DEMO_FIXTURES", "fixtures"))
 shutil.rmtree(out, ignore_errors=True)
 os.makedirs(os.path.join(out, "files", "round-1"))
 
@@ -22,8 +22,8 @@ def ts(s):
     return datetime.fromisoformat(s.replace("Z", "+00:00")).astimezone(timezone.utc).timestamp()
 
 runs = sorted((json.loads(l) for l in open(os.path.join(data, "runs.jsonl"))), key=lambda r: r["startedAt"])
-assert len(runs) == 3, "expected start, accept and approve-spec runs"
-keys = ["start", "accept", "approve"]
+assert len(runs) in (3, 4), "expected start, accept and approve-spec runs, and optionally the final approve (merge) run"
+keys = ["start", "accept", "approve", "merge"][:len(runs)]
 windows = {k: (ts(r["startedAt"]), ts(r["endedAt"])) for k, r in zip(keys, runs)}
 
 jobdir = next(os.path.join(repo, "factory", "jobs", d) for d in sorted(os.listdir(os.path.join(repo, "factory", "jobs"))))

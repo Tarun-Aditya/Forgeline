@@ -1,0 +1,3991 @@
+{
+ "meta": {
+  "job": "001-task-priority",
+  "feature": "Add a priority (low, medium or high) to tasks. The GraphQL API should accept it when adding a task and return it on every task, and the web app should let the user pick it when adding a task and show it as a badge on each task. Default is medium.",
+  "type": "feature",
+  "round": 1,
+  "reviews": {
+   "security": "PASS",
+   "ux": "PASS",
+   "ui": "PASS",
+   "code": "PASS"
+  },
+  "durations": {
+   "start": 37.5,
+   "accept": 91.5,
+   "approve": 1553.2,
+   "merge": 36.7
+  }
+ },
+ "timeline": {
+  "start": [
+   {
+    "t": 0.77,
+    "op": "activity",
+    "event": {
+     "ev": "session_start",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "startup",
+     "job": null
+    }
+   },
+   {
+    "t": 2.39,
+    "op": "activity",
+    "event": {
+     "ev": "prompt",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "/factory Add a priority (low, medium or high) to tasks. The GraphQL API should accept it when adding a task and return it on every task, and the web app should let the user pick it when adding a task\u2026",
+     "job": null
+    }
+   },
+   {
+    "t": 8.13,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "cat factory/policy.json | head -30; python3 -I factory/scripts/jobctl.py create --slug task-priority --feature \"Add a priority (low, medium or high) to tasks. \u2026",
+     "job": null
+    }
+   },
+   {
+    "t": 10.37,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "python3 -I factory/scripts/jobctl.py create --slug task-priority --stage intent --feature \"Add a priority (low, medium or high) to tasks. The GraphQL API shoul\u2026",
+     "job": null
+    }
+   },
+   {
+    "t": 10.51,
+    "op": "create"
+   },
+   {
+    "t": 10.84,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "python3 -I factory/scripts/jobctl.py create --slug task-priority --stage intent --feature \"Add a priority (low, medium or high) to tasks. The GraphQL API shoul\u2026",
+     "job": null,
+     "ms": 161
+    }
+   },
+   {
+    "t": 12.96,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "intent-writer Write intent",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 13.33,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_start",
+     "agent": "intent-writer",
+     "tool": "",
+     "text": "intent-writer",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 15.64,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "intent-writer",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/templates/intent.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 15.78,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "intent-writer",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/templates/intent.md",
+     "job": "001-task-priority",
+     "ms": 4
+    }
+   },
+   {
+    "t": 16.47,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "intent-writer",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample; cat factory/out-of-scope.md; cat docs/GLOSSARY.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 23.3,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "intent-writer",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/intent.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 23.31,
+    "op": "file",
+    "file": "intent.md"
+   },
+   {
+    "t": 23.44,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "intent-writer",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/intent.md",
+     "job": "001-task-priority",
+     "ms": 3
+    }
+   },
+   {
+    "t": 31.16,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_stop",
+     "agent": "intent-writer",
+     "tool": "",
+     "text": "intent-writer",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 31.3,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "intent-writer Write intent",
+     "job": "001-task-priority",
+     "ms": 18009
+    }
+   },
+   {
+    "t": 32.91,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "test -s factory/jobs/001-task-priority/intent.md && cat factory/jobs/001-task-priority/intent.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 33.25,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "test -s factory/jobs/001-task-priority/intent.md && cat factory/jobs/001-task-priority/intent.md",
+     "job": "001-task-priority",
+     "ms": 24
+    }
+   },
+   {
+    "t": 36.7,
+    "op": "activity",
+    "event": {
+     "ev": "stop",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "The intent for job `001-task-priority` is drafted and waiting for your review. Nothing has been built yet. The factory policy requires an accepted intent before a spec can be written. You can read it at `factory/jobs/001-task-priority/intent.md`. It has five open questions, each with a suggested de\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 36.84,
+    "op": "activity",
+    "event": {
+     "ev": "session_end",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "other",
+     "job": "001-task-priority"
+    }
+   }
+  ],
+  "accept": [
+   {
+    "t": 0.44,
+    "op": "activity",
+    "event": {
+     "ev": "session_start",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "startup",
+     "job": null
+    }
+   },
+   {
+    "t": 1.86,
+    "op": "activity",
+    "event": {
+     "ev": "prompt",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "/factory accept 001-task-priority",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 4.71,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Inspect job state, intent and policy",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 5.21,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Inspect job state, intent and policy",
+     "job": "001-task-priority",
+     "ms": 110
+    }
+   },
+   {
+    "t": 9.24,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Find base branch",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 9.73,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Find base branch",
+     "job": "001-task-priority",
+     "ms": 142
+    }
+   },
+   {
+    "t": 13.42,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Create job worktree and run setup",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 13.99,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Create job worktree and run setup",
+     "job": "001-task-priority",
+     "ms": 208
+    }
+   },
+   {
+    "t": 17.12,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "spec-writer Write spec",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 17.5,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "spec-writer Write spec",
+     "job": "001-task-priority",
+     "ms": 8
+    }
+   },
+   {
+    "t": 17.5,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_start",
+     "agent": "spec-writer",
+     "tool": "",
+     "text": "spec-writer",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 20.66,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "spec-writer",
+     "tool": "Bash",
+     "text": "List repo files, job folder, policy",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 21.5,
+    "op": "activity",
+    "event": {
+     "ev": "stop",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "001-task-priority: intent accepted. The worktree is set up on `factory/001-task-priority`, and the spec-writer is now running. I'll report when it finishes, then snapshot the spec and pause for your approval.",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 23.4,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "spec-writer",
+     "tool": "Bash",
+     "text": "Read server code, packages, intent",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 25.73,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "spec-writer",
+     "tool": "Bash",
+     "text": "Read web source",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 26.13,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "spec-writer",
+     "tool": "Bash",
+     "text": "Read web source",
+     "job": "001-task-priority",
+     "ms": 61
+    }
+   },
+   {
+    "t": 35.11,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "spec-writer",
+     "tool": "Bash",
+     "text": "Read tsconfigs and job metadata",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 35.42,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "spec-writer",
+     "tool": "Bash",
+     "text": "Read tsconfigs and job metadata",
+     "job": "001-task-priority",
+     "ms": 23
+    }
+   },
+   {
+    "t": 72.49,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "spec-writer",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/spec.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 72.51,
+    "op": "file",
+    "file": "spec.md"
+   },
+   {
+    "t": 72.64,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "spec-writer",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/spec.md",
+     "job": "001-task-priority",
+     "ms": 3
+    }
+   },
+   {
+    "t": 82.26,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_stop",
+     "agent": "spec-writer",
+     "tool": "",
+     "text": "spec-writer",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 85.13,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Verify spec exists, then snapshot",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 86.74,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Verify spec exists, then snapshot",
+     "job": "001-task-priority",
+     "ms": 216
+    }
+   },
+   {
+    "t": 86.75,
+    "op": "stage",
+    "stage": "spec-approval"
+   },
+   {
+    "t": 86.88,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Set spec-approval stage and show assumptions",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 87.15,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Set spec-approval stage and show assumptions",
+     "job": "001-task-priority",
+     "ms": 133
+    }
+   },
+   {
+    "t": 90.86,
+    "op": "activity",
+    "event": {
+     "ev": "stop",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "001-task-priority: the spec is written and committed as an audit snapshot. The job is at `spec-approval` and waiting for you. - **Spec:** `factory/jobs/001-task-priority/spec.md` - **Risk:** low. It only adds to the in-memory API and touches no frozen or escalate paths. - **Design:** a `TaskPriorit\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 91.01,
+    "op": "activity",
+    "event": {
+     "ev": "session_end",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "other",
+     "job": "001-task-priority"
+    }
+   }
+  ],
+  "approve": [
+   {
+    "t": 0.45,
+    "op": "activity",
+    "event": {
+     "ev": "session_start",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "startup",
+     "job": null
+    }
+   },
+   {
+    "t": 2.26,
+    "op": "activity",
+    "event": {
+     "ev": "prompt",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "/factory approve-spec 001-task-priority",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 5.53,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "python3 -I factory/scripts/jobctl.py show 001-task-priority 2>&1 | head -30; ls factory/jobs/001-task-priority/; grep -n -i -A3 'risk:\\|## Split' factory/jobs/\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 6.12,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "python3 -I factory/scripts/jobctl.py show 001-task-priority 2>&1 | head -30; ls factory/jobs/001-task-priority/; grep -n -i -A3 'risk:\\|## Split' factory/jobs/\u2026",
+     "job": "001-task-priority",
+     "ms": 222
+    }
+   },
+   {
+    "t": 14.08,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "printf 'Spec approved by user via: /factory approve-spec 001-task-priority\\nTime: 2026-10-20T14:48:02Z\\n' > factory/jobs/001-task-priority/spec-approval.md && \u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 15.21,
+    "op": "file",
+    "file": "spec-approval.md"
+   },
+   {
+    "t": 15.33,
+    "op": "stage",
+    "stage": "plan"
+   },
+   {
+    "t": 15.63,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "printf 'Spec approved by user via: /factory approve-spec 001-task-priority\\nTime: 2026-10-20T14:48:02Z\\n' > factory/jobs/001-task-priority/spec-approval.md && \u2026",
+     "job": "001-task-priority",
+     "ms": 311
+    }
+   },
+   {
+    "t": 15.77,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "planner Write plan for job 001",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 15.91,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_start",
+     "agent": "planner",
+     "tool": "",
+     "text": "planner",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 19.41,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Read spec, policy, and list worktree files",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 19.84,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Read spec, policy, and list worktree files",
+     "job": "001-task-priority",
+     "ms": 61
+    }
+   },
+   {
+    "t": 23.55,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Print the source files the spec touches",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 24.05,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Print the source files the spec touches",
+     "job": "001-task-priority",
+     "ms": 63
+    }
+   },
+   {
+    "t": 28.98,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Detect packages, find callers, check config",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 29.83,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Detect packages, find callers, check config",
+     "job": "001-task-priority",
+     "ms": 576
+    }
+   },
+   {
+    "t": 45.52,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Run baseline tests/lint and probe yoga enum handling",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 50.9,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Run baseline tests/lint and probe yoga enum handling",
+     "job": "001-task-priority",
+     "ms": 4901
+    }
+   },
+   {
+    "t": 61.26,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Baseline results, null-arg probe, badge contrast",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 66.18,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Baseline results, null-arg probe, badge contrast",
+     "job": "001-task-priority",
+     "ms": 4455
+    }
+   },
+   {
+    "t": 70.25,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Inspect baseline web test failure in worktree and main",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 72.43,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Inspect baseline web test failure in worktree and main",
+     "job": "001-task-priority",
+     "ms": 1898
+    }
+   },
+   {
+    "t": 75.47,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Check NODE_ENV and rerun web tests with test env",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 76.82,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "planner",
+     "tool": "Bash",
+     "text": "Check NODE_ENV and rerun web tests with test env",
+     "job": "001-task-priority",
+     "ms": 1092
+    }
+   },
+   {
+    "t": 117.23,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "planner",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/plan.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 117.26,
+    "op": "file",
+    "file": "plan.md"
+   },
+   {
+    "t": 117.4,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "planner",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/plan.md",
+     "job": "001-task-priority",
+     "ms": 8
+    }
+   },
+   {
+    "t": 128.29,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_stop",
+     "agent": "planner",
+     "tool": "",
+     "text": "planner",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 128.44,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "planner Write plan for job 001",
+     "job": "001-task-priority",
+     "ms": 112530
+    }
+   },
+   {
+    "t": 131.88,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/plan.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 132.27,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/plan.md",
+     "job": "001-task-priority",
+     "ms": 33
+    }
+   },
+   {
+    "t": 134.19,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "python3 -I factory/scripts/snapshot_audit.py 001-task-priority \"plan written\" 2>&1 | tail -1; python3 -I factory/scripts/jobctl.py set 001-task-priority stage=\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 135.33,
+    "op": "stage",
+    "stage": "build"
+   },
+   {
+    "t": 135.88,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "python3 -I factory/scripts/snapshot_audit.py 001-task-priority \"plan written\" 2>&1 | tail -1; python3 -I factory/scripts/jobctl.py set 001-task-priority stage=\u2026",
+     "job": "001-task-priority",
+     "ms": 334
+    }
+   },
+   {
+    "t": 136.02,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "builder Build job 001 round 1",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 136.19,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_start",
+     "agent": "builder",
+     "tool": "",
+     "text": "builder",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 142.29,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Check branch and read job files",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 142.64,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Check branch and read job files",
+     "job": "001-task-priority",
+     "ms": 45
+    }
+   },
+   {
+    "t": 148.36,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Read source files",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 148.74,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Read source files",
+     "job": "001-task-priority",
+     "ms": 75
+    }
+   },
+   {
+    "t": 156.64,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Run server tests (expect red)",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 158.05,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Run server tests (expect red)",
+     "job": "001-task-priority",
+     "ms": 1153
+    }
+   },
+   {
+    "t": 160.65,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/schema.test.ts",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 160.81,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/schema.test.ts",
+     "job": "001-task-priority",
+     "ms": 7
+    }
+   },
+   {
+    "t": 161.17,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/components.test.tsx",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 161.32,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/components.test.tsx",
+     "job": "001-task-priority",
+     "ms": 1
+    }
+   },
+   {
+    "t": 161.77,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/store.ts",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 161.92,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/store.ts",
+     "job": "001-task-priority",
+     "ms": 1
+    }
+   },
+   {
+    "t": 162.32,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/schema.ts",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 162.46,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/schema.ts",
+     "job": "001-task-priority",
+     "ms": 1
+    }
+   },
+   {
+    "t": 162.96,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/graphql.ts",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 163.11,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/graphql.ts",
+     "job": "001-task-priority",
+     "ms": 1
+    }
+   },
+   {
+    "t": 163.52,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/AddTaskForm.tsx",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 163.67,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/AddTaskForm.tsx",
+     "job": "001-task-priority",
+     "ms": 1
+    }
+   },
+   {
+    "t": 164.12,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/TaskItem.tsx",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 164.27,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/TaskItem.tsx",
+     "job": "001-task-priority",
+     "ms": 1
+    }
+   },
+   {
+    "t": 165.02,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/App.tsx",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 165.16,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/App.tsx",
+     "job": "001-task-priority",
+     "ms": 1
+    }
+   },
+   {
+    "t": 165.48,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/styles.css",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 165.62,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/styles.css",
+     "job": "001-task-priority",
+     "ms": 1
+    }
+   },
+   {
+    "t": 173.7,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/schema.test.ts",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 174.89,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/schema.test.ts",
+     "job": "001-task-priority",
+     "ms": 8
+    }
+   },
+   {
+    "t": 175.03,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Run server tests (expect red)",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 176.3,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Run server tests (expect red)",
+     "job": "001-task-priority",
+     "ms": 1109
+    }
+   },
+   {
+    "t": 180.75,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/store.ts",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 188.97,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/store.ts",
+     "job": "001-task-priority",
+     "ms": 10
+    }
+   },
+   {
+    "t": 189.1,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/store.ts",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 189.24,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/store.ts",
+     "job": "001-task-priority",
+     "ms": 2
+    }
+   },
+   {
+    "t": 189.37,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/schema.ts",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 189.51,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/schema.ts",
+     "job": "001-task-priority",
+     "ms": 2
+    }
+   },
+   {
+    "t": 189.64,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/schema.ts",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 189.78,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/schema.ts",
+     "job": "001-task-priority",
+     "ms": 1
+    }
+   },
+   {
+    "t": 189.92,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/schema.ts",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 190.07,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/server/src/schema.ts",
+     "job": "001-task-priority",
+     "ms": 3
+    }
+   },
+   {
+    "t": 190.21,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Run server tests and lint",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 192.19,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Run server tests and lint",
+     "job": "001-task-priority",
+     "ms": 1832
+    }
+   },
+   {
+    "t": 196.0,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Lint server and commit",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 197.29,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Lint server and commit",
+     "job": "001-task-priority",
+     "ms": 1004
+    }
+   },
+   {
+    "t": 209.96,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/components.test.tsx",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 211.45,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/components.test.tsx",
+     "job": "001-task-priority",
+     "ms": 13
+    }
+   },
+   {
+    "t": 211.59,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Run web tests (expect red)",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 213.12,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Run web tests (expect red)",
+     "job": "001-task-priority",
+     "ms": 1398
+    }
+   },
+   {
+    "t": 218.61,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/graphql.ts",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 228.19,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/graphql.ts",
+     "job": "001-task-priority",
+     "ms": 6
+    }
+   },
+   {
+    "t": 228.34,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/AddTaskForm.tsx",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 228.48,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/AddTaskForm.tsx",
+     "job": "001-task-priority",
+     "ms": 2
+    }
+   },
+   {
+    "t": 228.62,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/TaskItem.tsx",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 228.75,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/TaskItem.tsx",
+     "job": "001-task-priority",
+     "ms": 2
+    }
+   },
+   {
+    "t": 228.89,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/App.tsx",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 229.03,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/App.tsx",
+     "job": "001-task-priority",
+     "ms": 1
+    }
+   },
+   {
+    "t": 229.16,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/styles.css",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 229.3,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Edit",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority/web/src/styles.css",
+     "job": "001-task-priority",
+     "ms": 2
+    }
+   },
+   {
+    "t": 229.43,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Run web tests and root lint",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 232.94,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Run web tests and root lint",
+     "job": "001-task-priority",
+     "ms": 3374
+    }
+   },
+   {
+    "t": 237.64,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Verify exit codes and commit web change",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 243.28,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Verify exit codes and commit web change",
+     "job": "001-task-priority",
+     "ms": 5253
+    }
+   },
+   {
+    "t": 248.8,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Run callers check, grep, read dev config",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 249.43,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Run callers check, grep, read dev config",
+     "job": "001-task-priority",
+     "ms": 296
+    }
+   },
+   {
+    "t": 254.05,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Check ports in use",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 254.8,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Check ports in use",
+     "job": "001-task-priority",
+     "ms": 144
+    }
+   },
+   {
+    "t": 273.82,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Start combined dev server on port 5110",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 278.42,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Start combined dev server on port 5110",
+     "job": "001-task-priority",
+     "ms": 4111
+    }
+   },
+   {
+    "t": 280.89,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Learn agent-browser CLI",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 281.41,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Learn agent-browser CLI",
+     "job": "001-task-priority",
+     "ms": 106
+    }
+   },
+   {
+    "t": 284.27,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Open app and snapshot",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 287.57,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Open app and snapshot",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 294.72,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Open app and snapshot",
+     "job": "001-task-priority",
+     "ms": 6752
+    }
+   },
+   {
+    "t": 300.27,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Add high and low tasks, toggle done, inspect badges",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 301.97,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Add high and low tasks, toggle done, inspect badges",
+     "job": "001-task-priority",
+     "ms": 1424
+    }
+   },
+   {
+    "t": 305.04,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/scratchpad/app.png",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 305.19,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/scratchpad/app.png",
+     "job": "001-task-priority",
+     "ms": 4
+    }
+   },
+   {
+    "t": 311.03,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Contrast ratios, invalid variable check, cleanup",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 312.65,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Bash",
+     "text": "Contrast ratios, invalid variable check, cleanup",
+     "job": "001-task-priority",
+     "ms": 1342
+    }
+   },
+   {
+    "t": 342.8,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "builder",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/build.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 342.83,
+    "op": "file",
+    "file": "build.md"
+   },
+   {
+    "t": 342.96,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "builder",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/build.md",
+     "job": "001-task-priority",
+     "ms": 2
+    }
+   },
+   {
+    "t": 352.94,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_stop",
+     "agent": "builder",
+     "tool": "",
+     "text": "builder",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 353.09,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "builder Build job 001 round 1",
+     "job": "001-task-priority",
+     "ms": 216925
+    }
+   },
+   {
+    "t": 355.33,
+    "op": "stage",
+    "stage": "review"
+   },
+   {
+    "t": 355.43,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/build.md && python3 -I factory/scripts/snapshot_audit.py 001-task-priority \"build round 1\" 2>&1 | tail -1; python3 -I fa\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 356.08,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/build.md && python3 -I factory/scripts/snapshot_audit.py 001-task-priority \"build round 1\" 2>&1 | tail -1; python3 -I fa\u2026",
+     "job": "001-task-priority",
+     "ms": 329
+    }
+   },
+   {
+    "t": 360.93,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "reviewer-security Security review round 1",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 361.71,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "reviewer-ux UX review round 1",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 362.53,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "reviewer-ui UI review round 1",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 363.44,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "reviewer-code Code review round 1",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 364.09,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "reviewer-security Security review round 1",
+     "job": "001-task-priority",
+     "ms": 8
+    }
+   },
+   {
+    "t": 364.09,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_start",
+     "agent": "reviewer-ui",
+     "tool": "",
+     "text": "reviewer-ui",
+     "job": null
+    }
+   },
+   {
+    "t": 364.09,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "reviewer-code Code review round 1",
+     "job": "001-task-priority",
+     "ms": 6
+    }
+   },
+   {
+    "t": 364.1,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_start",
+     "agent": "reviewer-code",
+     "tool": "",
+     "text": "reviewer-code",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 364.1,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_start",
+     "agent": "reviewer-ux",
+     "tool": "",
+     "text": "reviewer-ux",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 364.1,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "reviewer-ux UX review round 1",
+     "job": "001-task-priority",
+     "ms": 9
+    }
+   },
+   {
+    "t": 364.1,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "reviewer-ui UI review round 1",
+     "job": "001-task-priority",
+     "ms": 7
+    }
+   },
+   {
+    "t": 364.1,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_start",
+     "agent": "reviewer-security",
+     "tool": "",
+     "text": "reviewer-security",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 365.85,
+    "op": "activity",
+    "event": {
+     "ev": "stop",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "001-task-priority: spec approved, plan ready, build round 1 ready (lint and tests pass). Round 1 reviews (security, ux, ui, code) are running in parallel. I'll record each verdict as it lands.",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 367.15,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-security",
+     "tool": "Bash",
+     "text": "Read job docs and review guidance",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 367.65,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-security",
+     "tool": "Bash",
+     "text": "Read job docs and review guidance",
+     "job": "001-task-priority",
+     "ms": 24
+    }
+   },
+   {
+    "t": 367.81,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && git diff main...HEAD --stat && git diff main...HEAD -- web | head -400;\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 368.27,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-code",
+     "tool": "Bash",
+     "text": "J=factory/jobs/001-task-priority; cat $J/spec.md $J/plan.md $J/build.md factory/REVIEW.md; cat factory/policy.json; ls $J",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 368.27,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && git diff main...HEAD --stat && cat /Users/demo/workspace/forgeli\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 368.35,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && git diff main...HEAD --stat && git diff main...HEAD -- web | head -400;\u2026",
+     "job": "001-task-priority",
+     "ms": 43
+    }
+   },
+   {
+    "t": 368.53,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && git diff main...HEAD --stat && cat /Users/demo/workspace/forgeli\u2026",
+     "job": "001-task-priority",
+     "ms": 32
+    }
+   },
+   {
+    "t": 369.42,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-code",
+     "tool": "Bash",
+     "text": "J=factory/jobs/001-task-priority; cat $J/spec.md $J/plan.md $J/build.md factory/REVIEW.md; cat factory/policy.json; ls $J",
+     "job": "001-task-priority",
+     "ms": 20
+    }
+   },
+   {
+    "t": 369.57,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-code",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && git log --oneline main..HEAD && git diff main...HEAD",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 369.76,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-code",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && git log --oneline main..HEAD && git diff main...HEAD",
+     "job": "001-task-priority",
+     "ms": 30
+    }
+   },
+   {
+    "t": 370.31,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-security",
+     "tool": "Read",
+     "text": "/Users/demo/.claude/projects/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/tool-results/b8wdb3d6f.txt",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 370.82,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-security",
+     "tool": "Read",
+     "text": "/Users/demo/.claude/projects/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/tool-results/b8wdb3d6f.txt",
+     "job": "001-task-priority",
+     "ms": 359
+    }
+   },
+   {
+    "t": 371.35,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-security",
+     "tool": "Bash",
+     "text": "Show branch commits and code diff",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 371.56,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && git diff main...HEAD -- web/src ':!web/src/*.test.tsx'; (npm run dev -w\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 371.67,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && cat web/src/styles.css; ls node_modules >/dev/null 2>&1 && echo hasnm; \u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 371.69,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-security",
+     "tool": "Bash",
+     "text": "Show branch commits and code diff",
+     "job": "001-task-priority",
+     "ms": 31
+    }
+   },
+   {
+    "t": 372.07,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && cat web/src/styles.css; ls node_modules >/dev/null 2>&1 && echo hasnm; \u2026",
+     "job": "001-task-priority",
+     "ms": 34
+    }
+   },
+   {
+    "t": 372.88,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-code",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && git diff main...HEAD -- server web | head -500; cd ../../forgeline-samp\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 373.03,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && git diff main...HEAD -- web/src ':!web/src/*.test.tsx'; (npm run dev -w\u2026",
+     "job": "001-task-priority",
+     "ms": 1039
+    }
+   },
+   {
+    "t": 374.02,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-code",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && git diff main...HEAD -- server web | head -500; cd ../../forgeline-samp\u2026",
+     "job": "001-task-priority",
+     "ms": 31
+    }
+   },
+   {
+    "t": 374.17,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-code",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && npm run lint 2>&1 | tail -5; npm test -w server 2>&1 | tail -6; npm tes\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 375.17,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && cat /tmp/ux.log; grep dev package.json server/package.json; lsof -i :40\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 375.57,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && cat /tmp/ux.log; grep dev package.json server/package.json; lsof -i :40\u2026",
+     "job": "001-task-priority",
+     "ms": 72
+    }
+   },
+   {
+    "t": 377.74,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && cat package.json | grep dev; cat web/vite.config.ts; grep -n \"seed\\|tit\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 378.17,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && cat package.json | grep dev; cat web/vite.config.ts; grep -n \"seed\\|tit\u2026",
+     "job": "001-task-priority",
+     "ms": 35
+    }
+   },
+   {
+    "t": 379.14,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-code",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && npm run lint 2>&1 | tail -5; npm test -w server 2>&1 | tail -6; npm tes\u2026",
+     "job": "001-task-priority",
+     "ms": 4821
+    }
+   },
+   {
+    "t": 380.07,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && grep -n -i \"port\\|4000\" server/src/index.ts; curl -s localhost:4000/gra\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 380.39,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && grep -n -i \"port\\|4000\" server/src/index.ts; curl -s localhost:4000/gra\u2026",
+     "job": "001-task-priority",
+     "ms": 38
+    }
+   },
+   {
+    "t": 380.74,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-security",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/round-1/review-security.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 380.76,
+    "op": "review",
+    "lens": "security",
+    "file": "round-1/review-security.md"
+   },
+   {
+    "t": 380.89,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-security",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/round-1/review-security.md",
+     "job": "001-task-priority",
+     "ms": 1
+    }
+   },
+   {
+    "t": 384.23,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && (npm run dev -w server >/dev/null 2>&1 &) ; (npm run dev -w web -- --po\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 386.26,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-code",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && npm run lint >/dev/null 2>&1; echo lint $?; npm test -w server 2>&1 | g\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 387.3,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_stop",
+     "agent": "reviewer-security",
+     "tool": "",
+     "text": "reviewer-security",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 387.98,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && pkill -f \"vite --port 5111\"; (PORT=5112 npm run dev -w server >/tmp/uxs\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 390.05,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/round-1/review-security.md && python3 -I factory/scripts/jobctl.py set 001-task-priority reviews.security=PASS >/dev/nul\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 390.73,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/round-1/review-security.md && python3 -I factory/scripts/jobctl.py set 001-task-priority reviews.security=PASS >/dev/nul\u2026",
+     "job": "001-task-priority",
+     "ms": 149
+    }
+   },
+   {
+    "t": 392.45,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && pkill -f \"vite --port 5111\"; (PORT=5112 npm run dev -w server >/tmp/uxs\u2026",
+     "job": "001-task-priority",
+     "ms": 4140
+    }
+   },
+   {
+    "t": 392.62,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-code",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && npm run lint >/dev/null 2>&1; echo lint $?; npm test -w server 2>&1 | g\u2026",
+     "job": "001-task-priority",
+     "ms": 6055
+    }
+   },
+   {
+    "t": 392.67,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && (npm run dev -w server >/dev/null 2>&1 &) ; (npm run dev -w web -- --po\u2026",
+     "job": "001-task-priority",
+     "ms": 7974
+    }
+   },
+   {
+    "t": 392.82,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/d.png",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 392.82,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/m.png",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 392.97,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/m.png",
+     "job": "001-task-priority",
+     "ms": 3
+    }
+   },
+   {
+    "t": 392.97,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/d.png",
+     "job": "001-task-priority",
+     "ms": 3
+    }
+   },
+   {
+    "t": 393.86,
+    "op": "activity",
+    "event": {
+     "ev": "stop",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "001-task-priority, round 1: security PASS. I've recorded it. UX, UI and code reviews are still running, and I'm waiting for all three before deciding.",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 395.42,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "lsof -iTCP:4000 -sTCP:LISTEN -P | head; cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && sed -n 1,12p server/src/index.ts",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 395.77,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "lsof -iTCP:4000 -sTCP:LISTEN -P | head; cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && sed -n 1,12p server/src/index.ts",
+     "job": "001-task-priority",
+     "ms": 57
+    }
+   },
+   {
+    "t": 398.24,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "curl -s localhost:5112/graphql -H 'content-type: application/json' -d '{\"query\":\"{tasks{title priority}}\"}'; lsof -i :5111 | head",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 398.92,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "curl -s localhost:5112/graphql -H 'content-type: application/json' -d '{\"query\":\"{tasks{title priority}}\"}'; lsof -i :5111 | head",
+     "job": "001-task-priority",
+     "ms": 69
+    }
+   },
+   {
+    "t": 399.07,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "sleep 1; curl -s localhost:5111/graphql -H 'content-type: application/json' -d '{\"query\":\"{tasks{title priority}}\"}'",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 400.26,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "sleep 1; curl -s localhost:5111/graphql -H 'content-type: application/json' -d '{\"query\":\"{tasks{title priority}}\"}'",
+     "job": "001-task-priority",
+     "ms": 1037
+    }
+   },
+   {
+    "t": 400.52,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-code",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/round-1/review-code.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 401.52,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && pkill -f \"vite --port 5112\"; pkill -f \"vite.*5112\"; sleep 1 SP=/private\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 401.66,
+    "op": "review",
+    "lens": "code",
+    "file": "round-1/review-code.md"
+   },
+   {
+    "t": 401.8,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-code",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/round-1/review-code.md",
+     "job": "001-task-priority",
+     "ms": 2
+    }
+   },
+   {
+    "t": 402.22,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_stop",
+     "agent": "reviewer-code",
+     "tool": "",
+     "text": "reviewer-code",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 403.24,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && git branch --show-current; grep -c priority server/src/schema.ts; ls -l\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 403.7,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && git branch --show-current; grep -c priority server/src/schema.ts; ls -l\u2026",
+     "job": "001-task-priority",
+     "ms": 108
+    }
+   },
+   {
+    "t": 404.13,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/round-1/review-code.md && python3 -I factory/scripts/jobctl.py set 001-task-priority reviews.code=PASS >/dev/null; echo \u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 404.59,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/round-1/review-code.md && python3 -I factory/scripts/jobctl.py set 001-task-priority reviews.code=PASS >/dev/null; echo \u2026",
+     "job": "001-task-priority",
+     "ms": 148
+    }
+   },
+   {
+    "t": 407.47,
+    "op": "activity",
+    "event": {
+     "ev": "stop",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "001-task-priority, round 1: code PASS, recorded. Security is also PASS. I'm still waiting on the UX and UI reviews.",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 407.99,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && grep -n -i priority server/src/schema.ts; ps -o pid,command -p 92293; l\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 408.35,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && grep -n -i priority server/src/schema.ts; ps -o pid,command -p 92293; l\u2026",
+     "job": "001-task-priority",
+     "ms": 67
+    }
+   },
+   {
+    "t": 409.97,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && pkill -f \"vite --port 5112\"; pkill -f \"vite.*5112\"; sleep 1 SP=/private\u2026",
+     "job": "001-task-priority",
+     "ms": 8145
+    }
+   },
+   {
+    "t": 413.17,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "for h in 127.0.0.1 \"[::1]\"; do curl -s $h:5112/graphql -H 'content-type: application/json' -d '{\"query\":\"{tasks{title priority}}\"}'; echo; done; lsof -nP -iTCP\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 413.52,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "for h in 127.0.0.1 \"[::1]\"; do curl -s $h:5112/graphql -H 'content-type: application/json' -d '{\"query\":\"{tasks{title priority}}\"}'; echo; done; lsof -nP -iTCP\u2026",
+     "job": "001-task-priority",
+     "ms": 73
+    }
+   },
+   {
+    "t": 413.97,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && SP=/private/tmp/claude-501/-Users-demo-workspace-forgeline-forge\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 417.17,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "pkill -f vite.ux.config; S=/private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/scratchpad sed \u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 419.32,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "cd /Users/demo/workspace/forgeline/forgeline-sample-factory/001-task-priority && SP=/private/tmp/claude-501/-Users-demo-workspace-forgeline-forge\u2026",
+     "job": "001-task-priority",
+     "ms": 5062
+    }
+   },
+   {
+    "t": 421.92,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "A=\"agent-browser --session 001-task-priority-ui\"; $A open http://localhost:5112 >/dev/null; $A set viewport 1000 700 >/dev/null; sleep 1; $A screenshot /privat\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 424.34,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/m.png",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 424.34,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/d.png",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 424.49,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/m.png",
+     "job": "001-task-priority",
+     "ms": 3
+    }
+   },
+   {
+    "t": 424.5,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/d.png",
+     "job": "001-task-priority",
+     "ms": 4
+    }
+   },
+   {
+    "t": 424.5,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cat /tmp/ux.log; lsof -nP -iTCP:5111 -sTCP:LISTEN",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 424.96,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "cat /tmp/ux.log; lsof -nP -iTCP:5111 -sTCP:LISTEN",
+     "job": "001-task-priority",
+     "ms": 68
+    }
+   },
+   {
+    "t": 426.91,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "A(){ agent-browser --session 001-task-priority-ui \"$@\"; }; A open http://localhost:5112 >/dev/null; A set viewport 1000 700 >/dev/null; sleep 1; A screenshot /\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 428.92,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "S=/private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/scratchpad A=\"agent-browser --session 00\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 429.53,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "A(){ agent-browser --session 001-task-priority-ui \"$@\"; }; A open http://localhost:5112 >/dev/null; A set viewport 1000 700 >/dev/null; sleep 1; A screenshot /\u2026",
+     "job": "001-task-priority",
+     "ms": 2205
+    }
+   },
+   {
+    "t": 429.67,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/m2.png",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 429.67,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/d2.png",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 429.83,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/d2.png",
+     "job": "001-task-priority",
+     "ms": 2
+    }
+   },
+   {
+    "t": 429.83,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/m2.png",
+     "job": "001-task-priority",
+     "ms": 3
+    }
+   },
+   {
+    "t": 433.3,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "lsof -iTCP:5112 -iTCP:4112 -sTCP:LISTEN -P; curl -s localhost:5112 | head -5; cat /private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-samp\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 433.73,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "lsof -iTCP:5112 -iTCP:4112 -sTCP:LISTEN -P; curl -s localhost:5112 | head -5; cat /private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-samp\u2026",
+     "job": "001-task-priority",
+     "ms": 87
+    }
+   },
+   {
+    "t": 436.46,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "S=/private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/scratchpad agent-browser --session 001-u\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 436.91,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "kill 92293; sleep 1; A(){ agent-browser --session 001-task-priority-ui \"$@\"; }; A open http://localhost:5112 >/dev/null; A set viewport 1000 700 >/dev/null; sl\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 437.08,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "S=/private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/scratchpad agent-browser --session 001-u\u2026",
+     "job": "001-task-priority",
+     "ms": 211
+    }
+   },
+   {
+    "t": 440.57,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "kill 92293; sleep 1; A(){ agent-browser --session 001-task-priority-ui \"$@\"; }; A open http://localhost:5112 >/dev/null; A set viewport 1000 700 >/dev/null; sl\u2026",
+     "job": "001-task-priority",
+     "ms": 3238
+    }
+   },
+   {
+    "t": 440.71,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/d3.png",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 440.71,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/m3.png",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 440.86,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/d3.png",
+     "job": "001-task-priority",
+     "ms": 2
+    }
+   },
+   {
+    "t": 440.86,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/m3.png",
+     "job": "001-task-priority",
+     "ms": 4
+    }
+   },
+   {
+    "t": 441.76,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "S=/private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/scratchpad agent-browser --session 001-u\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 442.25,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "S=/private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/scratchpad agent-browser --session 001-u\u2026",
+     "job": "001-task-priority",
+     "ms": 126
+    }
+   },
+   {
+    "t": 442.39,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/scratchpad/d.png",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 442.53,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/scratchpad/d.png",
+     "job": "001-task-priority",
+     "ms": 1
+    }
+   },
+   {
+    "t": 444.28,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "agent-browser --session 001-task-priority-ui close; pkill -f \"vite --config\"; pkill -f \"forgeline-sample-factory/001-task-priority\"; lsof -tiTCP:4112 -iTCP:511\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 445.88,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/scratchpad/m.png",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 446.02,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Read",
+     "text": "/private/tmp/claude-501/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/scratchpad/m.png",
+     "job": "001-task-priority",
+     "ms": 1
+    }
+   },
+   {
+    "t": 447.8,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Bash",
+     "text": "agent-browser --session 001-task-priority-ui close; pkill -f \"vite --config\"; pkill -f \"forgeline-sample-factory/001-task-priority\"; lsof -tiTCP:4112 -iTCP:511\u2026",
+     "job": "001-task-priority",
+     "ms": 234
+    }
+   },
+   {
+    "t": 447.94,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ui",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/round-1/review-ui.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 447.95,
+    "op": "review",
+    "lens": "ui",
+    "file": "round-1/review-ui.md"
+   },
+   {
+    "t": 448.07,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ui",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/round-1/review-ui.md",
+     "job": "001-task-priority",
+     "ms": 2
+    }
+   },
+   {
+    "t": 448.55,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "agent-browser --session 001-ux close; pkill -f vite.ux.config; pkill -f \"tsx.*src/index.ts\"; cat > /Users/demo/workspace/forgeline/forgeline-sample/fact\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 449.11,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "agent-browser --session 001-ux close; pkill -f vite.ux.config; pkill -f \"tsx.*src/index.ts\"; cat > /Users/demo/workspace/forgeline/forgeline-sample/fact\u2026",
+     "job": "001-task-priority",
+     "ms": 254
+    }
+   },
+   {
+    "t": 451.21,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "ls -la /Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/round-1/",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 451.63,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Bash",
+     "text": "ls -la /Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/round-1/",
+     "job": "001-task-priority",
+     "ms": 27
+    }
+   },
+   {
+    "t": 452.69,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_stop",
+     "agent": "reviewer-ui",
+     "tool": "",
+     "text": "reviewer-ui",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 455.75,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/round-1/review-ui.md && python3 -I factory/scripts/jobctl.py set 001-task-priority reviews.ui=PASS >/dev/null; echo ok",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 456.46,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "reviewer-ux",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/round-1/review-ux.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 456.47,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/round-1/review-ui.md && python3 -I factory/scripts/jobctl.py set 001-task-priority reviews.ui=PASS >/dev/null; echo ok",
+     "job": "001-task-priority",
+     "ms": 157
+    }
+   },
+   {
+    "t": 456.48,
+    "op": "review",
+    "lens": "ux",
+    "file": "round-1/review-ux.md"
+   },
+   {
+    "t": 456.61,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "reviewer-ux",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/round-1/review-ux.md",
+     "job": "001-task-priority",
+     "ms": 10
+    }
+   },
+   {
+    "t": 460.04,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_stop",
+     "agent": "reviewer-ux",
+     "tool": "",
+     "text": "reviewer-ux",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 465.39,
+    "op": "activity",
+    "event": {
+     "ev": "stop",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "001-task-priority, round 1: UI PASS, recorded. Security, code and UI are PASS. I'm still waiting on the UX review.",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 475.75,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/round-1/review-ux.md && python3 -I factory/scripts/jobctl.py set 001-task-priority reviews.ux=PASS >/dev/null; ls factor\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 476.33,
+    "op": "stage",
+    "stage": "approve"
+   },
+   {
+    "t": 476.73,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/round-1/review-ux.md && python3 -I factory/scripts/jobctl.py set 001-task-priority reviews.ux=PASS >/dev/null; ls factor\u2026",
+     "job": "001-task-priority",
+     "ms": 680
+    }
+   },
+   {
+    "t": 481.26,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "approver Final approval job 001",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 481.67,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_start",
+     "agent": "approver",
+     "tool": "",
+     "text": "approver",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 484.78,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "List and print job folder files and policy",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 485.36,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "List and print job folder files and policy",
+     "job": "001-task-priority",
+     "ms": 77
+    }
+   },
+   {
+    "t": 488.29,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Read",
+     "text": "/Users/demo/.claude/projects/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/tool-results/bfwgolfho.txt",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 488.8,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "approver",
+     "tool": "Read",
+     "text": "/Users/demo/.claude/projects/-Users-demo-workspace-forgeline-forgeline-sample/11a62682-0e2a-49a1-9380-da4f235113b7/tool-results/bfwgolfho.txt",
+     "job": "001-task-priority",
+     "ms": 346
+    }
+   },
+   {
+    "t": 494.04,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Log, diff stat, policy check, merge-tree, audit trail",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 494.67,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Log, diff stat, policy check, merge-tree, audit trail",
+     "job": "001-task-priority",
+     "ms": 267
+    }
+   },
+   {
+    "t": 499.14,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Check intent status markers and code diff",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 499.79,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Check intent status markers and code diff",
+     "job": "001-task-priority",
+     "ms": 66
+    }
+   },
+   {
+    "t": 503.63,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Find how intent acceptance is marked",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 504.18,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Find how intent acceptance is marked",
+     "job": "001-task-priority",
+     "ms": 35
+    }
+   },
+   {
+    "t": 507.43,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Read intent lifecycle rules",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 507.86,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Read intent lifecycle rules",
+     "job": "001-task-priority",
+     "ms": 44
+    }
+   },
+   {
+    "t": 510.93,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Read accept flow in factory skill",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 511.25,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Read accept flow in factory skill",
+     "job": "001-task-priority",
+     "ms": 31
+    }
+   },
+   {
+    "t": 516.69,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Read feature entry flow",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 517.18,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Read feature entry flow",
+     "job": "001-task-priority",
+     "ms": 29
+    }
+   },
+   {
+    "t": 532.24,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Re-run lint, server and web tests, grep check",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 536.78,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Re-run lint, server and web tests, grep check",
+     "job": "001-task-priority",
+     "ms": 4217
+    }
+   },
+   {
+    "t": 540.63,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Show test result summaries",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 544.71,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Show test result summaries",
+     "job": "001-task-priority",
+     "ms": 3807
+    }
+   },
+   {
+    "t": 550.23,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Find TS runners and test helper",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 550.65,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Find TS runners and test helper",
+     "job": "001-task-priority",
+     "ms": 34
+    }
+   },
+   {
+    "t": 557.42,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Probe mutation via variables: null, omitted, invalid",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 561.31,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Rerun probe as ESM",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 562.05,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "approver",
+     "tool": "Bash",
+     "text": "Rerun probe as ESM",
+     "job": "001-task-priority",
+     "ms": 388
+    }
+   },
+   {
+    "t": 1518.06,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "approver",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/decision.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 1518.08,
+    "op": "file",
+    "file": "decision.md"
+   },
+   {
+    "t": 1518.21,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "approver",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/decision.md",
+     "job": "001-task-priority",
+     "ms": 3
+    }
+   },
+   {
+    "t": 1528.19,
+    "op": "activity",
+    "event": {
+     "ev": "subagent_stop",
+     "agent": "approver",
+     "tool": "",
+     "text": "approver",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 1528.34,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Agent",
+     "text": "approver Final approval job 001",
+     "job": "001-task-priority",
+     "ms": 1046695
+    }
+   },
+   {
+    "t": 1533.11,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/decision.md && python3 -I factory/scripts/snapshot_audit.py 001-task-priority \"decision\" 2>&1 | tail -1; python3 -I fact\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 1543.38,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "head -1 factory/jobs/001-task-priority/decision.md && python3 -I factory/scripts/snapshot_audit.py 001-task-priority \"decision\" 2>&1 | tail -1; python3 -I fact\u2026",
+     "job": "001-task-priority",
+     "ms": 9899
+    }
+   },
+   {
+    "t": 1545.33,
+    "op": "stage",
+    "stage": "needs-human"
+   },
+   {
+    "t": 1545.43,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "python3 -I factory/scripts/jobctl.py set 001-task-priority stage=needs-human >/dev/null; echo ok",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 1545.94,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "python3 -I factory/scripts/jobctl.py set 001-task-priority stage=needs-human >/dev/null; echo ok",
+     "job": "001-task-priority",
+     "ms": 143
+    }
+   },
+   {
+    "t": 1552.56,
+    "op": "activity",
+    "event": {
+     "ev": "stop",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "001-task-priority is not merged and now needs a human decision. The approver said APPROVE, but the merge gate stopped it at verification (exit 5). **Why it stopped:** the gate runs `npm test` on a throwaway copy of `main`, and the web tests fail there too. That means the check was already red befor\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 1552.74,
+    "op": "activity",
+    "event": {
+     "ev": "session_end",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "other",
+     "job": "001-task-priority"
+    }
+   }
+  ],
+  "merge": [
+   {
+    "t": 0.55,
+    "op": "activity",
+    "event": {
+     "ev": "session_start",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "startup",
+     "job": null
+    }
+   },
+   {
+    "t": 0.98,
+    "op": "activity",
+    "event": {
+     "ev": "prompt",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "/factory approve 001-task-priority",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 5.16,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Inspect job state and decision",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 5.7,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Inspect job state and decision",
+     "job": "001-task-priority",
+     "ms": 95
+    }
+   },
+   {
+    "t": 8.43,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Read rest of decision and timestamp",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 8.75,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Read rest of decision and timestamp",
+     "job": "001-task-priority",
+     "ms": 23
+    }
+   },
+   {
+    "t": 12.19,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/human-approval.md",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 12.92,
+    "op": "file",
+    "file": "human-approval.md"
+   },
+   {
+    "t": 13.07,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Write",
+     "text": "/Users/demo/workspace/forgeline/forgeline-sample/factory/jobs/001-task-priority/human-approval.md",
+     "job": "001-task-priority",
+     "ms": 7
+    }
+   },
+   {
+    "t": 13.22,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Snapshot audit trail",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 13.55,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Snapshot audit trail",
+     "job": "001-task-priority",
+     "ms": 180
+    }
+   },
+   {
+    "t": 15.66,
+    "op": "activity",
+    "event": {
+     "ev": "tool",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Run merge gate with human approval",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 31.19,
+    "op": "stage",
+    "stage": "merged"
+   },
+   {
+    "t": 31.45,
+    "op": "activity",
+    "event": {
+     "ev": "tool_done",
+     "agent": "orchestrator",
+     "tool": "Bash",
+     "text": "Run merge gate with human approval",
+     "job": "001-task-priority",
+     "ms": 15369
+    }
+   },
+   {
+    "t": 36.05,
+    "op": "activity",
+    "event": {
+     "ev": "stop",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "`001-task-priority` is merged into `main` as commit `75a48c4`. I didn't push anything. - **Approval:** I recorded your approval in `human-approval.md`, took an audit snapshot, and ran the merge gate with `--human-approved`. The gate's other checks passed. - **Baseline tests are red on `main`:** The\u2026",
+     "job": "001-task-priority"
+    }
+   },
+   {
+    "t": 36.21,
+    "op": "activity",
+    "event": {
+     "ev": "session_end",
+     "agent": "orchestrator",
+     "tool": "",
+     "text": "other",
+     "job": "001-task-priority"
+    }
+   }
+  ]
+ }
+}

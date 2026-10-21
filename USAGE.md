@@ -196,7 +196,9 @@ Limits: it shows what agents do, not the model's streamed text, and each hook ca
 `/factory` runs from a browser, streams the run live, shows the board with approval buttons,
 reads the activity log (7a), animates how the agents hand work to each other (Agents view), lets several runs go at once and reports cost and token usage. Runs are detached processes, so
 closing the browser or crashing the web server does not stop a job. It launches the same `claude -p "/factory ..."` commands;
-see `web/README.md`. It is not copied into other repos.
+see `web/README.md`. It is not copied into other repos. The agent process does not inherit the web server's `NODE_ENV` or
+Next variables (`agentEnv()` in `web-studio/lib/runner.ts`), so a repo's tests run as they would from your shell.
+A narrated demo of a feature built this way, and how to record another, are in `web-studio/demo/README.md`.
 When a web-started run stops to ask something (it ends with the job mid-loop, or a job command
 did not move the job), the job card shows a "needs your answer" badge and a reply box that
 resumes the same session; runs started in a terminal, the desktop app or VS Code are not covered.

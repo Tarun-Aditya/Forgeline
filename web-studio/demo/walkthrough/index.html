@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Code changes</title>
+<style>
+:root{--bg:#1a1b1e;--side:#202226;--line:#2f3238;--fg:#d6dbe0;--dim:#8b939d;--ac:#3ddc9e;--pink:#ff7ab8}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif;overflow:hidden}
+#app{display:grid;grid-template-rows:84px 1fr 28px;height:100vh}
+#top{display:flex;align-items:center;gap:12px;padding:0 18px;border-bottom:1px solid var(--line);font-size:13px;color:var(--dim)}
+#top b{color:var(--fg);font-weight:600}
+#main{display:grid;grid-template-columns:330px 1fr;min-height:0}
+#side{background:var(--side);border-right:1px solid var(--line);overflow:auto;padding-bottom:12px}
+h4{margin:14px 14px 6px;font:600 11px/1 system-ui;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.grp{margin:8px 14px 2px;font:600 12px/1.2 ui-monospace,Menlo,monospace;color:#aab3bc}
+.row{display:flex;align-items:center;gap:8px;padding:4px 14px 4px 26px;cursor:pointer;font:13px/1.3 ui-monospace,Menlo,monospace;white-space:nowrap}
+.row:hover{background:#2a2d33}.row.sel{background:#2f3a36;box-shadow:inset 3px 0 var(--ac)}
+.row .n{overflow:hidden;text-overflow:ellipsis;flex:1}
+.badge{font:700 11px/1 ui-monospace,Menlo,monospace;width:16px;text-align:center}
+.M{color:#e2c08d}.A{color:#73c991}
+.st{font:11px/1 ui-monospace,Menlo,monospace;color:var(--dim)}.st i{font-style:normal;color:#73c991}.st u{text-decoration:none;color:#f48771}
+.commit{display:flex;gap:8px;padding:3px 14px;font:12px/1.35 ui-monospace,Menlo,monospace}
+.commit s{text-decoration:none;color:var(--ac);flex:none}.commit span{color:#b9c1c9;white-space:normal}
+#ed{display:flex;flex-direction:column;min-width:0}
+#tab{display:flex;align-items:center;gap:10px;height:36px;padding:0 14px;border-bottom:1px solid var(--line);font:13px ui-monospace,Menlo,monospace;color:var(--fg);background:#1e2024}
+#tab em{font-style:normal;color:var(--dim);font-size:12px}
+#box{flex:1;min-height:0}
+#bar{display:flex;align-items:center;gap:18px;padding:0 14px;background:#16171a;border-top:1px solid var(--line);font:12px system-ui;color:var(--dim)}
+#bar b{color:var(--ac);font-weight:600}
+</style></head>
+<body><div id="app">
+<div id="top"><b id="repo"></b><span>changes from one factory job</span></div>
+<div id="main"><div id="side"></div><div id="ed"><div id="tab"><span id="tname">Pick a file</span><em id="tsum"></em></div><div id="box"></div></div></div>
+<div id="bar"><b id="br"></b><span id="bsum"></span></div>
+</div>
+<script src="/.pw/node_modules/monaco-editor/min/vs/loader.js"></script>
+<script>
+const BASE = location.origin + "/.pw/node_modules/monaco-editor/min";
+window.MonacoEnvironment = { getWorkerUrl: () => URL.createObjectURL(new Blob([`self.MonacoEnvironment={baseUrl:'${BASE}/'};importScripts('${BASE}/vs/base/worker/workerMain.js');`], { type: "text/javascript" })) };
+require.config({ paths: { vs: BASE + "/vs" } });
+const LANG = { ts: "typescript", tsx: "typescript", css: "css", md: "markdown", json: "json" };
+const GROUPS = { server: "server/  (GraphQL API)", web: "web/  (React app)", record: "the record  (written by the factory)" };
+require(["vs/editor/editor.main"], async () => {
+  const data = await (await fetch("/walkthrough/data.json")).json();
+  document.getElementById("repo").textContent = data.repo;
+  document.getElementById("br").textContent = "⎇ " + data.branch;
+  const tot = data.files.filter((f) => f.group !== "record");
+  document.getElementById("bsum").textContent = `${tot.length} code files changed · +${tot.reduce((a, f) => a + f.add, 0)} −${tot.reduce((a, f) => a + f.del, 0)} · ${data.commits.length} commits`;
+  const side = document.getElementById("side");
+  let html = "<h4>Changed files</h4>";
+  let last = "";
+  for (const f of data.files) {
+    if (f.group !== last) { html += `<div class="grp">${GROUPS[f.group]}</div>`; last = f.group; }
+    const name = f.path.replace(/^(server|web)\//, "").replace(/^factory\/audit\/[^/]+\//, "audit/");
+    html += `<div class="row" data-path="${f.path}"><span class="badge ${f.status}">${f.status}</span><span class="n">${name}</span><span class="st"><i>+${f.add}</i> <u>−${f.del}</u></span></div>`;
+  }
+  html += "<h4>Commits</h4>";
+  for (const c of data.commits) html += `<div class="commit"><s>${c.hash}</s><span>${c.subject.replace(/</g, "&lt;")}</span></div>`;
+  side.innerHTML = html;
+
+  const ed = monaco.editor.createDiffEditor(document.getElementById("box"), {
+    theme: "vs-dark", readOnly: true, renderSideBySide: true, automaticLayout: true, fontSize: 15, lineHeight: 22,
+    minimap: { enabled: false }, scrollBeyondLastLine: false, originalEditable: false, renderOverviewRuler: false,
+    scrollbar: { vertical: "auto", horizontal: "auto" }, hideUnchangedRegions: { enabled: false },
+  });
+  const byPath = Object.fromEntries(data.files.map((f) => [f.path, f]));
+  let current = null;
+  window.__wt = {
+    open(path) {
+      const f = byPath[path]; if (!f) return 0;
+      current = f;
+      document.querySelectorAll(".row").forEach((r) => r.classList.toggle("sel", r.dataset.path === path));
+      const lang = LANG[path.split(".").pop()] || "plaintext";
+      const old = ed.getModel(); 
+      const o = monaco.editor.createModel(f.original, lang), m = monaco.editor.createModel(f.modified, lang);
+      ed.setModel({ original: o, modified: m });
+      if (old) { old.original.dispose(); old.modified.dispose(); }
+      document.getElementById("tname").textContent = f.path;
+      document.getElementById("tsum").textContent = `${f.status === "A" ? "new file" : "modified"} · +${f.add} −${f.del}`;
+      return new Promise((res) => { const t = setInterval(() => { const c = ed.getLineChanges(); if (c) { clearInterval(t); res(c.length); } }, 80); });
+    },
+    reveal(i) {
+      const c = ed.getLineChanges() || []; if (!c.length) return;
+      const ch = c[Math.min(i, c.length - 1)];
+      ed.getModifiedEditor().revealLineNearTop(Math.max(1, ch.modifiedStartLineNumber - 3), 0);
+      ed.getOriginalEditor().revealLineNearTop(Math.max(1, ch.originalStartLineNumber - 3), 0);
+    },
+    changes() { return (ed.getLineChanges() || []).length; },
+  };
+  document.querySelectorAll(".row").forEach((r) => r.addEventListener("click", () => window.__wt.open(r.dataset.path)));
+  window.__wtReady = true;
+});
+</script></body></html>

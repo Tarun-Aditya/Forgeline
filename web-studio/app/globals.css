@@ -378,3 +378,7 @@ html { font-feature-settings: "ss06" on; }
 @keyframes agent-flow {
   to { stroke-dashoffset: -8; }
 }
+
+/* Code changes view (components/code-changes.tsx): lines the job added, in the plain "Code" view. */
+.fl-added-line { background: rgba(61, 220, 158, 0.14); }
+.fl-added-gutter { background: #3ddc9e; width: 3px !important; margin-left: 4px; }

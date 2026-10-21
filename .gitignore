@@ -3,3 +3,4 @@ __pycache__/
 .factory-test-lock
 /factory/jobs/
 /factory/activity/
+.DS_Store
