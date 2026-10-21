@@ -113,6 +113,10 @@ command: `--no-save` prunes whatever else was there.
   on **Monaco**, the VS Code editor engine, fed with the real diffs by `build-data.py`. It is not the VS Code app.
   Say so when handing the video over. `STORY` in `build-data.py` sets the file order (contract first, then each
   side, then tests, then the record).
+  The web app now has the same view built in (job card, **Code changes**, Diff or Code, see `web-studio/README.md`).
+  A future cut can record that instead of this page: the replay repo needs the job's branch
+  (`factory/<job-id>`, pointing at the branch tip, for example the second parent of the merge commit) and a local `main`
+  so the app can find the change.
 
 ## How the script is written
 

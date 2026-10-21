@@ -27,6 +27,7 @@ Gaps were taken from an audit against Anthropic's "The AI-Native SDLC Playbook".
 | Build: CLAUDE.md | `scripts/doctor.py`, `/factory doctor`, `onboarder` agent and `/factory init` |
 | Build: skills | Five team skills in `.claude/skills/` |
 | Build: auto mode | `install.py --default-mode auto`; hooks verified in auto mode |
+| Review: read the change without leaving the app | Web app job panel: **Code changes** (changed files, line counts, commits; each file as a diff or as the finished code with added lines marked), `lib/jobchanges.ts`, `lib/linediff.ts`, Monaco served locally; 9 tests |
 | Demo and teaching | `web-studio/demo/record-sample.mjs`, `run-sample-demo.sh`, `drive-job.py`, `walkthrough/` (Monaco code view of the real diffs), `videos/forgeline-sample-demo.mp4`, and the `record-demo` skill; web app `agentEnv()` stops leaking `NODE_ENV` to the agents |
 | Build: quality bar cannot be lowered quietly | `policy_check.py` flags added suppressions, skipped or deleted tests and stripped assertions (`weakened bar`); the approver escalates them. Idea from Osmani `constraint-driven-development` and pstack `encode-lessons-in-structure` |
 | Build/Deploy: excuses and proof | Builder and approver carry a short excuses-to-rules table, builder must observe the real artifact, approver tries to disprove before APPROVE, diagnoser lists competing hypotheses. Ideas from Osmani anti-rationalization tables and `doubt-driven-development`, pstack `prove-it-works`; nothing third-party was installed |

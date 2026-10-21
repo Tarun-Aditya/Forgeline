@@ -34,6 +34,14 @@ Needs Node 22+ and the `claude` CLI logged in. It binds to `127.0.0.1` only.
 - **Board**: the factory's stages as columns, read from `factory/jobs/*/job.json` every 2s.
   Click a card to read its markdown files. At the human gates the dialog has the buttons
   for `approve-spec`, `respec`, `approve`, `rework`, `accept` and `resume`.
+- **Code changes**: the code a job changed, inside the job. Open a card and click **Code changes** (or the
+  "code changes" entry in the files dialog). It lists the changed files grouped by folder (code first, then tests,
+  then the record the factory wrote under `factory/audit/` and `docs/`) with line counts and the job's commits.
+  Each file opens as a **Diff** (side by side or inline) or as the finished **Code**, with the lines the job added
+  marked in green. It follows the job's branch while it exists and its merge commit afterwards. The editor is
+  Monaco (the engine behind VS Code), served from `/monaco` (copied from `node_modules` by `scripts/copy-monaco.mjs`),
+  so it works offline. The API is read-only git: `GET /api/jobs/<id>?repo=...&changes=1` for the list and
+  `&file=<path>` for one file before and after; only files in the job's own change can be requested.
 - **Repo picker**: repos listed in `FORGELINE_REPOS` (path-separated), or `web/.data/repos.json`,
   or this repo by default. A repo needs `factory/policy.json` and `.claude/agents/`.
 - **MCP servers**: names from your existing Claude config (`~/.claude.json`, `.mcp.json`)

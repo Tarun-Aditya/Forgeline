@@ -59,6 +59,7 @@ export function AppShell() {
     try { const v = localStorage.getItem("forgeline.scope"); if (v) setOpenRaw(v); } catch {}
   }, []);
   const [filesOpen, setFilesOpen] = useState(false);
+  const [filesView, setFilesView] = useState<"docs" | "code">("docs");
   const [agentName, setAgentName] = useState<string | null>(null);
   const [options, setOptions] = useState<Options>({ type: "feature", ticket: "", mcpOff: [] });
   const runId = useRef<string | null>(null);
@@ -206,7 +207,7 @@ export function AppShell() {
                   {tab === "agents" ? (
                     <AgentPanel row={selectedAgent!} activity={activity} onClose={() => setAgentName(null)} />
                   ) : (
-                    <JobPanel job={selected!} stages={jobData?.stages ?? []} running={!!open && running.has(open)} busy={busy} onClose={() => setOpen(null)} onFiles={() => setFilesOpen(true)} onCommand={submit} />
+                    <JobPanel job={selected!} stages={jobData?.stages ?? []} running={!!open && running.has(open)} busy={busy} onClose={() => setOpen(null)} onFiles={() => { setFilesView("docs"); setFilesOpen(true); }} onCode={() => { setFilesView("code"); setFilesOpen(true); }} onCommand={submit} />
                   )}
                 </MainCard>
               </Panel>
@@ -215,7 +216,7 @@ export function AppShell() {
         </PanelGroup>
       </AppFrame>
       <CommandPalette items={palette} />
-      {repo && <JobDrawer job={filesOpen ? selected : undefined} stages={jobData?.stages ?? []} running={!!open && running.has(open)} repo={repo} busy={busy} onClose={() => setFilesOpen(false)} onCommand={submit} />}
+      {repo && <JobDrawer job={filesOpen ? selected : undefined} stages={jobData?.stages ?? []} running={!!open && running.has(open)} repo={repo} busy={busy} view={filesView} onClose={() => setFilesOpen(false)} onCommand={submit} />}
     </div>
   );
 }
