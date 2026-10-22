@@ -77,7 +77,7 @@ A second pipeline in the same web app: turn a REST API into an Apollo Connectors
 with eight agents (`graphos-intake`, `-selector`, `-author`, `-validator`, `-reviewer`, `-recorder`, `-reconciler`, `-exporter`)
 and a `/graphos` orchestrator skill. Workspaces are standalone Git repos under `graphos/<name>/` (git-ignored here). Stage and next
 agent come from one script, `factory/scripts/graphos_state.py`, which both the skill and the web board call. Questions are
-decisions saved in the workspace and answered with the skill's own CLI. Usage: `USAGE.md` section 7c. The demo (a bookshop REST
+decisions saved in the workspace and answered with the skill's own CLI. Usage: `USAGE.md` section 7c. Hand-off and context: `docs/graphos-handoff.md`. The 17 use cases and how to use them: `docs/graphos-use-cases.md`. The demo (a bookshop REST
 API, its v1/v2 specs, the real golden run, the replay and the video recorder): `demo/graphos/README.md`.
 
 Proven (a real run on the demo API, Sonnet/Opus via the subscription): docs-only intake and spec intake; scope proposal and

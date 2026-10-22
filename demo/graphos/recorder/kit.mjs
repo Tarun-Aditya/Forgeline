@@ -7,7 +7,7 @@ import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 // playwright-core lives where the factory demo recorder installs it (see web-studio/.claude/skills/record-demo):
-//   npm install --no-save --prefix web-studio/demo/.pw playwright-core@1.56.1 monaco-editor@0.52.2
+//   npm install --no-save --prefix web-studio/demo/.pw playwright-core@1.64.0 monaco-editor@0.52.2
 import { chromium } from "../../../web-studio/demo/.pw/node_modules/playwright-core/index.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -18,7 +18,12 @@ export async function createKit({ out, size = { width: 1440, height: 810 } }) {
   const SIZE = size;
   const CHROME = process.env.CHROME_BIN ?? ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"].find((p) => fs.existsSync(p));
   fs.mkdirSync(OUT, { recursive: true });
-  const browser = await chromium.launch({ executablePath: CHROME, args: ["--no-sandbox"] });
+  // Headless Chrome 155 records only the top ~89% of the frame (a grey band below), so the recorder runs headed, with the window off-screen
+  // and rendering kept alive (macOS may otherwise throttle a window nobody can see).
+  const browser = await chromium.launch({
+    executablePath: CHROME, headless: false,
+    args: ["--no-sandbox", "--window-position=-3000,0", "--disable-backgrounding-occluded-windows", "--disable-renderer-backgrounding", "--disable-features=CalculateNativeWinOcclusion"],
+  });
   const context = await browser.newContext({ viewport: SIZE, recordVideo: { dir: OUT, size: SIZE }, colorScheme: "dark" });
   const page = await context.newPage();
   const T0 = Date.now(); // the video starts with the page

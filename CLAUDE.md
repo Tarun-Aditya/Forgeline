@@ -10,6 +10,8 @@ No install step; the scripts use the standard library. Tests: `python3 factory/e
 
 ## Working rules
 
+- Documentation lives in `docs/` (index: `docs/README.md`), named `<area>-<topic>.md`; decisions go in `docs/adr/`. Put new docs there, never beside the code,
+  and add each one to the index.
 - This repo is the factory itself, not a target project. `.claude/` and `factory/` are what
   gets copied into other repos. `factory/jobs/` is runtime state and should not be committed.
 - Run the offline evals after any change: `python3 factory/evals/run_evals.py`. It needs

@@ -11,7 +11,8 @@ pipeline for the demo video.
 | `docs.html` | Served at `/docs`. The only description of the API for the "docs only, no spec" start. |
 | `golden.py` | Runs the whole story for real through the web app's API and logs each step. |
 | `build_fixtures.py`, `fake_claude.py` | Turn that real run into a replay, so the video needs no model. |
-| `video/` | The recorder (`record.mjs`), voice and mux scripts. `run-graphos-demo.sh` runs it end to end. |
+| `recorder/` | The recorder (`record.mjs`), voice and mux scripts. `run-graphos-demo.sh` runs it end to end. |
+| `videos/` | The finished video, `forgeline-graphos-demo.mp4` (about 15.5 minutes, narrated). Raw working files are in `recorder/out/` (git-ignored). |
 
 ## What the API has, on purpose
 
@@ -39,29 +40,33 @@ Open http://127.0.0.1:3000, switch to **GraphOS**, open **New connector**, click
 `bash .claude/skills/graphos-factory/graphos-factory-core/scripts/toolchain.sh` after you have read and accepted
 Apollo's Elastic License v2 (`APOLLO_ELV2_LICENSE=accept`); the web app passes that on when `FORGELINE_ELV2_ACCEPTED=1`.
 
-## The 16 things the mode covers, and where the demo shows each
+## The 17 things the mode covers, and where the demo shows each
 
-| # | Use case | Where |
+The full guide, with how to use each in the app and real-world variations, is [`docs/graphos-use-cases.md`](../../docs/graphos-use-cases.md). The hand-off and context
+document is [`docs/graphos-handoff.md`](../../docs/graphos-handoff.md).
+
+| # | Use case | Where the demo shows it |
 | --- | --- | --- |
-| 1 | New subgraph from an OpenAPI/Swagger spec | start box, "spec" |
-| 2 | New subgraph from a docs link only (no spec) | start box, "docs only" |
-| 3 | Choose scope: which operations, with reasons for what is left out | Scope tab |
-| 4 | A POST that may be a read, and the unsupported sources greyed out | Scope tab, start box |
-| 5 | Relationships between types (links), entities | Decision cards |
-| 6 | Design decisions with alternatives: PII, secrets, mutations, nulls, pagination, payment | Decisions tab |
-| 7 | Generic wrapper or customer-specific fields | start box checkbox |
-| 8 | Write the schema, editing only what changed | Apply stage, Schema tab |
+| 1 | New subgraph from an OpenAPI/Swagger spec | New connector, "spec" |
+| 2 | New subgraph from a docs link only (no spec) | New connector, "docs only" |
+| 3 | Choose scope, with reasons for what is left out | Scope tab |
+| 4 | A POST that may be a read; unsupported sources greyed out | Scope tab, New connector |
+| 5 | Relationships between types, and federation entities | Decision cards |
+| 6 | Design decisions with alternatives and recorded reasons | Decisions tab |
+| 7 | Plain wrapper or customer-specific (a real assessment) | New connector checkbox, Record tab |
+| 8 | Write the schema, tests and coverage, editing only the delta | Apply stage, Schema tab |
 | 9 | Hand edits detected and codified | Schema tab banner |
-| 10 | Validation layers: compose, Connector tests, mocked Router, conformance, lint | Validate tab |
-| 11 | Check against your own supergraph (only with your graph and key, else "not run") | Validate tab |
-| 12 | Record live traffic as fixtures; spec-versus-reality findings | Record tab |
-| 13 | Follow an API change: refresh, classify against your scope, reapply | Record tab, "API changed" |
-| 14 | Export with the production URL (never publishes) | Validate tab |
-| 15 | Hand the workspace to a teammate or another agent (Git record, resume) | Record tab, Runs |
-| 16 | Schema review (naming, nullability, fan-out, security) | Validate tab |
+| 10 | Validation in layers (nothing not-run shown as a pass) | Validate tab |
+| 11 | Live check against the real service | Validate tab |
+| 12 | Record live traffic; spec-versus-reality findings | Record tab |
+| 13 | Compose with other subgraphs (a local stand-in for the supergraph check) | Validate tab |
+| 14 | Follow an API change: refresh, classify against your scope, reapply | Record tab, "API changed" |
+| 15 | Export with the production URL (never publishes) | Validate tab |
+| 16 | Hand-off: a fresh agent answers from the record | Record tab, "Ask the record" |
+| 17 | Schema review (naming, nullability, fan-out, security) | Validate tab |
 
-Use case 11 is shown honestly as "not run": it needs a published GraphOS graph and an `APOLLO_KEY`, which a local demo
-does not have, and the skill never asks for or prints a key.
+The real check against a published GraphOS graph (`supergraph_check`) shows as "not run": it needs a graph and an `APOLLO_KEY`, which a local demo
+does not have, and the skill never asks for or prints a key. Use case 13 is the local stand-in.
 
 ## Re-record the video
 
@@ -71,7 +76,7 @@ python3 demo/graphos/golden.py
 # 2. fixtures from it
 python3 demo/graphos/build_fixtures.py
 # 3. record (needs ffmpeg, Chrome, and optionally the Piper voice; Playwright is installed once for the factory demo too)
-npm install --no-save --prefix web-studio/demo/.pw playwright-core@1.56.1 monaco-editor@0.52.2
+npm install --no-save --prefix web-studio/demo/.pw playwright-core@1.64.0 monaco-editor@0.52.2
 VO_PY=$HOME/forgeline-voice/venv/bin/python VO_MODEL=$HOME/forgeline-voice/en_US-hfc_female-medium.onnx \
   caffeinate -dimsu demo/graphos/run-graphos-demo.sh
 ```
