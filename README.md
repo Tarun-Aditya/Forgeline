@@ -75,7 +75,7 @@ factory/
   audit/                       committed copy of each job's record (made on the job branch)
 .github/workflows/factory-evals.yml   runs the evals on any change to the factory
 .gitignore.factory             lines to add to your .gitignore
-web/                           optional local web app over the factory (not copied into other repos)
+web-studio/                    optional local web app over the factory, in Mastra Studio style (not copied into other repos)
 ```
 
 ## Commands
@@ -196,7 +196,7 @@ continues the job from its files. Details are in `USAGE.md` section 7a.
 
 ## Web app
 
-`web/` is an optional local web app (Next.js, Vercel AI SDK, AI Elements) over the same factory.
+`web-studio/` is an optional local web app (Next.js, Vercel AI SDK, AI Elements) over the same factory.
 It does not replace the orchestrator: each action launches `claude -p "/factory ..."` in the
 chosen repo. It gives you an input box for a task or ticket, the job board with approval buttons,
 a live run log, the shared activity feed, a Runs tab that replays any run, an Agents view that
@@ -205,10 +205,10 @@ changes on each job, alerts, parallel runs, and cost and token metrics by model,
 the web server does not stop a job.
 
 ```bash
-cd web && npm install && npm run dev      # http://127.0.0.1:3000, needs Node 22+ and a logged-in claude CLI
+cd web-studio && npm install && npm run dev      # http://127.0.0.1:3000, needs Node 22+ and a logged-in claude CLI
 ```
 
-It listens on `127.0.0.1` only and refuses cross-origin writes. See `web/README.md` for settings
+It listens on `127.0.0.1` only and refuses cross-origin writes. See `web-studio/README.md` for settings
 and `USAGE.md` section 7b.
 
 **Demo video.** `web-studio/demo/videos/forgeline-sample-demo.mp4` shows a small GraphQL + React sample app before and after a

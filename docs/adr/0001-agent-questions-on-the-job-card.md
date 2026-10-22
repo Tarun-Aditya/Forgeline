@@ -1,5 +1,8 @@
 # ADR 0001: Agent questions on the job card
 
+> Note (2026-10-22): the `web/` app this ADR describes was removed when the Studio layout (`web-studio/`) became the only web app. The decision is kept as history; see CONTEXT.md.
+
+
 - Status: Accepted
 - Date: 2026-10-12
 - Job: 003-agent-questions-badge (full record: factory/audit/003-agent-questions-badge/)
