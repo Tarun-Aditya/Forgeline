@@ -1,5 +1,5 @@
 "use client";
-import { Bot, CodeXml, Compass, FileText, GitPullRequest, Hammer, Lightbulb, ListChecks, MousePointerClick, Palette, ScanSearch, ShieldAlert, ShieldCheck, Stamp, Stethoscope } from "lucide-react";
+import { BadgeCheck, Bot, ClipboardCheck, CodeXml, Compass, FileText, GitCompare, GitPullRequest, Hammer, History, Lightbulb, ListChecks, MousePointerClick, PackageOpen, Palette, Radio, ScanSearch, ShieldAlert, ShieldCheck, Stamp, Stethoscope } from "lucide-react";
 import { Fragment, type ComponentType } from "react";
 import type { AgentRow } from "@/components/agents-view";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,8 @@ const ICONS: Record<string, ComponentType<{ className?: string }>> = {
   "reviewer-security": ShieldCheck, "reviewer-ux": MousePointerClick, "reviewer-ui": Palette, "reviewer-code": CodeXml,
   approver: Stamp, "scanner-quality": ScanSearch, "scanner-security": ShieldAlert, diagnoser: Stethoscope,
   onboarder: Compass, "pr-reviewer": GitPullRequest,
+  "graphos-intake": PackageOpen, "graphos-selector": ListChecks, "graphos-author": Hammer, "graphos-validator": ClipboardCheck,
+  "graphos-reviewer": ShieldCheck, "graphos-exporter": BadgeCheck, "graphos-recorder": Radio, "graphos-reconciler": GitCompare, "graphos-historian": History,
 };
 
 // The factory's order of work, left to right. Agents not named here land in "Other".
@@ -18,6 +20,17 @@ const LANES: { title: string; names: string[] }[] = [
   { title: "Build", names: ["builder"] },
   { title: "Review", names: ["reviewer-security", "reviewer-ux", "reviewer-ui", "reviewer-code"] },
   { title: "Decide", names: ["approver"] },
+];
+// GraphOS mode: a REST API to an Apollo subgraph. The recorder, reconciler and historian are used on demand.
+const GRAPHOS_LANES: { title: string; names: string[] }[] = [
+  { title: "Inventory", names: ["graphos-intake"] },
+  { title: "Select", names: ["graphos-selector"] },
+  { title: "Apply", names: ["graphos-author"] },
+  { title: "Validate", names: ["graphos-validator", "graphos-reviewer"] },
+  { title: "Export", names: ["graphos-exporter"] },
+];
+const GRAPHOS_SIDE: { title: string; names: string[] }[] = [
+  { title: "On demand", names: ["graphos-recorder", "graphos-reconciler", "graphos-historian"] },
 ];
 const SIDE: { title: string; names: string[] }[] = [
   { title: "Maintain loop", names: ["scanner-quality", "scanner-security", "diagnoser"] },
@@ -65,19 +78,23 @@ function Link({ live }: { live: boolean }) {
 }
 
 /** Pictorial view: the pipeline as lanes of agent tiles, with live agents pulsing. */
-export function AgentMap({ rows, selected, onSelect, job }: { rows: AgentRow[]; selected: string | null; onSelect: (n: string) => void; job?: string | null }) {
+export function AgentMap({ rows, selected, onSelect, job, kind = "factory" }: { rows: AgentRow[]; selected: string | null; onSelect: (n: string) => void; job?: string | null; kind?: "factory" | "graphos" }) {
+  const gx = kind === "graphos";
+  const LANES_ = gx ? GRAPHOS_LANES : LANES;
+  const SIDE_ = gx ? GRAPHOS_SIDE : SIDE;
   const by = new Map(rows.map((r) => [r.name, r]));
   const pick = (names: string[]) => names.map((n) => by.get(n)).filter((r): r is AgentRow => !!r);
-  const known = new Set([...LANES, ...SIDE].flatMap((l) => l.names));
-  const other = rows.filter((r) => !known.has(r.name));
-  const lanes = LANES.map((l) => ({ ...l, rows: pick(l.names) })).filter((l) => l.rows.length);
+  const known = new Set([...LANES_, ...SIDE_].flatMap((l) => l.names));
+  const mine = rows.filter((r) => (gx ? r.name.startsWith("graphos-") : !r.name.startsWith("graphos-")));
+  const other = mine.filter((r) => !known.has(r.name));
+  const lanes = LANES_.map((l) => ({ ...l, rows: pick(l.names) })).filter((l) => l.rows.length);
   const liveLane = lanes.map((l) => l.rows.some((r) => r.state === "running"));
-  const side = [...SIDE.map((l) => ({ ...l, rows: pick(l.names) })), { title: "Other", names: [], rows: other }].filter((l) => l.rows.length);
+  const side = [...SIDE_.map((l) => ({ ...l, rows: pick(l.names) })), { title: "Other", names: [], rows: other }].filter((l) => l.rows.length);
 
   return (
     <div className="space-y-8">
       <div>
-        <h3 className="mb-3 text-eyebrow text-muted-foreground uppercase">Factory pipeline</h3>
+        <h3 className="mb-3 text-eyebrow text-muted-foreground uppercase">{gx ? "GraphOS pipeline" : "Factory pipeline"}</h3>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-0">
           {lanes.map((l, i) => (
             <Fragment key={l.title}>

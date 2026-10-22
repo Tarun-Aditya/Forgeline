@@ -9,7 +9,7 @@ Built with Next.js, the Vercel AI SDK (`ai`, `@ai-sdk/react`) and AI Elements.
 ## Run
 
 ```bash
-cd web
+cd web-studio
 npm install
 npm run dev        # http://127.0.0.1:3000
 npm test           # node:test, no extra tooling
@@ -34,6 +34,17 @@ Needs Node 22+ and the `claude` CLI logged in. It binds to `127.0.0.1` only.
 - **Board**: the factory's stages as columns, read from `factory/jobs/*/job.json` every 2s.
   Click a card to read its markdown files. At the human gates the dialog has the buttons
   for `approve-spec`, `respec`, `approve`, `rework`, `accept` and `resume`.
+- **GraphOS mode**: a **Factory | GraphOS** switch in the sidebar. GraphOS shows connector workspaces (`graphos/<name>`, each its
+  own Git repo) with the same Board, Agents, Activity, Runs and Metrics pages, and the scope switcher lists connectors in place of jobs.
+  - **Board**: stages Inventory, Scope, Design, Apply, Validate and Export, read by `factory/scripts/graphos_state.py`. A card docks a
+    side panel (pipeline, next step, counts); **Open connector** opens the full dialog.
+  - **Dialog**: a Scope picker, Decision cards (answered with the skill's own CLI, each answer a Git commit, with the agent's
+    recommendation), Validate (every layer, nothing that did not run shown as a pass, a live check, a local composition with your
+    other subgraphs, the schema review, Export), Schema (hand-edit detection and Codify) and Record (findings, Git history, refresh
+    against a newer spec, live recording, and "Ask the record": a fresh agent answers from the workspace alone).
+  - **New connector**: a spec or a docs link in, with a plain or customer-specific switch, and a control for the demo API in
+    `demo/graphos/`. gRPC, database and GraphQL sources are shown as not built yet (they are not, upstream).
+  - **Agents**: the nine `graphos-*` agents as a pipeline. See `USAGE.md` section 7c and `demo/graphos/README.md`.
 - **Code changes**: the code a job changed, inside the job. Open a card and click **Code changes** (or the
   "code changes" entry in the files dialog). It lists the changed files grouped by folder (code first, then tests,
   then the record the factory wrote under `factory/audit/` and `docs/`) with line counts and the job's commits.
@@ -56,6 +67,9 @@ Needs Node 22+ and the `claude` CLI logged in. It binds to `127.0.0.1` only.
 | --- | --- | --- |
 | `FORGELINE_REPOS` | this repo | Repos the app may use. |
 | `FORGELINE_PERMISSION_MODE` | `auto` | Passed as `--permission-mode`. |
+| `FORGELINE_GRAPHOS_DIR` | `graphos` | Folder under the repo that holds GraphOS workspaces. |
+| `FORGELINE_ELV2_ACCEPTED` | unset | Set to `1` to pass `APOLLO_ELV2_LICENSE=accept` to `/graphos` runs (Apollo's Elastic License v2; only you can accept it). |
+| `FORGELINE_DEMO_PORT` | `4010` | Port of the demo API the start form can launch. |
 | `FORGELINE_ALLOW_API_KEY` | unset | By default `ANTHROPIC_API_KEY` is removed so runs use the subscription. |
 | `CLAUDE_BIN` | `claude` | Path to the CLI. |
 | `FORGELINE_WEB_DATA` | `web/.data` | Run history and event logs. |

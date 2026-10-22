@@ -36,12 +36,14 @@ export type StartInput = {
 const VERBS = "accept|approve-spec|respec|approve|rework|resume|stop|next|metrics|review";
 const TICKET = /^[A-Z][A-Z0-9]+-\d+$/;
 const JOB_VERB = new RegExp(`^/factory\\s+(?:${VERBS})\\s+(\\S+)`);
+// GraphOS commands act on a workspace; its name locks it the way a job id locks a job.
+const GRAPHOS_VERB = /^\/graphos\s+(?:new|continue|refresh|record|review|validate|codify|compose|ask|export|fix)\s+([A-Za-z0-9][A-Za-z0-9._-]*)/;
 
 /** Anything starting with /factory is passed through; plain text becomes a new job. */
 export function buildPrompt({ text, type, ticket }: Pick<StartInput, "text" | "type" | "ticket">): string {
   const t = text.trim();
   if (!t) throw new Error("Nothing to run.");
-  if (t.startsWith("/factory")) return t;
+  if (t.startsWith("/factory") || t.startsWith("/graphos")) return t;
   const key = ticket?.trim() || (TICKET.test(t) ? t : "");
   if (key && !TICKET.test(key)) throw new Error("Ticket must look like ABC-123.");
   return ["/factory", t, type === "bugfix" ? "--type bugfix" : "", key ? `--ticket ${key}` : ""]
@@ -51,7 +53,8 @@ export function buildPrompt({ text, type, ticket }: Pick<StartInput, "text" | "t
 
 /** The job a command acts on, used to refuse two orchestrators on one job. */
 export function jobKey(prompt: string): string | null {
-  return JOB_VERB.exec(prompt)?.[1] ?? null;
+  const g = GRAPHOS_VERB.exec(prompt)?.[1];
+  return g ? `gx-${g}` : (JOB_VERB.exec(prompt)?.[1] ?? null);
 }
 
 export function activeRuns() {
@@ -84,6 +87,8 @@ export function launchRun(input: StartInput): string {
     ...mcpArgs(input.repo, input.mcp, mcpFile),
   ];
   const env = agentEnv(process.env);
+  // Apollo's router and composition plugin are Elastic License v2; only the person accepts it, once, by setting this.
+  if (prompt.startsWith("/graphos") && process.env.FORGELINE_ELV2_ACCEPTED === "1") env.APOLLO_ELV2_LICENSE = "accept";
 
   const out = fs.openSync(eventLogPath(runId), "w");
   const err = fs.openSync(errLogPath(runId), "w");
