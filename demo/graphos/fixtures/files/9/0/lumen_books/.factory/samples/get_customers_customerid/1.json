@@ -1,0 +1,35 @@
+{
+  "contract_version": 1,
+  "operation": "get:/customers/{customerId}",
+  "recorded_at": "2026-10-21T19:03:03.708Z",
+  "provenance": "probe",
+  "request": {
+    "method": "GET",
+    "url": "http://127.0.0.1:4010/customers/c1",
+    "headers": {
+      "Authorization": "<redacted:authorization>",
+      "Accept": "application/json"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "content_type": "application/json",
+    "body": {
+      "id": "c1",
+      "name": "Priya Raman",
+      "email": "priya.raman@example.com",
+      "phone": "+44 20 7946 0101",
+      "tier": "gold",
+      "createdAt": "2023-01-05T09:00:00Z"
+    },
+    "json": true
+  },
+  "scrub": {
+    "replacements": {
+      "key:authorization": 1
+    },
+    "credential": "LUMEN_TOKEN"
+  },
+  "note": null
+}

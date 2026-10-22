@@ -1,0 +1,16 @@
+contract_version: 2
+defaults:
+  fields: all
+  max_depth: 6
+  opaque_json_policy: forbid
+  null_handling: omit
+operations:
+  # Proposed starter scope: the read-only book catalog.
+  "get:/books": { include: true, graphql: { root: query, name: books } }
+  "get:/books/{id}": { include: true, graphql: { root: query, name: book } }
+  "get:/authors/{id}": { include: true, graphql: { root: query, name: author } }
+  # Not in the starter scope; toggle on the board to add.
+  "get:/orders": { include: false, reason: "orders carry customer ids and payment details (last4, brand); add after the catalog", graphql: { root: query, name: orders } }
+  "get:/orders/{id}": { include: false, reason: "orders carry customer ids and payment details (last4, brand); add after the catalog", graphql: { root: query, name: order } }
+  "get:/customers/{id}": { include: false, reason: "undocumented (found by probe only) and returns personal data (email, phone)", graphql: { root: query, name: customer } }
+  "post:/orders": { include: false, reason: "write; docs-only, never probed, no sandbox known", graphql: { root: mutation, name: createOrder } }

@@ -1,0 +1,3 @@
+mutation {
+  lumen_books_cancelOrder(orderId: "o-1001")
+}

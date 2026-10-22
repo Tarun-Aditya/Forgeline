@@ -1,0 +1,29 @@
+# expect-upstream-status: 401
+query {
+  lumen_books_orders(
+    customerId: "customerId-401"
+    status: paid
+    after: "after-403"
+    limit: 40
+  ) {
+    data {
+      id
+      customerId
+      status
+      items {
+        bookId
+        quantity
+        unitPriceCents
+      }
+      totalCents
+      payment {
+        type
+        last4
+        brand
+        iban
+      }
+      createdAt
+    }
+    nextCursor
+  }
+}

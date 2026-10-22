@@ -1,0 +1,26 @@
+# Lumen Books — Apollo Connectors subgraph.
+#
+# The schema header init wrote: the spec links and the one source. Each
+# root field (type Query, type Mutation) and its @connect is added at
+# apply; until the first apply adds one, compose fails on this file.
+# This file is the artifact: edit it directly. Selection lives in
+# .factory/selection.yaml, the reasoning in .factory/decisions.json.
+#
+# Auth: Authorization: Bearer <credential>; the scheme prefix stays outside AUTH_EXPR.
+
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.15", import: ["@key"])
+  @link(url: "https://specs.apollo.dev/connect/v0.4", import: ["@source", "@connect"])
+
+@source(
+  name: "lumen_docs"
+  http: {
+    baseURL: "{{BASE_URL}}"
+    headers: [
+      { name: "Authorization", value: "Bearer {{AUTH_EXPR}}" }
+      { name: "Accept", value: "application/json" }
+      { name: "Content-Type", value: "application/json" }
+      { name: "User-Agent", value: "graphos-factory" }
+    ]
+  }
+)

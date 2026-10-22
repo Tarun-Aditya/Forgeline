@@ -1,0 +1,20 @@
+mutation {
+  lumen_books_updateOrder(orderId: "o-901", status: shipped, note: "leave at the door") {
+    id
+    customerId
+    status
+    items {
+      bookId
+      quantity
+      unitPriceCents
+    }
+    totalCents
+    payment {
+      type
+      last4
+      brand
+      iban
+    }
+    createdAt
+  }
+}

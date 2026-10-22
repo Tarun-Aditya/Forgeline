@@ -1,0 +1,29 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-yqmrto",
+    "slug": "book-author-relationship-field-or-author",
+    "title": "Book.author: relationship field or Author entity reference",
+    "status": "open",
+    "date": "2026-10-21",
+    "after": [
+      "D-ox8zkp",
+      "D-qbc6qk"
+    ],
+    "phase": "select",
+    "question": "Book.author is a field-level connector on GET /authors/{authorId} (the links: form D-ox8zkp confirmed), and Author is also an entity with a type-level connector on the same GET, so lint warns link-key-drift. Keep the relationship field, or map author: { id: authorId } in every Book selection so the router resolves it through the Author entity connector (same request count; Author has no batch endpoint)?",
+    "affects": [
+      "lumen-books.graphql"
+    ],
+    "choices": [
+      {
+        "id": "field",
+        "label": "Keep the field-level relationship connector"
+      },
+      {
+        "id": "entity",
+        "label": "Resolve Book.author through the Author entity reference"
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "data": {
+    "lumen_books_order": {
+      "id": "o-1301",
+      "items": [
+        {
+          "book": {
+            "authorId": "a-1301",
+            "currency": "EUR",
+            "genres": [
+              "fiction",
+              "classic"
+            ],
+            "id": "b-1301",
+            "isbn": "978-0-00-001301",
+            "priceCents": 1499,
+            "publishedAt": "1999-04-01",
+            "stock": 12,
+            "title": "River Atlas"
+          },
+          "bookId": "b-1301",
+          "quantity": 1
+        }
+      ]
+    }
+  }
+}

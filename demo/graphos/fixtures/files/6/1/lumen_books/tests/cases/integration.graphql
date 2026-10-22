@@ -1,0 +1,7 @@
+query {
+  lumen_books_integration(integrationId: "i-1101") {
+    id
+    name
+    webhookUrl
+  }
+}

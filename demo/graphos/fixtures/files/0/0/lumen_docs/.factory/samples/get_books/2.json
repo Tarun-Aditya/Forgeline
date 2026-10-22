@@ -1,0 +1,100 @@
+{
+  "contract_version": 1,
+  "operation": "get:/books",
+  "recorded_at": "2026-10-21T18:29:03.490Z",
+  "provenance": "probe",
+  "request": {
+    "method": "GET",
+    "url": "http://127.0.0.1:4010/books?page=2&limit=3",
+    "headers": {
+      "Authorization": "<redacted:authorization>",
+      "Accept": "application/json"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "content_type": "application/json",
+    "body": {
+      "data": [
+        {
+          "id": "b4",
+          "title": "A Quiet Stove",
+          "authorId": "a2",
+          "isbn": "9780000000042",
+          "priceCents": 1250,
+          "currency": "EUR",
+          "genres": [
+            "crime",
+            "food"
+          ],
+          "publishedAt": "2020-01-30",
+          "stock": 0,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "crime",
+              "food"
+            ]
+          }
+        },
+        {
+          "id": "b5",
+          "title": "Concrete and Weather",
+          "authorId": "a3",
+          "isbn": "9780000000059",
+          "priceCents": 2100,
+          "currency": "GBP",
+          "genres": [
+            "essays"
+          ],
+          "publishedAt": "2022-11-02",
+          "stock": 9,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "essays"
+            ]
+          }
+        },
+        {
+          "id": "b6",
+          "title": "Streets Without Names",
+          "authorId": "a3",
+          "isbn": "9780000000066",
+          "priceCents": 1750,
+          "currency": "GBP",
+          "genres": [
+            "essays",
+            "travel"
+          ],
+          "publishedAt": "2023-04-18",
+          "stock": 17,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "essays",
+              "travel"
+            ]
+          }
+        }
+      ],
+      "meta": {
+        "page": 2,
+        "limit": 3,
+        "total": 10
+      }
+    },
+    "json": true
+  },
+  "scrub": {
+    "replacements": {
+      "key:authorization": 1
+    },
+    "credential": "LUMEN_TOKEN"
+  },
+  "note": null
+}

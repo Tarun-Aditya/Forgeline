@@ -1,0 +1,17 @@
+{
+  "data": {
+    "lumen_books_books": {
+      "data": [
+        {
+          "id": "b-1601",
+          "isbn": "978-0-00-001601",
+          "isbn13": "9780000016011",
+          "title": "River Atlas"
+        }
+      ],
+      "limit": 10,
+      "page": 1,
+      "total": 1
+    }
+  }
+}

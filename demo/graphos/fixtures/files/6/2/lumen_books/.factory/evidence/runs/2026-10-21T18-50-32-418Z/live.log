@@ -1,0 +1,2 @@
+live: no tests/live.yaml — nothing to run (not_run)
+graphos-factory-core: live runs /Users/tarunaditya/.cache/graphos-factory-core/apollographql-graphos-factory/bin/graphos-factory-core (from GRAPHOS_FACTORY_CORE_BIN), version 0.11.0 (expected >= 0.11.0)

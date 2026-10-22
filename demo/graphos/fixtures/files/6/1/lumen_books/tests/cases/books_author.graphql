@@ -1,0 +1,14 @@
+query {
+  lumen_books_books(genre: "poetry") {
+    data {
+      id
+      authorId
+      author {
+        id
+        name
+        bio
+        born
+      }
+    }
+  }
+}

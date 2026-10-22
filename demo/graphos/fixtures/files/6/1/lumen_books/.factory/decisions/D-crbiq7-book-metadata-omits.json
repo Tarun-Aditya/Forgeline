@@ -1,0 +1,56 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-crbiq7",
+    "slug": "book-metadata-omits",
+    "title": "Book.metadata left off every book read",
+    "status": "resolved",
+    "date": "2026-10-21",
+    "after": [
+      "D-2hoz50"
+    ],
+    "question": "Map the free-form metadata object on the three operations that return books?",
+    "affects": [
+      "Lumen_Books_Book.metadata"
+    ],
+    "choices": [
+      {
+        "id": "omit",
+        "label": "leave metadata off"
+      },
+      {
+        "id": "expose",
+        "label": "map it as Lumen_Books_JSON"
+      }
+    ],
+    "resolution": {
+      "chosen": [
+        "omit"
+      ],
+      "note": "Carries out D-2hoz50 (exclude metadata) as source-coverage omits.",
+      "decision": "metadata is not mapped on get:/books, get:/books/{bookId} or post:/books/search.",
+      "by": "agent",
+      "at": "2026-10-21"
+    },
+    "omits": [
+      {
+        "operation": "get:/books",
+        "direction": "response",
+        "path": "data[].metadata",
+        "reason": "editorial"
+      },
+      {
+        "operation": "post:/books/search",
+        "direction": "response",
+        "path": "data[].metadata",
+        "reason": "editorial"
+      },
+      {
+        "operation": "get:/books/{bookId}",
+        "direction": "response",
+        "path": "metadata",
+        "reason": "editorial"
+      }
+    ]
+  }
+}

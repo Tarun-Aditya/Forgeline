@@ -1,0 +1,25 @@
+# expect-upstream-status: 404
+mutation {
+  lumen_books_updateOrder(
+    orderId: "orderId-404"
+    status: pending
+    note: "note-406"
+  ) {
+    id
+    customerId
+    status
+    items {
+      bookId
+      quantity
+      unitPriceCents
+    }
+    totalCents
+    payment {
+      type
+      last4
+      brand
+      iban
+    }
+    createdAt
+  }
+}

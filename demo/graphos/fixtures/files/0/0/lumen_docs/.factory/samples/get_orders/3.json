@@ -1,0 +1,51 @@
+{
+  "contract_version": 1,
+  "operation": "get:/orders",
+  "recorded_at": "2026-10-21T18:29:03.612Z",
+  "provenance": "probe",
+  "request": {
+    "method": "GET",
+    "url": "http://127.0.0.1:4010/orders?status=paid",
+    "headers": {
+      "Authorization": "<redacted:authorization>",
+      "Accept": "application/json"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "content_type": "application/json",
+    "body": {
+      "data": [
+        {
+          "id": "o2",
+          "customerId": "c1",
+          "status": "paid",
+          "items": [
+            {
+              "bookId": "b5",
+              "quantity": 2,
+              "unitPriceCents": 2100
+            }
+          ],
+          "totalCents": 4200,
+          "payment": {
+            "type": "card",
+            "last4": "4242",
+            "brand": "visa"
+          },
+          "createdAt": "2024-09-14T16:20:00Z"
+        }
+      ],
+      "nextCursor": null
+    },
+    "json": true
+  },
+  "scrub": {
+    "replacements": {
+      "key:authorization": 1
+    },
+    "credential": "LUMEN_TOKEN"
+  },
+  "note": null
+}

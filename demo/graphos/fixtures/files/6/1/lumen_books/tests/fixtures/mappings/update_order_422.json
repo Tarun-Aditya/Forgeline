@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "PATCH",
+    "urlPath": "/orders/orderId-422",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "status": "shipped",
+          "note": "note-424"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "code": "invalid_request",
+      "message": "The request body is invalid."
+    }
+  }
+}

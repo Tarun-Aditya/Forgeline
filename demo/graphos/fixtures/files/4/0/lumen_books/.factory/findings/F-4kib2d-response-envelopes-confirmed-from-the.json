@@ -1,0 +1,20 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-4kib2d",
+    "slug": "response-envelopes-confirmed-from-the",
+    "title": "Response envelopes confirmed from the inventory",
+    "date": "2026-10-21",
+    "status": "current",
+    "body": "books, searchBooks and orders read the payload under 'data' (the one array root property beside meta / nextCursor); every single-record operation reads the whole body (envelope null); cancelOrder is a 204 with no body. The envelope names the wrapper key only; flatten-or-keep is the pagination decisions D-oqs0jf and D-qf95m2.",
+    "cites": "references/schema-authoring.md#envelopes",
+    "source": "agent",
+    "affects": [
+      "selection.yaml"
+    ],
+    "related": [
+      "D-oqs0jf",
+      "D-qf95m2"
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/authors/a-1201",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "a-1201",
+      "name": "Tove Berg",
+      "bio": "Poet.",
+      "born": 1980
+    }
+  },
+  "metadata": {
+    "x-cases": [
+      "books_author"
+    ]
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "data": null,
+  "errors": [
+    {
+      "extensions": {
+        "code": "conflict",
+        "connector": {
+          "coordinate": "lumen-books:Mutation.lumen_books_refundOrder[0]"
+        },
+        "http": {
+          "status": 409
+        },
+        "httpStatus": 409,
+        "service": "lumen-books"
+      },
+      "message": "Order cannot be refunded in its current status.",
+      "path": [
+        "lumen_books_refundOrder"
+      ]
+    }
+  ]
+}

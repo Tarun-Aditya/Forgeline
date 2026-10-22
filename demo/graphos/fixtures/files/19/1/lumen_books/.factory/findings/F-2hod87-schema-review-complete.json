@@ -1,0 +1,12 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-2hod87",
+    "slug": "schema-review-complete",
+    "title": "Schema review complete",
+    "date": "2026-10-21",
+    "status": "current",
+    "body": "CHANGES, 2 blockers, 5 should-fix",
+    "source": "agent"
+  }
+}

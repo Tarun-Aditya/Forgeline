@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/authors/authorId-404",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    }
+  },
+  "response": {
+    "status": 404,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "code": "not_found",
+      "message": "No such resource."
+    }
+  }
+}

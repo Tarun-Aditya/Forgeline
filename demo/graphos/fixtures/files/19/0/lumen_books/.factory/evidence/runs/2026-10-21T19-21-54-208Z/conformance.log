@@ -1,0 +1,505 @@
+{
+  "oracle": "openapi.json",
+  "counts": {
+    "fail": 0,
+    "pass": 60,
+    "unchecked": 0,
+    "unmatched": 0,
+    "waived": 1
+  },
+  "operations": {
+    "get:/authors/{authorId}": "pass",
+    "get:/books/{bookId}": "pass",
+    "get:/books": "pass",
+    "delete:/orders/{orderId}": "pass",
+    "post:/orders": "pass",
+    "get:/customers/{customerId}": "pass",
+    "get:/integrations/{integrationId}": "pass",
+    "get:/orders/{orderId}": "pass",
+    "get:/orders": "pass",
+    "post:/orders/{orderId}/refund": "pass",
+    "post:/books/search": "pass"
+  },
+  "results": [
+    {
+      "where": "tests/fixtures/mappings/author.json",
+      "operation": "get:/authors/{authorId}",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/author_404.json",
+      "operation": "get:/authors/{authorId}",
+      "kind": "response",
+      "httpStatus": 404,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/book.json",
+      "operation": "get:/books/{bookId}",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/book_404.json",
+      "operation": "get:/books/{bookId}",
+      "kind": "response",
+      "httpStatus": 404,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/books.json",
+      "operation": "get:/books",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/books_401.json",
+      "operation": "get:/books",
+      "kind": "response",
+      "httpStatus": 401,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/books_author.json",
+      "operation": "get:/books",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/books_author_a1201.json",
+      "operation": "get:/authors/{authorId}",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/books_q.json",
+      "operation": "get:/books",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/cancel_order.json",
+      "operation": "delete:/orders/{orderId}",
+      "kind": "response",
+      "status": "waived",
+      "reason": "no JSON body in the stub response (status 204)",
+      "waiver": {
+        "target": "tests/fixtures/mappings/cancel_order.json",
+        "status": "unchecked",
+        "reason": "DELETE /orders/{orderId} answers 204 with no body, so there is no body for the oracle to judge; the spec documents none",
+        "decision": null,
+        "context": null
+      }
+    },
+    {
+      "where": "tests/fixtures/mappings/cancel_order_404.json",
+      "operation": "delete:/orders/{orderId}",
+      "kind": "response",
+      "httpStatus": 404,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/create_order.json",
+      "operation": "post:/orders",
+      "kind": "response",
+      "httpStatus": 201,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/create_order.json",
+      "operation": "post:/orders",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/create_order_422.json",
+      "operation": "post:/orders",
+      "kind": "response",
+      "httpStatus": 422,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/create_order_422.json",
+      "operation": "post:/orders",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/create_order_bank.json",
+      "operation": "post:/orders",
+      "kind": "response",
+      "httpStatus": 201,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/create_order_bank.json",
+      "operation": "post:/orders",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/create_order_minimal.json",
+      "operation": "post:/orders",
+      "kind": "response",
+      "httpStatus": 201,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/create_order_minimal.json",
+      "operation": "post:/orders",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/create_order_nulls.json",
+      "operation": "post:/orders",
+      "kind": "response",
+      "httpStatus": 201,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/create_order_nulls.json",
+      "operation": "post:/orders",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/customer.json",
+      "operation": "get:/customers/{customerId}",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/customer_404.json",
+      "operation": "get:/customers/{customerId}",
+      "kind": "response",
+      "httpStatus": 404,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/integration.json",
+      "operation": "get:/integrations/{integrationId}",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/integration_404.json",
+      "operation": "get:/integrations/{integrationId}",
+      "kind": "response",
+      "httpStatus": 404,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/order.json",
+      "operation": "get:/orders/{orderId}",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/order_404.json",
+      "operation": "get:/orders/{orderId}",
+      "kind": "response",
+      "httpStatus": 404,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/order_items_book.json",
+      "operation": "get:/orders/{orderId}",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/order_items_book_b1301.json",
+      "operation": "get:/books/{bookId}",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/orders.json",
+      "operation": "get:/orders",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/orders_401.json",
+      "operation": "get:/orders",
+      "kind": "response",
+      "httpStatus": 401,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/refund_order.json",
+      "operation": "post:/orders/{orderId}/refund",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/refund_order.json",
+      "operation": "post:/orders/{orderId}/refund",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/refund_order_404.json",
+      "operation": "post:/orders/{orderId}/refund",
+      "kind": "response",
+      "httpStatus": 404,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/refund_order_409.json",
+      "operation": "post:/orders/{orderId}/refund",
+      "kind": "response",
+      "httpStatus": 409,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/refund_order_minimal.json",
+      "operation": "post:/orders/{orderId}/refund",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/refund_order_minimal.json",
+      "operation": "post:/orders/{orderId}/refund",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/refund_order_null_reason.json",
+      "operation": "post:/orders/{orderId}/refund",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/refund_order_null_reason.json",
+      "operation": "post:/orders/{orderId}/refund",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/search_books.json",
+      "operation": "post:/books/search",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/search_books.json",
+      "operation": "post:/books/search",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/search_books_422.json",
+      "operation": "post:/books/search",
+      "kind": "response",
+      "httpStatus": 422,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/search_books_422.json",
+      "operation": "post:/books/search",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/search_books_minimal.json",
+      "operation": "post:/books/search",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/search_books_minimal.json",
+      "operation": "post:/books/search",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/search_books_nulls.json",
+      "operation": "post:/books/search",
+      "kind": "response",
+      "httpStatus": 200,
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/fixtures/mappings/search_books_nulls.json",
+      "operation": "post:/books/search",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › lumen_books_books request shape and mapping",
+      "operation": "get:/books",
+      "kind": "response",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › lumen_books_book request shape and mapping",
+      "operation": "get:/books/{bookId}",
+      "kind": "response",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › lumen_books_author request shape and mapping",
+      "operation": "get:/authors/{authorId}",
+      "kind": "response",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › lumen_books_customer request shape and mapping",
+      "operation": "get:/customers/{customerId}",
+      "kind": "response",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › lumen_books_orders request shape",
+      "operation": "get:/orders",
+      "kind": "response",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › lumen_books_order request shape",
+      "operation": "get:/orders/{orderId}",
+      "kind": "response",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › lumen_books_integration request shape and mapping",
+      "operation": "get:/integrations/{integrationId}",
+      "kind": "response",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › lumen_books_searchBooks request body and mapping",
+      "operation": "post:/books/search",
+      "kind": "response",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › lumen_books_searchBooks request body and mapping",
+      "operation": "post:/books/search",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › lumen_books_refundOrder request body and mapping",
+      "operation": "post:/orders/{orderId}/refund",
+      "kind": "response",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › lumen_books_refundOrder request body and mapping",
+      "operation": "post:/orders/{orderId}/refund",
+      "kind": "request",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › Lumen_Books_Book.author relationship field",
+      "operation": "get:/authors/{authorId}",
+      "kind": "response",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › Lumen_Books_OrderItem.book relationship field",
+      "operation": "get:/books/{bookId}",
+      "kind": "response",
+      "status": "pass",
+      "problems": []
+    },
+    {
+      "where": "tests/lumen-books.connector.yaml › Lumen_Books_Book $batch lookup",
+      "operation": "get:/books",
+      "kind": "response",
+      "status": "pass",
+      "problems": []
+    }
+  ],
+  "waivers": {
+    "applied": [
+      {
+        "target": "tests/fixtures/mappings/cancel_order.json",
+        "status": "unchecked",
+        "reason": "DELETE /orders/{orderId} answers 204 with no body, so there is no body for the oracle to judge; the spec documents none",
+        "decision": null,
+        "context": null
+      }
+    ],
+    "unused": []
+  }
+}

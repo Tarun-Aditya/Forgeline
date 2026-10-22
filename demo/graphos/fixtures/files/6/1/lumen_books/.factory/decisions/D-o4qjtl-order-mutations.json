@@ -1,0 +1,49 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-o4qjtl",
+    "slug": "order-mutations",
+    "title": "Order mutations",
+    "status": "resolved",
+    "date": "2026-10-21",
+    "phase": "design",
+    "question": "Which order writes should the subgraph expose as mutations?",
+    "context": "Recommendation: all three, since the scope confirmation included them; pick none if the subgraph should only read. cancelOrder returns no body, so its field returns only whether the call succeeded.",
+    "multiple": true,
+    "affects": [
+      "selection.yaml"
+    ],
+    "choices": [
+      {
+        "id": "create-order",
+        "label": "createOrder (POST /orders)"
+      },
+      {
+        "id": "update-order",
+        "label": "updateOrder (PATCH /orders/{orderId}, status and note)"
+      },
+      {
+        "id": "cancel-order",
+        "label": "cancelOrder (DELETE /orders/{orderId}, 204 no body)"
+      },
+      {
+        "id": "none",
+        "label": "None: the subgraph is read-only"
+      }
+    ],
+    "resolution": {
+      "chosen": [
+        "create-order",
+        "update-order",
+        "cancel-order"
+      ],
+      "note": "demo answer",
+      "by": "user",
+      "at": "2026-10-21"
+    },
+    "after": [
+      "D-5iyre8",
+      "D-jnm0uf"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "data": {
+    "lumen_books_integration": {
+      "id": "i-1101",
+      "name": "Warehouse sync",
+      "webhookUrl": "https://hooks.example.com/lumen"
+    }
+  }
+}

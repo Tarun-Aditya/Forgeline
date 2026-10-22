@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/orders/o-1109/refund",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    }
+  },
+  "response": {
+    "status": 409,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "code": "conflict",
+      "message": "Order cannot be refunded in its current status."
+    }
+  }
+}

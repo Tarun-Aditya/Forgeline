@@ -1,0 +1,10 @@
+# expect-upstream-status: 404
+query {
+  lumen_books_integration(
+    integrationId: "integrationId-404"
+  ) {
+    id
+    name
+    webhookUrl
+  }
+}

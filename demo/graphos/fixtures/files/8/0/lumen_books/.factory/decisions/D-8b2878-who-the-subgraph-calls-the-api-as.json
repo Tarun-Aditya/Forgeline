@@ -1,0 +1,30 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-8b2878",
+    "slug": "who-the-subgraph-calls-the-api-as",
+    "title": "Who the subgraph calls the API as",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "select",
+    "question": "Every request carries one service bearer token, so any client the supergraph lets through can read any customer's orders, IBANs (D-a39c6a) and integration webhook URLs, and can create, update and cancel orders. Forward the caller's own token so the API enforces per-user access, or keep the service token and have the router require authentication on those fields? (@authenticated/@requiresScopes are licensed router features this target leaves out of the workspace schema: federation-subgraph.md; they would be a change in your own graph.)",
+    "affects": [
+      "lumen-books.graphql",
+      "template.yaml"
+    ],
+    "choices": [
+      {
+        "id": "forward",
+        "label": "Forward the caller's Authorization header as AUTH_EXPR at export"
+      },
+      {
+        "id": "router-auth",
+        "label": "Keep the service token; require router authentication on order, customer and integration fields and the three mutations, in your own graph"
+      },
+      {
+        "id": "keep",
+        "label": "Keep the service token as is; access is controlled before the supergraph"
+      }
+    ]
+  }
+}

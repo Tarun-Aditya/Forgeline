@@ -1,0 +1,11 @@
+# The person's own supergraph config: the other subgraphs in their graph. The workspace's subgraph (lumen_books) is added by the validator.
+federation_version: =2.15.2
+subgraphs:
+  lumen_books:
+    routing_url: http://127.0.0.1:4010
+    schema:
+      file: ./PLACEHOLDER-the-validator-points-this-at-the-rendered-schema.graphql
+  reviews:
+    routing_url: http://127.0.0.1:4020
+    schema:
+      file: ./reviews.graphql

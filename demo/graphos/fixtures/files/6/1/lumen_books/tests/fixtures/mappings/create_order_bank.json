@@ -1,0 +1,61 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/orders",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "customerId": "c-804",
+          "items": [
+            {
+              "bookId": "b-805",
+              "quantity": 4,
+              "unitPriceCents": 750
+            },
+            {
+              "bookId": "b-806",
+              "quantity": 5
+            }
+          ],
+          "payment": {
+            "type": "bank",
+            "iban": "GB29NWBK60161331926819"
+          }
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "o-804",
+      "customerId": "c-804",
+      "status": "pending",
+      "items": [
+        {
+          "bookId": "b-805",
+          "quantity": 4,
+          "unitPriceCents": 750
+        },
+        {
+          "bookId": "b-806",
+          "quantity": 5
+        }
+      ],
+      "totalCents": 3000,
+      "payment": {
+        "type": "bank",
+        "iban": "GB29NWBK60161331926819"
+      },
+      "createdAt": "2026-03-05T09:00:00Z"
+    }
+  }
+}

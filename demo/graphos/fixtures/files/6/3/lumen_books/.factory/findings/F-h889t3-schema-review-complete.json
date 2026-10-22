@@ -1,0 +1,12 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-h889t3",
+    "slug": "schema-review-complete",
+    "title": "Schema review complete",
+    "date": "2026-10-21",
+    "status": "current",
+    "body": "CHANGES, 1 blockers, 6 should-fix",
+    "source": "agent"
+  }
+}

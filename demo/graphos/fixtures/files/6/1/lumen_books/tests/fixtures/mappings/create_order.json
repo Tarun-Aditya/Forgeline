@@ -1,0 +1,65 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/orders",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "customerId": "c-801",
+          "items": [
+            {
+              "bookId": "b-801",
+              "quantity": 2,
+              "unitPriceCents": 1299
+            },
+            {
+              "bookId": "b-802",
+              "quantity": 1,
+              "unitPriceCents": 899
+            }
+          ],
+          "payment": {
+            "type": "card",
+            "last4": "4242",
+            "brand": "visa"
+          }
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 201,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "o-801",
+      "customerId": "c-801",
+      "status": "pending",
+      "items": [
+        {
+          "bookId": "b-801",
+          "quantity": 2,
+          "unitPriceCents": 1299
+        },
+        {
+          "bookId": "b-802",
+          "quantity": 1,
+          "unitPriceCents": 899
+        }
+      ],
+      "totalCents": 2598,
+      "createdAt": "2026-03-04T10:20:30Z",
+      "payment": {
+        "type": "card",
+        "last4": "4242",
+        "brand": "visa"
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/books",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    },
+    "queryParameters": {
+      "page": {
+        "equalTo": "3"
+      },
+      "limit": {
+        "equalTo": "30"
+      },
+      "genre": {
+        "equalTo": "rare"
+      },
+      "ids": {
+        "equalTo": "b-4011,b-4012"
+      }
+    }
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "code": "unauthorized",
+      "message": "Missing or invalid token."
+    }
+  }
+}

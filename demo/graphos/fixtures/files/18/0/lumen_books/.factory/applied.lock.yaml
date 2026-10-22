@@ -1,0 +1,556 @@
+contract_version: 1
+schema: lumen-books.graphql
+written_at: "2026-10-21T19:21:03.184Z"
+written_by: "graphos-factory 0.11.0"
+spans:
+  header: "0e095a2235bddbb99c0baedd5b8d3f96e20d1acd3a7dff4fc95107cec0f4083e"
+  "type:Lumen_Books_Currency": "8513f1a522516120538e9010b72d60a809ee36879bbdb237e58de7244fd7b4ad"
+  "type:Lumen_Books_OrderStatus": "21f7a2bbaff491b86b7f8972709db351085bd8e9022284ee73d08bc10c118f10"
+  "type:Lumen_Books_CustomerTier": "3ab68efa0873ee97f880df261df91b9c9613fde59b5a6528699c06930be058f1"
+  "type:Lumen_Books_PaymentType": "4b1c8b172ccd929de53f44f6fc197661e0f4a9660db6ba5ac10ff203373b4951"
+  "type:Lumen_Books_Book": "2d6c6498c9225fae3146beb418858267e141ec0193a68ccdaaab12f8aca76348"
+  "type:Lumen_Books_Author": c64c2f4aef1cd1edf5f2c7703d2c9d556a1628313a899cb49ed6923e4c3ee603
+  "type:Lumen_Books_BookPage": c1768be3055c1c0f6566aca044134f314ee759942f72dce08248d68d6942716e
+  "type:Lumen_Books_Customer": f980ad02e0e2612dfb7eb6c470a60247d463c339c4c36f24e9b0d48c0e34ac38
+  "type:Lumen_Books_OrderItem": c9795ba0e0c78a1574e0999fe0c24b4ffef2e6e2047c0555b8a7a9281b417a51
+  "type:Lumen_Books_Payment": c579a23ff3fac7080b7cf2388715134bc85a29973437a6da5a93071080a1df76
+  "type:Lumen_Books_Order": "6ae1524de75812d6e14dc39c0f6570a99214a892952e60da149582e69d8e7b72"
+  "type:Lumen_Books_OrderPage": a251aa03467e26ca565581137d234b77b341b0b145b01e4c9dd5b7899fcd6738
+  "type:Lumen_Books_Integration": "2a555a1962b5e89ff2da16d14249dd350ddac060b3ab9bd014a4e17d7b432c0b"
+  "type:Lumen_Books_OrderItemInput": "3f412a9e78c1913fade80b84f0f83fcf9388463132178906252ba667092f4ad9"
+  "type:Lumen_Books_PaymentInput": "7ed5f820edcf5881cd05a89b6cd2e6c6201b8c863ae9aabc97c717251ea36fbb"
+  "get:/books": e2fbbe557393b3d1c0ea0552df407bcf445745b93df3299e3f5985c38904d911
+  "get:/books/{bookId}": fc837adcd02175a9c55b5b3f34d32bab899c96d6f110a5a0385c426e8a820c7c
+  "post:/books/search": "9230e9558e9148d892201ffb3739bb1fa37d396ac148582f913a67f9f47e4c80"
+  "get:/authors/{authorId}": ea864c9e24fb79b077e7d2dbdaa26c1b55420d0a8d9f76090e53c33c017fa785
+  "get:/customers/{customerId}": f3afddab35e88af9b5f72ab6866108641ef971f66014d18b5d09f97ea086454e
+  "get:/orders": "7b947b593cdee50cd663a891a08ea6a930bbf0db821edda160826b1b9959a204"
+  "get:/orders/{orderId}": "087cf02d3714047b4492a0cc8ef99e8720ade63dc8cf4c05c0256cdf4c09ee35"
+  "get:/integrations/{integrationId}": "9336a76faf9cc865ab42510a0dc714672ac268bb207f2d47bf4fc383473b309c"
+  "post:/orders": ee09db907d680c5739e7b490e77914cc2bbd558f5efd5684ea68182cf547b063
+  "post:/orders/{orderId}/refund": a0d5400776ff3e7c85fe02507a00a1e9ef32d1b344268712eb36f60e52f40894
+  "delete:/orders/{orderId}": "38e6483de639ea1303758045bfd4a9bb996634d96789ee3041d2b9ab57f0c86e"
+inventory: "848a0363d0dedc5c013f98d2a08c8cd11dd576b660c720b32e61e446ec14517d"
+sources:
+  openapi.json: "3d30ef53fd3ae444be80c1360e8bc4cc89f20aa3bd922de9f10dbbf31eb60ea5"
+provenance:
+  recorded_at: "2026-10-21T19:21:03.202Z"
+  skill:
+    revision: bc53e82b5a4ba50b2d3ef88909a29be990956162
+    dirty: true
+    source: GRAPHOS_FACTORY_CORE_SCRIPTS
+  authoring_agent:
+    model: unknown
+    attested: true
+  binary:
+    name: graphos-factory
+    version: "0.11.0"
+    revision: "6c660ac7a6a874c95fe7953b26bb4b16bfe00aca"
+    dirty: false
+    rustc: "rustc 1.99.0 (b940084d7 2026-09-28)"
+    target: aarch64-apple-darwin
+  toolchain:
+    connect_spec: v0.4
+    federation: "2.15.2"
+    rover_pin: "0.41.0"
+    router_pin: "2.17.0"
+    wiremock_pin: "3.13.2"
+  inputs:
+    ".factory/decisions/D-02z6er-searchbooks-deprecated-upstream-in.json":
+      sha256: "567f42064cef8190664ce9de61a871e6ad4bca9abb1b726d15255db37280b281"
+      bytes: 1193
+    ".factory/decisions/D-2hoz50-book-metadata.json":
+      sha256: "98f5fe92abc9b15fca69c33627e61bf53ba81433e49dd7d0c53e10db73dc299d"
+      bytes: 962
+    ".factory/decisions/D-3avp7m-write-null-handling.json":
+      sha256: "9aa292858acb8a2bc86b9cebf476083eb207bd9e4637952b465d27859c57896c"
+      bytes: 1024
+    ".factory/decisions/D-4yyj7v-customer-pii.json":
+      sha256: "354e5fdf49daedd8114716d13522c9a940be807d610f43c01a6b1793e5c63c62"
+      bytes: 1288
+    ".factory/decisions/D-5iyre8-confirm-scope.json":
+      sha256: "1e66325a865a20a43c77cedcc6c0cc53c479d326e095a3a1365ffcf73b1965e1"
+      bytes: 563
+    ".factory/decisions/D-88ripv-integration-webhookurl.json":
+      sha256: dc1322ce0ed6cc53c65338232ed0e17aed0f3ce75b2a4bc462a4d3b74def36e7
+      bytes: 882
+    ".factory/decisions/D-8b2878-who-the-subgraph-calls-the-api-as.json":
+      sha256: "2367b99e4fccbc410e147feee9db8ff7d36a2eb600206afcf5a2790477236b7d"
+      bytes: 1509
+    ".factory/decisions/D-a39c6a-order-payment-details.json":
+      sha256: "4bbf0ecdb4bc4126eb073538de9d04b4ab01d897a60999c0a52f5d61692c9dbd"
+      bytes: 1006
+    ".factory/decisions/D-aaaada-book-isbn-deprecated-upstream-isbn13.json":
+      sha256: "3a71cba68bf90b7585d054d58347edfb3e2d663e25164b4e2d83a1b80923cc49"
+      bytes: 1149
+    ".factory/decisions/D-crbiq7-book-metadata-omits.json":
+      sha256: d5c517ce1b3203bd31c8a973424923469cd8b97782e967ab82cca548cf5b9b95
+      bytes: 1373
+    ".factory/decisions/D-doncxi-orderitem-book-batch.json":
+      sha256: "6e9817991d199e65fcde765c46d3ffe8968d383fd31703a239dacb2167c44f9d"
+      bytes: 1570
+    ".factory/decisions/D-ilif9j-new-order-status-value-refunded.json":
+      sha256: "44336f26bf7effccf02983a76c6115f7ce01ede3e88c7f709f6923d3aa21df00"
+      bytes: 1144
+    ".factory/decisions/D-jnm0uf-search-books-root.json":
+      sha256: "235857590943e600789f3438765d82c8d5085277bed2768918efe536ac4cfda9"
+      bytes: 974
+    ".factory/decisions/D-nmhlzf-integration-api-key-omit.json":
+      sha256: c1580c5a4123ba6e3397e44f7637c3e68e0e6aa00ba5eb457c8c964e51c77349
+      bytes: 1015
+    ".factory/decisions/D-o4qjtl-order-mutations.json":
+      sha256: "0ccc235879aa06bce63000c77b62675dfdceb16ae3a916940dc40ed4f63313f6"
+      bytes: 1273
+    ".factory/decisions/D-oqs0jf-books-pagination.json":
+      sha256: "32681bf64fa32c799bc35235b7edb1605412a36ecc4334c6ee006ad9a8d5b410"
+      bytes: 1243
+    ".factory/decisions/D-ox8zkp-relationship-links.json":
+      sha256: "7dd02f79106e5fe082805b9f3f4ce222c0f2c7cb1ac18c6052a6c25000376c3d"
+      bytes: 1380
+    ".factory/decisions/D-q0zlfg-list-size-search-items.json":
+      sha256: "6b1955ffde4bf2d3d5959ff3e8425448cb6fd914dc6a21b2491676d360df008d"
+      bytes: 1252
+    ".factory/decisions/D-qbc6qk-federation-entities.json":
+      sha256: "814f517bf368cd6077aeafdb1190310f155a02d1ee4e27d533313dcc811cb9ed"
+      bytes: 1293
+    ".factory/decisions/D-qf95m2-orders-pagination.json":
+      sha256: "1a697d768aa825da4f40d2b2478be10510a513fbad192a93e1ca0185717bddce"
+      bytes: 977
+    ".factory/decisions/D-rvl036-order-payment-shape.json":
+      sha256: a7a39f4271221be773372d840251c581a8c06dd02bef15600fe21e713e8b0955
+      bytes: 1670
+    ".factory/decisions/D-wf0vvx-integration-api-key.json":
+      sha256: "7ac81202dc323191a5ca242fc359f43324b35a88d93a25a0a732468e945b5cdd"
+      bytes: 944
+    ".factory/decisions/D-wnrxww-book-batching.json":
+      sha256: "924fa39c8bc8f32f7dc041852973587981b3a4072abc81ec12b715fc6a56930a"
+      bytes: 1266
+    ".factory/decisions/D-x1ekw6-book-batch-page-size.json":
+      sha256: "219f9d1d8f3bd0af56278f9be8c9e4ef35f65f0ace30c536a98604c0549c5942"
+      bytes: 1325
+    ".factory/decisions/D-x4ukx1-updateorder-removed-upstream-api-2-0-0.json":
+      sha256: "213b86dbea24fd0b5841b6db70bddca123e9eafbe61a02eff17b533075045b3d"
+      bytes: 1368
+    ".factory/decisions/D-xghnp0-create-order-payment-input.json":
+      sha256: "0e1816afb8c512365e731d01df97d052d541fa08a894597cb2186c1819e8d6b8"
+      bytes: 1316
+    ".factory/decisions/D-xwq2hy-customer-contact-omits.json":
+      sha256: "8842d68778b9922ae555352885c9808f843f17d14c83483cf458bcb9a46a2eb5"
+      bytes: 1243
+    ".factory/decisions/D-yqmrto-book-author-relationship-field-or-author.json":
+      sha256: "0073913d864675ba242b5e38fe8798e521ba9531e3c0f7a036ccc30a6236eb43"
+      bytes: 1197
+    ".factory/decisions/D-zkxfd4-demand-control-list-sizes.json":
+      sha256: "4348b8caa37119130666da04f5d997a236ad38a04301dade7736b1c88293b59d"
+      bytes: 1019
+    ".factory/findings/F-0as594-schema-review-complete.json":
+      sha256: "9c72898213d63eed2b95f77345411407b6674e605b1f35884e706657bbdef5fe"
+      bytes: 269
+    ".factory/findings/F-0ye6oo-null-dropping-body-members-read.json":
+      sha256: "0635b12d66aee533fa9ab5208e1e9f655367bdb0f1ac25587bfebac5ca4215bb"
+      bytes: 1331
+    ".factory/findings/F-4kib2d-response-envelopes-confirmed-from-the.json":
+      sha256: "0b975f9540aac06d2a76f46f439ef79e9e11c25657fc4d9bcc4947221e0238ac"
+      bytes: 765
+    ".factory/findings/F-5jebof-live-order-payment-is-null-for-a.json":
+      sha256: "6f7a5c20d8613a0d52953ef48b27b6cbc5b19864039893ac091d10d75a5cdb7c"
+      bytes: 753
+    ".factory/findings/F-6noy2p-composed-with-supergraph-demo-yaml-pass.json":
+      sha256: a090c65675ddd0ceaee2ba2ff4576ac41a3e0d08cba8427923f8d310e7db49a7
+      bytes: 511
+    ".factory/findings/F-h889t3-schema-review-complete.json":
+      sha256: "86d0aa6d7f6ecce53864d6c8080a552168357c82daa33fb83c4f6850521dc5f0"
+      bytes: 269
+    ".factory/findings/F-jen638-upstream-changed-1-0-0-to-2-0-0.json":
+      sha256: d3b2b1629fdc86b4174b004b4fa407a5f6c7c48157f92da05b22c00c5610b718
+      bytes: 3000
+    ".factory/findings/F-jx72bt-closed-enums-stay-in-wire-casing.json":
+      sha256: "51d376425fd6724b1cde7e86e519bd2601e04ad0c8b9b395af2bdcaddb7ea0b8"
+      bytes: 664
+    ".factory/findings/F-lr3c96-order-payment-is-a-union-at-connect-v0-4.json":
+      sha256: "341056d978c7b33765e9cfe53e5a7b475195e8cada9995e64b05e740327e2607"
+      bytes: 721
+    ".factory/findings/F-p8a153-null-dropping-body-members-read.json":
+      sha256: c0ac3befe53480e1ecc1f19e0e3d00eb7d2f144f0798007d43c907e02f695be3
+      bytes: 999
+    ".factory/findings/F-pl4te8-upstream-refreshed-openapi-json.json":
+      sha256: c7dcba7ed0721554db8c33242a4db351aa98400a675128cacab991850156e6b5
+      bytes: 1609
+    ".factory/findings/F-tjc0x5-forwarding-the-callers-token-d-8b2878.json":
+      sha256: a05a570d8f2175423564ad58bfd37892e322fbe2ad9a1ca0aa6f52bb0a48b599
+      bytes: 1517
+    ".factory/findings/F-yk39gu-design-pass-complete.json":
+      sha256: d1f3c9e7d67d09c39b9cb87dac93d8ec609accba1b1f6f1f3ad2108f2d4f1493
+      bytes: 428
+    ".factory/findings/F-zutkg7-live-the-lumen-api-otherwise-matches-the.json":
+      sha256: "5400cc70e098d1d558002dd83d007b3b60053fc5b372f062cbddcd268218eb17"
+      bytes: 935
+    ".factory/inventory.json":
+      sha256: "1470e194e50d23c00b818e690d954ea80f8df0a877f4ca734ad14e3c14e47d66"
+      bytes: 27028
+    ".factory/memory.md":
+      sha256: "721cf22c753480c2092821e5d25e99488f9e0bf207b5739833a47345eb66f1eb"
+      bytes: 3008
+    ".factory/selection.yaml":
+      sha256: "2556d83388b30b1b34ebadd15bf2640894cde1d4493c98ec29d41b080ae5f152"
+      bytes: 4898
+    ".factory/sources.lock.yaml":
+      sha256: "268a08b637102764bdbc30a3f31ad56aea37edf2d9272ad9aa2976d8bd88fea7"
+      bytes: 1211
+    ".factory/sources/openapi.upstream.json":
+      sha256: "51190dafa9d26ab2cc3b4d20944694c05505e37f4828284cd45bbe8d0adb4c1f"
+      bytes: 24069
+    ".factory/workspace.yaml":
+      sha256: "6aeea6cd5e60c4cb61ad629ad3c1b0753974786c44222345e35ea3dc2140d00d"
+      bytes: 302
+    openapi.json:
+      sha256: "2a3426e2b09593e1afad0a60d9486b401644006c6ae3dcc08457d6f5cddd914f"
+      bytes: 23922
+  outputs:
+    lumen-books.graphql:
+      sha256: ec99e0549ab7dae2118dd916f3558e2a3d72c9641ccfd436503d047896f5e45f
+      bytes: 14574
+    supergraph.yaml:
+      sha256: a5742f2adc4bed3e4a68cf83baf7ac90515fde7e2bb689dc5954c34caef60dfd
+      bytes: 288
+    template.yaml:
+      sha256: fd997549b732d18a9dee69d3f553b18c705872b754f79072a24303c3a1f21cc5
+      bytes: 360
+    tests/cases/author.expected.json:
+      sha256: "33d113dba8e8136b90972ed9da8924288a260ad99cee1dc004f6efb35f4b4e56"
+      bytes: 162
+    tests/cases/author.graphql:
+      sha256: f39b87ae5016cc4571370758cdc6c1cceda2e4370391c45f8d95747c08c13651
+      bytes: 89
+    tests/cases/author_404.expected.json:
+      sha256: "7fbe2cae7bfba47d0eeab63c753833643d9136de2f9e62121b7c960feb856ec5"
+      bytes: 414
+    tests/cases/author_404.graphql:
+      sha256: f95d7108aa0b7667733c2ef3f68d4b82b249b06a9179a24af05b24e5f3d8f376
+      bytes: 134
+    tests/cases/book.expected.json:
+      sha256: "2998520d97cc4244c6034aad02df9f73240c3cb6c81116b76ee0a9a751dd716e"
+      bytes: 333
+    tests/cases/book.graphql:
+      sha256: efbdc9b860bdc1ba03633910f61442ad2935f5f5c75a37556e6a119329cfa2a0
+      bytes: 156
+    tests/cases/book_404.expected.json:
+      sha256: bf4295b123824a82275fb9a34e8f15e9cbcebd15c001692a942016e503e7aa6f
+      bytes: 410
+    tests/cases/book_404.graphql:
+      sha256: "19880ed731769538d851cf1c52bc68612dd9cc661c557796c2530d06e95f4b4f"
+      bytes: 199
+    tests/cases/books.expected.json:
+      sha256: "87c5321c8c61b3bfeb8b0b91814acb67f89f57d212fb4d145cdb9f89a2a6ab09"
+      bytes: 827
+    tests/cases/books.graphql:
+      sha256: cb1890325f49987b8edee9e5aff557d33bd61be8193063e5321f9435a0683e56
+      bytes: 262
+    tests/cases/books_401.expected.json:
+      sha256: "842fc4e3d357719e10318c81370811c5aecdd2e25984cb8d43ec4a966200565b"
+      bytes: 423
+    tests/cases/books_401.graphql:
+      sha256: "80432f2f42a2fcdc26d58f97765ca1f8d98596830fda2ec2a8a35b2dc8c1a541"
+      bytes: 308
+    tests/cases/books_author.expected.json:
+      sha256: "3c65efcde4632f5896505466e6522132fee85b95b8dd601b1673216a24e2fdeb"
+      bytes: 303
+    tests/cases/books_author.graphql:
+      sha256: e659399caf069ce7315c89c84292d56f46dceba7e0b92dd375d8c4e4eac47729
+      bytes: 166
+    tests/cases/books_q.expected.json:
+      sha256: "415e57a9f22ed4f393e017678215cb33b079b9e2e7d4bdab6621ef92357fbcb1"
+      bytes: 284
+    tests/cases/books_q.graphql:
+      sha256: "12295360ee09d16944618026c263af77843e6b31345cc1a212acaed15708ba42"
+      bytes: 253
+    tests/cases/cancel_order.expected.json:
+      sha256: "9e76bee7008a1d5ff4c100cb2acc11af2a8c1de9e725c9148a6ca4b00d635815"
+      bytes: 56
+    tests/cases/cancel_order.graphql:
+      sha256: "119e44a5f3b54ab89ffe830d8525c8ba7dd6d5be3b7f9898f7167689078a4dcc"
+      bytes: 58
+    tests/cases/cancel_order_404.expected.json:
+      sha256: "28d68d94a1b6a85272755d0a0a4132c21463dd69385dac6fa8695038a3583d26"
+      bytes: 427
+    tests/cases/cancel_order_404.graphql:
+      sha256: f6f17093cf0c68b3ec35a414b5dd1f8fdcac6bd2cde3587cc13c35350721ff08
+      bytes: 101
+    tests/cases/create_order.expected.json:
+      sha256: "1b872b4a1349bfdb3605227a9e66026a6c8198bbdfb327b8436475b6e071ac4d"
+      bytes: 567
+    tests/cases/create_order.graphql:
+      sha256: "7e0270d1c7e4e69fdd522f7e91d5c845c3cab0d9d40c9b054150fdf8d535f76b"
+      bytes: 450
+    tests/cases/create_order_422.expected.json:
+      sha256: "59a9c9bfe6b500695452ab17e71a3bfac484210e8ac2cd74df37159b34244182"
+      bytes: 444
+    tests/cases/create_order_422.graphql:
+      sha256: e3cfd74b4f36709d1f2ad604b94ea25c3fa266486f5a324c224f00f4a2eb7a68
+      bytes: 347
+    tests/cases/create_order_bank.expected.json:
+      sha256: "94c05762f62b42ad90748438796868ac9f64a198ab0e2e60b4879ddc34177b1e"
+      bytes: 583
+    tests/cases/create_order_bank.graphql:
+      sha256: "887731d749135d07a7c1d93e08abb6785973d450e80d2b6bbe19ddf643d366b2"
+      bytes: 430
+    tests/cases/create_order_minimal.expected.json:
+      sha256: "1c04f838b86e1b4e27873fe69f84da86c82c131323deb07d670bd090363c441f"
+      bytes: 360
+    tests/cases/create_order_minimal.graphql:
+      sha256: e3875582cc32080fde36ce2a5c3ab1d7c41a73665bbcb5ce1eeb4d4630b94e84
+      bytes: 304
+    tests/cases/create_order_nulls.expected.json:
+      sha256: cf88e04eb634e71ebb3e1f96070a1bd1c5ae2d83de8c7ee3c8b12a7782037b5f
+      bytes: 476
+    tests/cases/create_order_nulls.graphql:
+      sha256: "2f4c9119ee698b2b6858ee650f5568a9dc3a8ed216b525cf0a620ac22d920782"
+      bytes: 416
+    tests/cases/customer.expected.json:
+      sha256: faf72dc0c9e38d5d5778484f4262d2be4ebd533ff35f629c779e69d95e5443b3
+      bytes: 168
+    tests/cases/customer.graphql:
+      sha256: "6b2aaf4169bb569ed4e89da3ca4a13e31ffa85630a707c5e1a605d8df988929d"
+      bytes: 99
+    tests/cases/customer_404.expected.json:
+      sha256: bbbfe88239314c985b09de3e20586810eeb995db86e39af45afd0fe407d83f02
+      bytes: 418
+    tests/cases/customer_404.graphql:
+      sha256: a9ff8a3bd6d62d80def7eaebd0ce089330b223748b10fd759c0a7d5d8884b95f
+      bytes: 146
+    tests/cases/integration.expected.json:
+      sha256: "832956bfeefce6703b97a3231d539d4cccc1ac33db61aca77500384ef9c33952"
+      bytes: 167
+    tests/cases/integration.graphql:
+      sha256: "6c36ea2fbf5d8526ec27ac4cfd4ca0f35da750606164d8f7e80dfebc12441313"
+      bytes: 98
+    tests/cases/integration_404.expected.json:
+      sha256: ed7ed15ab1a00b73d9b63afeeb4c841cc99021974e5dc53fac96c0a13e270f73
+      bytes: 424
+    tests/cases/integration_404.graphql:
+      sha256: "6af85b969f794a48d2a36c4e1af7405cdd56599b7686f4c1398f46933a2dc1d3"
+      bytes: 147
+    tests/cases/order.expected.json:
+      sha256: "5fb3bced2950d13a207ea0f11871c949cb0c58fd2c0aef8dec4a351f9c4707d2"
+      bytes: 471
+    tests/cases/order.graphql:
+      sha256: ce5279785e56943573d7635526b72a7efeda4bc078549ffc5cfb6759cbdb1e61
+      bytes: 249
+    tests/cases/order_404.expected.json:
+      sha256: b72b0dbc8d11728c831678f4b564f49a5452f2955a720f5e7d8337a1574459ef
+      bytes: 412
+    tests/cases/order_404.graphql:
+      sha256: acf44a6d07c9ada4200d27bcd874a2d5aa2b8f36a530bffd89d755cb8fc7dad5
+      bytes: 293
+    tests/cases/order_items_book.expected.json:
+      sha256: e1e124fb504f2c624a3b2120147bbdc5ed551ac964f10ca48daefe3e800ece2b
+      bytes: 560
+    tests/cases/order_items_book.graphql:
+      sha256: "0a019d418a25d077732c57c8b88af43a010ce68a605889776032a14ebfee0adc"
+      bytes: 269
+    tests/cases/orders.expected.json:
+      sha256: "6396b2631f8673ba9243ee3cc2a443378d418884be87b430fa23754b64e295a7"
+      bytes: 1108
+    tests/cases/orders.graphql:
+      sha256: "1941dc41211606bc814427ce5612a7f60a9b73d7dd5d13e0374041a740cffe46"
+      bytes: 360
+    tests/cases/orders_401.expected.json:
+      sha256: e0838405c344119ded1c850bad4b22502a6eb7c25d67589466df3bbd03e332e0
+      bytes: 425
+    tests/cases/orders_401.graphql:
+      sha256: "624d86c77357ab2986e51aa7a90b36770982c29ba71e0c66e22e2dcd0a9710bb"
+      bytes: 418
+    tests/cases/refund_order.expected.json:
+      sha256: c11ce7c86b7877906cac1d8f151ee2aa424e09ec64e3ae9cb08652cf9b89f7b7
+      bytes: 465
+    tests/cases/refund_order.graphql:
+      sha256: "72310362aeb982f03ff5e01cfc062f9edf19f65ebc46c2f38f72b0b12414d732"
+      bytes: 289
+    tests/cases/refund_order_404.expected.json:
+      sha256: b2b423a89132ebc0fedc8798c34c612254ff47e6518a28ff6ad41a182d6b1380
+      bytes: 427
+    tests/cases/refund_order_404.graphql:
+      sha256: "2d74329743166222cef44651010040a445d7ad6d7b724df42422fe1e371d5c42"
+      bytes: 316
+    tests/cases/refund_order_409.expected.json:
+      sha256: "6a03c17c29d0a9896ebdebf8922e0a2452566ab4a208b346ad4b9ac0c241b407"
+      bytes: 456
+    tests/cases/refund_order_409.graphql:
+      sha256: "5a52fc143e29bfdd4d1cf6414fff6f4af024e927a79c76235584a9935386c9f6"
+      bytes: 311
+    tests/cases/refund_order_minimal.expected.json:
+      sha256: "103d7402c9bd2910ff364aa8ebac09ddf8dd65c03039dcedd5d3341cbdfe776e"
+      bytes: 465
+    tests/cases/refund_order_minimal.graphql:
+      sha256: "7b7542c0e7e2a0c42bb21294effd7d1e59d6f01e9263ec48e32b848901ed04c2"
+      bytes: 332
+    tests/cases/refund_order_null_reason.expected.json:
+      sha256: e1b91109d96085f408e97381730a5e8b3b2c516bc00f01be864397ec77177bef
+      bytes: 465
+    tests/cases/refund_order_null_reason.graphql:
+      sha256: "4b6ebd6e8e61f452f8b2484794e584803d6603ac5ecd0871e53ae7579278bbaa"
+      bytes: 342
+    tests/cases/search_books.expected.json:
+      sha256: "1ebdc1731bf8bb3f0ba1fc73c8844f94d317be51cc2558f2f8cde8ccc38ea33a"
+      bytes: 479
+    tests/cases/search_books.graphql:
+      sha256: "3c653033073dc434d4aa10e1f54db76170a0f37656adf0dc9ea11ac445bb275c"
+      bytes: 262
+    tests/cases/search_books_422.expected.json:
+      sha256: b9fabbe20e5f5f35989769b75c9189b812d064d454cce48246e0e6be9b3c7d50
+      bytes: 441
+    tests/cases/search_books_422.graphql:
+      sha256: "525bff41b3997b7e17a254d0d60341331dd4971a08938e2c510e1120f6968947"
+      bytes: 314
+    tests/cases/search_books_minimal.expected.json:
+      sha256: f62629daff5107fa2b17d84b3ecd0d894df9e4ee5f40cfc0872859856feb4a51
+      bytes: 479
+    tests/cases/search_books_minimal.graphql:
+      sha256: "8ae5aa17731ccd6ba36647ac01bc45ffe8de6b28f020a0c52890ac64aa511087"
+      bytes: 210
+    tests/cases/search_books_nulls.expected.json:
+      sha256: "9cdf51c618c9123fb0c54eadc7eff22beac2ef9826094b398e8f13d8c6e36aeb"
+      bytes: 479
+    tests/cases/search_books_nulls.graphql:
+      sha256: dafbb5c2640b807c5148f320029db5073379bded799198d4dce7fb47a8aa3f83
+      bytes: 336
+    tests/fixtures/mappings/author.json:
+      sha256: c3dea9d9ba05300e1bd32b92d4b9723b3861db1a40645a3b0204a9840c81a571
+      bytes: 409
+    tests/fixtures/mappings/author_404.json:
+      sha256: "882b935d0eb980cbe566954115ece4c47c8ff32928d8954cb37572124f42dc8f"
+      bytes: 372
+    tests/fixtures/mappings/book.json:
+      sha256: "245350701ae9e2342a0f84cbcc70718e0040206e85f1e76ae4f0c2016a956215"
+      bytes: 636
+    tests/fixtures/mappings/book_404.json:
+      sha256: ecea5c5043338a62574433af085145093e82ffa937def9ff459df5da25753745
+      bytes: 368
+    tests/fixtures/mappings/books.json:
+      sha256: ef6d6d96884a8cd3a5ebfb209050f4346a032d462566f42cd7ba6d5f02d9c79e
+      bytes: 1474
+    tests/fixtures/mappings/books_401.json:
+      sha256: "8a84cc9396ae3103ca0ee2e2a76d1e0e093ebeef274b412e2a2aca2d4baa50d7"
+      bytes: 608
+    tests/fixtures/mappings/books_author.json:
+      sha256: ee85f6e8786e784e92678417b60b8b35e264f5a9541b869e77ca3d628129fd5e
+      bytes: 1049
+    tests/fixtures/mappings/books_author_a1201.json:
+      sha256: "626af84b5f4c8c47591d23a198a54a02659071ed548902d3473c4d6cc9889165"
+      bytes: 457
+    tests/fixtures/mappings/books_q.json:
+      sha256: "9a57b6ec811ed52d7a726bfc1e49220ecd1cc2c96bea705fa3abab81a7675ba8"
+      bytes: 1103
+    tests/fixtures/mappings/cancel_order.json:
+      sha256: d2d773f392f30c4b07671ef8f40d80a76c625517058ff72d2d3f5a773bb83a77
+      bytes: 214
+    tests/fixtures/mappings/cancel_order_404.json:
+      sha256: "545b99e35f99bb90d372fcf1fccced3b0a4fd036da547fe0fdcbde24cd44f996"
+      bytes: 373
+    tests/fixtures/mappings/create_order.json:
+      sha256: "73d26a3911d5f7ee2d08feae89ecec028fface8d5786361f2ee51137b8678d41"
+      bytes: 1302
+    tests/fixtures/mappings/create_order_422.json:
+      sha256: "0523a7e5bfe986e0fcbc29c5f2e37981f3c3aa8d1d4de50006397f8e5de19d3e"
+      bytes: 613
+    tests/fixtures/mappings/create_order_bank.json:
+      sha256: "7ce275c99cc6850d317209ca799dc37eda57a9e651fe749ee829548373b93c97"
+      bytes: 1209
+    tests/fixtures/mappings/create_order_minimal.json:
+      sha256: "7a38bde468b4d7899ace9461a82d0753cc08bb83002ef6d23beb86b59a0a8887"
+      bytes: 774
+    tests/fixtures/mappings/create_order_nulls.json:
+      sha256: d025b6487797bea0da3911b8dfcf478369b881fe0c5777ee5d0f84e4a0b60d7b
+      bytes: 867
+    tests/fixtures/mappings/customer.json:
+      sha256: "583d105c9aec6d7732e5a5fe9cc21e512b562a80ad387afb23a177cf7c9476cb"
+      bytes: 484
+    tests/fixtures/mappings/customer_404.json:
+      sha256: "915f7b16663a5ecc34ea8779b4a599cf9c6efe7c2f13cc9e29aac638fb2c4526"
+      bytes: 376
+    tests/fixtures/mappings/integration.json:
+      sha256: "5456f43d885201978cbd65f1330ef43ee63435b75e40e37e2b4b33268de19a81"
+      bytes: 454
+    tests/fixtures/mappings/integration_404.json:
+      sha256: "0087dbf39b77a0a2837043bed409e05117646eeb31a84ab2109d9e0e1cabce09"
+      bytes: 382
+    tests/fixtures/mappings/order.json:
+      sha256: "8645d3f6cbb3e928c4edd52bb2b10769dcc95d458f48c03a3dc8cdd0874c7346"
+      bytes: 672
+    tests/fixtures/mappings/order_404.json:
+      sha256: fde1305af59b806650e7abefa6a98e7df0597ffc210967d4fc9bd912187c9d20
+      bytes: 370
+    tests/fixtures/mappings/order_items_book.json:
+      sha256: a9c7ebeb4026380ce12819bbd62e8f87cb81e584d5d6395bd5c9441bf4fbf4d5
+      bytes: 680
+    tests/fixtures/mappings/order_items_book_b1301.json:
+      sha256: "63587e7e3c9fd7e1e24242f7086004162faba658111e24fd2cc81f25c897bdf6"
+      bytes: 706
+    tests/fixtures/mappings/orders.json:
+      sha256: "5c16232e345eadd7b2ef34dafdc91f6259ea135e83a314a731e6c248b88f84f8"
+      bytes: 1515
+    tests/fixtures/mappings/orders_401.json:
+      sha256: "0ae7ab1758d6d59ead70ad4993b400aa8e4a34b653bf20910845fecce60a611e"
+      bytes: 627
+    tests/fixtures/mappings/refund_order.json:
+      sha256: "8c69db8425af05715bea9cd9f747ddc6e5f68e94a2907976f3b5a8aa93114cc2"
+      bytes: 814
+    tests/fixtures/mappings/refund_order_404.json:
+      sha256: "67e17efd1b40881eaf5a85c6375e1745e2caefe201d1863efe48a4a569068a07"
+      bytes: 378
+    tests/fixtures/mappings/refund_order_409.json:
+      sha256: c7bb45d9858376b3c50f741b522c482880dfe7e1868ef6bfb5c996b2ef908895
+      bytes: 402
+    tests/fixtures/mappings/refund_order_minimal.json:
+      sha256: a8a6331041e3207de73fd7185c51a04e114c2b7543af82dd2e25b4b3535102e4
+      bytes: 764
+    tests/fixtures/mappings/refund_order_null_reason.json:
+      sha256: c64d2f6d6f16ac7133d86d219c89499068b4aa2b8c909d95c3d92f8e49a9527f
+      bytes: 764
+    tests/fixtures/mappings/search_books.json:
+      sha256: "92d294a2052da05acd09d82dea24c5499da0b0dfd7e76109040e3a3c32c9e86f"
+      bytes: 986
+    tests/fixtures/mappings/search_books_422.json:
+      sha256: f6874e1e9fcb57811b2de3be275dc0b491bd0257320ddd02a97f310509ac7b38
+      bytes: 557
+    tests/fixtures/mappings/search_books_minimal.json:
+      sha256: e89b82c63c1a167587945536c0e42735086bc8524e0aaefc6fd65080ab179786
+      bytes: 890
+    tests/fixtures/mappings/search_books_nulls.json:
+      sha256: e3dc3368f274e82e2190b86de6cc96778ae584edf8fb7d386d137434337a0fc8
+      bytes: 927
+    tests/live.yaml:
+      sha256: "9fc81acd9247b9c50c494327e7816b7d217349019ee426027de64877b22f0fbd"
+      bytes: 2490
+    tests/live/author.graphql:
+      sha256: "3f2326415943cacebb85b337faa62eb504b01d670c19c05183122b23c8246c0c"
+      bytes: 90
+    tests/live/book.graphql:
+      sha256: f50ece3dda084155f82f06bfee248a66390f1cccb6b96c90f99a5a592dec7357
+      bytes: 152
+    tests/live/books_by_ids.graphql:
+      sha256: "14c8205a727d7b8c2f1c7ebb56b90c510e35f86e9b37eaafb6c7209cb6232073"
+      bytes: 124
+    tests/live/customer.graphql:
+      sha256: "16f5b8ebc929df33c4d3433157da20e76158deeee537ffa45fc094cc9ba83424"
+      bytes: 104
+    tests/live/integration.graphql:
+      sha256: ae810a479c28761c4ed6298818a355296c551032ba5b186994a8cde9338d9177
+      bytes: 80
+    tests/live/list_books.graphql:
+      sha256: "4fead0ea0a50e6161aaee496268bcae216f170259a16477933d9c19f28c907d8"
+      bytes: 184
+    tests/live/list_orders.graphql:
+      sha256: "7ac0d9ac307c800ecbb8acb5cbaca19406dbdf7857b076a00f222d5900596782"
+      bytes: 210
+    tests/live/order.graphql:
+      sha256: "7dd72901ff602ecd34bfa71c20d86945c18721a172631f40a9997faf40b9e6e0"
+      bytes: 186
+    tests/lumen-books.connector.yaml:
+      sha256: "7802626ab8effaae5a7eefc7a40ad0a7d25afde6221089a710e2984809d67cd5"
+      bytes: 12933
+    tests/router.yaml:
+      sha256: "3a5d850c28d8ef3a72f7fd0dd3738f8b3c1dc9c13f9f337bdad873312417d667"
+      bytes: 274
+  omitted_outputs: {}
+  reproducibility: "records the authored state and tools; the model is self-reported and does not prove model identity, full session history, or bit-for-bit LLM replay"

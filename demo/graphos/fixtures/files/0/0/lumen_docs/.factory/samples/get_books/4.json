@@ -1,0 +1,246 @@
+{
+  "contract_version": 1,
+  "operation": "get:/books",
+  "recorded_at": "2026-10-21T18:29:03.663Z",
+  "provenance": "probe",
+  "request": {
+    "method": "GET",
+    "url": "http://127.0.0.1:4010/books?limit=999",
+    "headers": {
+      "Authorization": "<redacted:authorization>",
+      "Accept": "application/json"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "content_type": "application/json",
+    "body": {
+      "data": [
+        {
+          "id": "b1",
+          "title": "The Salt Archive",
+          "authorId": "a1",
+          "isbn": "9780000000011",
+          "priceCents": 1899,
+          "currency": "USD",
+          "genres": [
+            "scifi"
+          ],
+          "publishedAt": "2019-03-04",
+          "stock": 14,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "scifi"
+            ]
+          }
+        },
+        {
+          "id": "b2",
+          "title": "Low Orbit Letters",
+          "authorId": "a1",
+          "isbn": "9780000000028",
+          "priceCents": 1599,
+          "currency": "USD",
+          "genres": [
+            "scifi",
+            "essays"
+          ],
+          "publishedAt": "2021-09-12",
+          "stock": 3,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "scifi",
+              "essays"
+            ]
+          }
+        },
+        {
+          "id": "b3",
+          "title": "Knife Work",
+          "authorId": "a2",
+          "isbn": "9780000000035",
+          "priceCents": 1450,
+          "currency": "EUR",
+          "genres": [
+            "crime"
+          ],
+          "publishedAt": "2018-06-21",
+          "stock": 22,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "crime"
+            ]
+          }
+        },
+        {
+          "id": "b4",
+          "title": "A Quiet Stove",
+          "authorId": "a2",
+          "isbn": "9780000000042",
+          "priceCents": 1250,
+          "currency": "EUR",
+          "genres": [
+            "crime",
+            "food"
+          ],
+          "publishedAt": "2020-01-30",
+          "stock": 0,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "crime",
+              "food"
+            ]
+          }
+        },
+        {
+          "id": "b5",
+          "title": "Concrete and Weather",
+          "authorId": "a3",
+          "isbn": "9780000000059",
+          "priceCents": 2100,
+          "currency": "GBP",
+          "genres": [
+            "essays"
+          ],
+          "publishedAt": "2022-11-02",
+          "stock": 9,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "essays"
+            ]
+          }
+        },
+        {
+          "id": "b6",
+          "title": "Streets Without Names",
+          "authorId": "a3",
+          "isbn": "9780000000066",
+          "priceCents": 1750,
+          "currency": "GBP",
+          "genres": [
+            "essays",
+            "travel"
+          ],
+          "publishedAt": "2023-04-18",
+          "stock": 17,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "essays",
+              "travel"
+            ]
+          }
+        },
+        {
+          "id": "b7",
+          "title": "The Long Pier",
+          "authorId": "a4",
+          "isbn": "9780000000073",
+          "priceCents": 999,
+          "currency": "USD",
+          "genres": [
+            "fiction"
+          ],
+          "publishedAt": "2015-08-09",
+          "stock": 40,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "fiction"
+            ]
+          }
+        },
+        {
+          "id": "b8",
+          "title": "Harbour Lights",
+          "authorId": "a4",
+          "isbn": "9780000000080",
+          "priceCents": 1100,
+          "currency": "USD",
+          "genres": [
+            "fiction",
+            "travel"
+          ],
+          "publishedAt": "2017-12-01",
+          "stock": 5,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "fiction",
+              "travel"
+            ]
+          }
+        },
+        {
+          "id": "b9",
+          "title": "Orbital Debt",
+          "authorId": "a1",
+          "isbn": "9780000000097",
+          "priceCents": 1999,
+          "currency": "USD",
+          "genres": [
+            "scifi"
+          ],
+          "publishedAt": "2024-02-14",
+          "stock": 12,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "scifi"
+            ]
+          }
+        },
+        {
+          "id": "b10",
+          "title": "Salt and Smoke",
+          "authorId": "a2",
+          "isbn": "9780000000103",
+          "priceCents": 1350,
+          "currency": "EUR",
+          "genres": [
+            "food",
+            "crime"
+          ],
+          "publishedAt": "2024-07-07",
+          "stock": 8,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "food",
+              "crime"
+            ]
+          }
+        }
+      ],
+      "meta": {
+        "page": 1,
+        "limit": 50,
+        "total": 10
+      }
+    },
+    "json": true
+  },
+  "scrub": {
+    "replacements": {
+      "key:authorization": 1
+    },
+    "credential": "LUMEN_TOKEN"
+  },
+  "note": null
+}

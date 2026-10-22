@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/authors/a-301",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "a-301",
+      "name": "Ines Okafor",
+      "bio": "Novelist and essayist.",
+      "born": 1971
+    }
+  }
+}

@@ -1,0 +1,8 @@
+query {
+  lumen_books_books(limit: 5) {
+    data { id title authorId isbn priceCents currency genres publishedAt stock author { id name bio born } }
+    page
+    limit
+    total
+  }
+}

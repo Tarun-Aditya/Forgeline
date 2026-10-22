@@ -1,0 +1,36 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/orders/o-1301",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "o-1301",
+      "customerId": "c-1301",
+      "status": "paid",
+      "items": [
+        {
+          "bookId": "b-1301",
+          "quantity": 1,
+          "unitPriceCents": 1599
+        }
+      ],
+      "totalCents": 2598,
+      "createdAt": "2026-03-04T10:20:30Z",
+      "payment": {
+        "type": "card",
+        "last4": "4242",
+        "brand": "visa"
+      }
+    }
+  }
+}

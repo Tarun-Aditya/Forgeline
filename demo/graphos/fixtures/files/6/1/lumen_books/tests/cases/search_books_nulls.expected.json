@@ -1,0 +1,25 @@
+{
+  "data": {
+    "lumen_books_searchBooks": {
+      "data": [
+        {
+          "authorId": "a-4",
+          "currency": "EUR",
+          "genres": [
+            "fiction",
+            "classic"
+          ],
+          "id": "b-403",
+          "isbn": "978-0-00-000403",
+          "priceCents": 1499,
+          "publishedAt": "1999-04-01",
+          "stock": 12,
+          "title": "Dune Sea"
+        }
+      ],
+      "limit": 10,
+      "page": 1,
+      "total": 1
+    }
+  }
+}

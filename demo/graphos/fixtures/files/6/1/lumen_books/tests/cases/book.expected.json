@@ -1,0 +1,18 @@
+{
+  "data": {
+    "lumen_books_book": {
+      "authorId": "a-201",
+      "currency": "EUR",
+      "genres": [
+        "fiction",
+        "classic"
+      ],
+      "id": "b-201",
+      "isbn": "978-0-00-000201",
+      "priceCents": 1499,
+      "publishedAt": "1999-04-01",
+      "stock": 12,
+      "title": "Night Harbour"
+    }
+  }
+}

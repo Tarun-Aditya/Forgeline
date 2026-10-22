@@ -1,0 +1,10 @@
+{
+  "data": {
+    "lumen_books_customer": {
+      "createdAt": "2025-11-02T08:00:00Z",
+      "id": "c-501",
+      "name": "Mara Lind",
+      "tier": "gold"
+    }
+  }
+}

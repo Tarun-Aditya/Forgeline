@@ -1,0 +1,99 @@
+# Selection for lumen_books. The scope was confirmed with every operation
+# included (D-5iyre8). Names follow naming.md; the lumen_books_ prefix is
+# added on emit. Open design questions are in the decision log.
+contract_version: 2
+defaults:
+  fields: all
+  max_depth: 6
+  opaque_json_policy: forbid
+  null_handling: omit
+operations:
+  "get:/books":
+    response:
+      envelope: "data"   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: books }
+  "get:/books/{bookId}":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: book }
+  "get:/authors/{authorId}":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: author }
+  "post:/books/search":
+    response:
+      envelope: "data"   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: mutation, name: searchBooks }
+  "get:/customers/{customerId}":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: customer }
+  "get:/orders":
+    response:
+      envelope: "data"   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: orders }
+  "get:/orders/{orderId}":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: order }
+  "post:/orders":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: mutation, name: createOrder }
+  "patch:/orders/{orderId}":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: mutation, name: updateOrder }
+  "delete:/orders/{orderId}":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: mutation, name: cancelOrder }
+  "get:/integrations/{integrationId}":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: integration }
+
+links:
+  - shape: Book
+    path: authorId
+    operation: "get:/authors/{authorId}"
+    parameter: authorId
+    field: author
+    include: true
+    confirmed: false   # drafted by `graphos-factory-core selection draft`
+  - shape: Order
+    path: customerId
+    operation: "get:/customers/{customerId}"
+    parameter: customerId
+    field: customer
+    include: true
+    confirmed: false   # drafted by `graphos-factory-core selection draft`
+  - shape: OrderItem
+    path: bookId
+    operation: "get:/books/{bookId}"
+    parameter: bookId
+    field: book
+    include: true
+    confirmed: false   # drafted by `graphos-factory-core selection draft`

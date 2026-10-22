@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/books/search",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "query": "query-422",
+          "genre": "genre-423",
+          "maxPriceCents": 424
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "code": "invalid_request",
+      "message": "The request body is invalid."
+    }
+  }
+}

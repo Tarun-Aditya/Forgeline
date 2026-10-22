@@ -1,0 +1,31 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-aaaada",
+    "slug": "book-isbn-deprecated-upstream-isbn13",
+    "title": "Book.isbn deprecated upstream; isbn13 added",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "select",
+    "question": "API 2.0.0 marks Book.isbn deprecated and adds Book.isbn13 (string). The selection says all fields, so reconcile reports isbn13 as unmapped on lumen_books_books, lumen_books_book and lumen_books_searchBooks (and the Book $batch lookup). How should Lumen_Books_Book change?",
+    "affects": [
+      "get:/books",
+      "get:/books/{bookId}",
+      "post:/books/search"
+    ],
+    "choices": [
+      {
+        "id": "add-deprecate",
+        "label": "Add isbn13 and mark isbn @deprecated(reason: \"Use isbn13\")"
+      },
+      {
+        "id": "add-only",
+        "label": "Add isbn13 and leave isbn as it is"
+      },
+      {
+        "id": "exclude",
+        "label": "Leave isbn13 off (record it as an omit)"
+      }
+    ]
+  }
+}

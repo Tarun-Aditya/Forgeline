@@ -1,0 +1,24 @@
+contract_version: 1
+sources:
+  - kind: docs
+    url: http://127.0.0.1:4010/docs
+    retrieved_at: "2026-10-21T18:28:09Z"
+    used_for:
+      - "get:/books"
+      - "get:/books/{id}"
+      - "get:/authors/{id}"
+      - "get:/orders"
+      - "get:/orders/{id}"
+      - "post:/orders"
+    note: "The only description of the API (no OpenAPI file). Single HTML page."
+  - kind: probe
+    base_url: "http://127.0.0.1:4010"
+    retrieved_at: "2026-10-21T18:29:03.663Z"
+    operations:
+      - "get:/books"
+      - "get:/books/{id}"
+      - "get:/authors/{id}"
+      - "get:/orders"
+      - "get:/orders/{id}"
+      - "get:/customers/{id}"
+    credential: LUMEN_TOKEN

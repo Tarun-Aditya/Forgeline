@@ -1,0 +1,132 @@
+# Selection for lumen_books. The scope was confirmed with every operation
+# included (D-5iyre8). Names follow naming.md; the lumen_books_ prefix is
+# added on emit. Open design questions are in the decision log.
+contract_version: 2
+defaults:
+  fields: all
+  max_depth: 6
+  opaque_json_policy: forbid
+  null_handling: omit
+operations:
+  "get:/books":
+    response:
+      envelope: "data"   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: books, entity: true, key: id, batch: true }   # D-qbc6qk, D-wnrxww: the $batch lookup
+    fields:
+      exclude:
+        - "data[]>metadata"   # D-2hoz50
+  "get:/books/{bookId}":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: book }
+    fields:
+      exclude:
+        - "metadata"   # D-2hoz50
+  "get:/authors/{authorId}":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: author, entity: true, key: id }   # D-qbc6qk
+  "post:/books/search":
+    response:
+      envelope: "data"   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: searchBooks }   # D-jnm0uf
+    fields:
+      exclude:
+        - "data[]>metadata"   # D-2hoz50
+  "get:/customers/{customerId}":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: customer }
+    fields:
+      exclude:
+        - "email"   # D-4yyj7v
+        - "phone"   # D-4yyj7v
+  "get:/orders":
+    response:
+      envelope: "data"   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: orders }
+  "get:/orders/{orderId}":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: order }
+  "post:/orders":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: mutation, name: createOrder }
+  "post:/orders/{orderId}/refund":   # D-x4ukx1: replaces patch:/orders/{orderId} (removed in API 2.0.0)
+    response:
+      envelope: null   # the response is one Order, as on get:/orders/{orderId}
+      confirmed: true
+    include: true
+    graphql: { root: mutation, name: refundOrder }
+  "delete:/orders/{orderId}":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: mutation, name: cancelOrder }
+  "get:/integrations/{integrationId}":
+    response:
+      envelope: null   # matches the inventory's response facts
+      confirmed: true
+    include: true
+    graphql: { root: query, name: integration }
+    fields:
+      exclude:
+        - "apiKey"   # D-wf0vvx
+
+links:
+  - shape: Book
+    path: authorId
+    operation: "get:/authors/{authorId}"
+    parameter: authorId
+    field: author
+    include: true
+    confirmed: true   # D-ox8zkp
+  - shape: Order
+    path: customerId
+    operation: "get:/customers/{customerId}"
+    parameter: customerId
+    field: customer
+    include: false
+    reason: "Declined in D-ox8zkp: expose customerId only"
+    confirmed: true
+  - shape: OrderItem
+    path: bookId
+    operation: "get:/books/{bookId}"
+    parameter: bookId
+    field: book
+    include: true
+    confirmed: true   # D-ox8zkp
+
+# Conformance gaps accepted by `graphos-factory-core codify --waive`: bodies the oracle could
+# not judge (unchecked) or could not match (unmatched), each with its reason.
+waivers:
+  - where: tests/fixtures/mappings/cancel_order.json
+    status: unchecked
+    reason: "DELETE /orders/{orderId} answers 204 with no body, so there is no body for the oracle to judge; the spec documents none"
+
+# Hand edits codified by `graphos-factory-core codify`: the engineer's intent, checked
+# by every reconcile; the agent may change these spans as long as the assertions hold.
+overrides:
+  - key: "get:/books/{bookId}"
+    reason: "The engineer marked lumen_books_book as the field the on-call dashboard calls before anything else (the inline comment on the root field)."
+    context: "Hand edit found uncommitted against HEAD 9ea9afd: only an SDL '#' comment was added after the return type; nothing was reordered, selected or renamed, so selection.yaml cannot express it. The field is still second in Query, after lumen_books_books: 'pinned first' describes the dashboard's call order, not the field's position, so position is not asserted. A '#' comment is not part of the field's description and does not reach the composed supergraph."
+    assert:
+      - contains: "# pinned first: the on-call dashboard calls this one before anything else"

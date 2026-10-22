@@ -1,0 +1,38 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-xghnp0",
+    "slug": "create-order-payment-input",
+    "title": "createOrder payment input is one typed input object",
+    "status": "resolved",
+    "date": "2026-10-21",
+    "after": [
+      "D-rvl036",
+      "D-o4qjtl",
+      "D-3avp7m"
+    ],
+    "question": "NewOrder.payment is a card or a bank account (oneOf). How should createOrder take it?",
+    "affects": [
+      "post:/orders"
+    ],
+    "choices": [
+      {
+        "id": "object",
+        "label": "one input Lumen_Books_PaymentInput {type!, last4, brand, iban}, sent as payment"
+      },
+      {
+        "id": "split",
+        "label": "two optional arguments, cardPayment and bankPayment, one of which is sent"
+      }
+    ],
+    "resolution": {
+      "chosen": [
+        "object"
+      ],
+      "note": "Mirrors the output shape chosen in D-rvl036; GraphQL has no input unions, and one input keeps the body a straight copy of the argument. Body ids (customerId, items.bookId) are ID: the router sends the literal the caller writes, so a caller must pass them as strings, which the spec requires.",
+      "decision": "lumen_books_createOrder(customerId: ID!, items: [Lumen_Books_OrderItemInput!]!, payment: Lumen_Books_PaymentInput).",
+      "by": "agent",
+      "at": "2026-10-21"
+    }
+  }
+}

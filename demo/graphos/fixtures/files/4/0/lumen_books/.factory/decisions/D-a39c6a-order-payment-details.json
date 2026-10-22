@@ -1,0 +1,30 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-a39c6a",
+    "slug": "order-payment-details",
+    "title": "Order payment details",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "design",
+    "question": "Order.payment is a card (last4, brand) or a bank account (iban). How much of it should the subgraph expose?",
+    "context": "Recommendation: hide-iban. A full IBAN is financial personal data; last4 and brand are already masked by the API.",
+    "affects": [
+      "Lumen_Books_Order.payment"
+    ],
+    "choices": [
+      {
+        "id": "expose",
+        "label": "Expose card last4/brand and bank iban"
+      },
+      {
+        "id": "hide-iban",
+        "label": "Expose card last4/brand and the payment type; hide iban"
+      },
+      {
+        "id": "hide-all",
+        "label": "Hide payment entirely"
+      }
+    ]
+  }
+}

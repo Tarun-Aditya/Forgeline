@@ -1,0 +1,22 @@
+{
+  "data": null,
+  "errors": [
+    {
+      "extensions": {
+        "code": "not_found",
+        "connector": {
+          "coordinate": "lumen-books:Query.lumen_books_order[0]"
+        },
+        "http": {
+          "status": 404
+        },
+        "httpStatus": 404,
+        "service": "lumen-books"
+      },
+      "message": "No such resource.",
+      "path": [
+        "lumen_books_order"
+      ]
+    }
+  ]
+}

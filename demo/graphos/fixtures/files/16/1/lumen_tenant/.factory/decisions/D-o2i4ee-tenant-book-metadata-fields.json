@@ -1,0 +1,22 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-o2i4ee",
+    "slug": "tenant-book-metadata-fields",
+    "title": "Tenant book metadata fields",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "context",
+    "question": "Do you want the tenant's Book.metadata keys exposed as typed fields? If so, supply a sample of real metadata or the key list. If skipped, Book.metadata stays a generic JSON scalar.",
+    "choices": [
+      {
+        "id": "typed",
+        "label": "Type the metadata keys (needs a sample or key list)"
+      },
+      {
+        "id": "json",
+        "label": "Keep Book.metadata as a JSON scalar"
+      }
+    ]
+  }
+}

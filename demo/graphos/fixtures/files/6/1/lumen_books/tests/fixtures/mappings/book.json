@@ -1,0 +1,34 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/books/b-201",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "b-201",
+      "title": "Night Harbour",
+      "isbn": "978-0-00-000201",
+      "priceCents": 1499,
+      "currency": "EUR",
+      "genres": [
+        "fiction",
+        "classic"
+      ],
+      "publishedAt": "1999-04-01",
+      "stock": 12,
+      "metadata": {
+        "imprint": "Lumen"
+      },
+      "authorId": "a-201"
+    }
+  }
+}

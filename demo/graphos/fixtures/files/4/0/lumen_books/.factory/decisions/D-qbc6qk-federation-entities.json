@@ -1,0 +1,30 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-qbc6qk",
+    "slug": "federation-entities",
+    "title": "Federation entities",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "design",
+    "question": "Which types should be federation entities (@key(fields: \"id\")) that another subgraph can reference or extend? Types in scope with a by-id lookup: Book, Author, Customer, Order, Integration.",
+    "context": "Recommendation: catalog. Another subgraph can then reference or extend Book and Author; each entity needs its by-id lookup connector (GET /books/{bookId}, GET /authors/{authorId}), which is in scope. Exposing Customer or Integration as entities widens who can reach personal data and credentials.",
+    "affects": [
+      "lumen-books.graphql"
+    ],
+    "choices": [
+      {
+        "id": "none",
+        "label": "None: root fields and relationship links only"
+      },
+      {
+        "id": "catalog",
+        "label": "Catalog types: Book and Author keyed by id"
+      },
+      {
+        "id": "all",
+        "label": "All five: Book, Author, Customer, Order, Integration keyed by id"
+      }
+    ]
+  }
+}

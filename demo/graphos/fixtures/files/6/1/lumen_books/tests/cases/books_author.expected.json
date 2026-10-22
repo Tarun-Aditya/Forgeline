@@ -1,0 +1,18 @@
+{
+  "data": {
+    "lumen_books_books": {
+      "data": [
+        {
+          "author": {
+            "bio": "Poet.",
+            "born": 1980,
+            "id": "a-1201",
+            "name": "Tove Berg"
+          },
+          "authorId": "a-1201",
+          "id": "b-1201"
+        }
+      ]
+    }
+  }
+}

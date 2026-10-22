@@ -1,0 +1,16 @@
+# expect-upstream-status: 404
+query {
+  lumen_books_book(
+    bookId: "bookId-404"
+  ) {
+    id
+    title
+    authorId
+    isbn
+    priceCents
+    currency
+    genres
+    publishedAt
+    stock
+  }
+}

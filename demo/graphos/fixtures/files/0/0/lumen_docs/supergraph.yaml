@@ -1,0 +1,8 @@
+# rover's compose config for this one subgraph, for the local layers: not the
+# user's supergraph. federation_version must equal .factory/workspace.yaml's.
+federation_version: =2.15.2
+subgraphs:
+  lumen-docs:
+    routing_url: http://localhost
+    schema:
+      file: lumen-docs.graphql

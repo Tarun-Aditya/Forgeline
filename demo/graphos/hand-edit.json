@@ -1,0 +1,5 @@
+{
+  "file": "lumen-books.graphql",
+  "find": "lumen_books_book(",
+  "append": "  # pinned first: the on-call dashboard calls this one before anything else"
+}

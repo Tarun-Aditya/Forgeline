@@ -1,0 +1,28 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-jen638",
+    "slug": "upstream-changed-1-0-0-to-2-0-0",
+    "title": "Upstream changed: 1.0.0 to 2.0.0",
+    "date": "2026-10-21",
+    "status": "superseded",
+    "body": "Lumen Books OpenAPI 1.0.0 -> 2.0.0 (upstream sha fd9b7f188535 -> 51190dafa9d2). The one patch (Payment discriminator mapping) re-applied; none obsolete or in conflict. Classified for this workspace's selection:\nBREAKING (selected operations)\n1. patch:/orders/{orderId} removed. Mutation.lumen_books_updateOrder now calls an endpoint that no longer exists; selection.yaml still includes it (reconcile: selection error). Open decision D-x4ukx1.\n2. OrderStatus gains 'refunded'. Lumen_Books_OrderStatus is a closed enum, so a refunded order fails Order.status on lumen_books_orders, lumen_books_order and lumen_books_createOrder (and refundOrder if added). Open decision D-ilif9j.\nDEPRECATED (selected operations)\n3. post:/books/search deprecated ('use GET /books?q= instead'); lumen_books_searchBooks still works. Open decision D-02z6er.\n4. Book.isbn deprecated, still returned, on get:/books, get:/books/{bookId}, post:/books/search and the Book $batch lookup. Open decision D-aaaada.\nCHANGED (selected operations, additive)\n5. Book.isbn13 (string) added; selection says all fields, so reconcile reports data[]>isbn13 / isbn13 unmapped on get:/books, get:/books/{bookId} (overridden span: its assertion still ok), post:/books/search. Part of D-aaaada.\n6. get:/books gains optional query parameter q (free-text search over title and genre). Part of D-02z6er.\n7. get:/authors/{authorId}, get:/customers/{customerId}, get:/integrations/{integrationId} are reported changed (response) by the inventory diff, but the vendor documents differ only as listed here; their schemas are unchanged (the diff counts the rebuilt inventory, which also dropped the shapes infer --update-inventory had written, see below).\nNEW (not selected, informational)\n8. get:/books/{bookId}/reviews (listBookReviews): array of Review {id, bookId, rating, text, reviewer}; 404.\n9. post:/orders/{orderId}/refund (refundOrder): optional body {reason}; returns Order; 404, 409. A candidate replacement in D-x4ukx1.\nOTHER\n- The refresh rebuilt inventory.json from the spec, which discards the 8 shapes the earlier record run's infer --update-inventory had written (lock --check already flagged that inventory edit before the refresh). Re-run infer --update-inventory if the inferred shapes are still wanted.\n- Recorded fixtures, samples and tests/live.yaml were made against 1.0.0: re-run e2e and live before calling the workspace current.",
+    "source": "sources",
+    "affects": [
+      "patch:/orders/{orderId}",
+      "get:/orders",
+      "get:/orders/{orderId}",
+      "post:/orders",
+      "post:/books/search",
+      "get:/books",
+      "get:/books/{bookId}"
+    ],
+    "related": [
+      "F-pl4te8",
+      "D-x4ukx1",
+      "D-ilif9j",
+      "D-02z6er",
+      "D-aaaada"
+    ]
+  }
+}

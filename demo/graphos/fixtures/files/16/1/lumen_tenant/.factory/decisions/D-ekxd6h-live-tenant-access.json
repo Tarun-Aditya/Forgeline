@@ -1,0 +1,22 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-ekxd6h",
+    "slug": "live-tenant-access",
+    "title": "Live tenant access",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "context",
+    "question": "Will you provide a read-only credential (as an environment variable name) and tenant base URL for live validation? If skipped, the live layer is not_run and the subgraph is checked offline only.",
+    "choices": [
+      {
+        "id": "provide",
+        "label": "Provide read-only credential and base URL"
+      },
+      {
+        "id": "skip",
+        "label": "Skip live validation"
+      }
+    ]
+  }
+}

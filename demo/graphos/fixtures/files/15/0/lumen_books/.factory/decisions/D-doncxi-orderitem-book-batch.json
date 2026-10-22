@@ -1,0 +1,32 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-doncxi",
+    "slug": "orderitem-book-batch",
+    "title": "OrderItem.book: per-item GET or the batched Book entity",
+    "status": "open",
+    "date": "2026-10-21",
+    "after": [
+      "D-ox8zkp",
+      "D-wnrxww",
+      "D-x1ekw6",
+      "D-yqmrto"
+    ],
+    "phase": "select",
+    "question": "Review blocker (review.md finding 1): Lumen_Books_OrderItem.book is the field-level connector D-ox8zkp confirmed (GET /books/{bookId}, one request per order item), so lumen_books_orders(limit: 50) with many items per order sends one request per item, and Order.items has no documented maximum. Book is already an entity with a $batch connector (D-wnrxww, D-x1ekw6: GET /books?ids=...&limit=50, at most 50 ids). Keep the per-item field, or map book: { id: bookId } in the items selection of lumen_books_orders, lumen_books_order, lumen_books_createOrder and lumen_books_refundOrder so the router resolves it through the $batch connector (one request per 50 books), with the OrderItem link set include: false?",
+    "affects": [
+      "lumen-books.graphql",
+      "selection.yaml"
+    ],
+    "choices": [
+      {
+        "id": "field",
+        "label": "Keep the field-level connector (one GET /books/{bookId} per order item)"
+      },
+      {
+        "id": "batch",
+        "label": "Resolve OrderItem.book through the Book $batch entity connector"
+      }
+    ]
+  }
+}

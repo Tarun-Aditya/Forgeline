@@ -1,0 +1,12 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-ewjnmy",
+    "slug": "exported",
+    "title": "Exported",
+    "date": "2026-10-22",
+    "status": "current",
+    "body": "graphos-exports/lumen_books, base url https://api.lumenbooks.example, evidence 2026-10-22T01:18:39.491Z",
+    "source": "agent"
+  }
+}

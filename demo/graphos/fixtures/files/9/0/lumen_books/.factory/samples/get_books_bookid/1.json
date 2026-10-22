@@ -1,0 +1,47 @@
+{
+  "contract_version": 1,
+  "operation": "get:/books/{bookId}",
+  "recorded_at": "2026-10-21T19:03:03.626Z",
+  "provenance": "probe",
+  "request": {
+    "method": "GET",
+    "url": "http://127.0.0.1:4010/books/b1",
+    "headers": {
+      "Authorization": "<redacted:authorization>",
+      "Accept": "application/json"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "content_type": "application/json",
+    "body": {
+      "id": "b1",
+      "title": "The Salt Archive",
+      "authorId": "a1",
+      "isbn": "9780000000011",
+      "priceCents": 1899,
+      "currency": "USD",
+      "genres": [
+        "scifi"
+      ],
+      "publishedAt": "2019-03-04",
+      "stock": 14,
+      "metadata": {
+        "publisher": "Lumen Press",
+        "edition": 1,
+        "tags": [
+          "scifi"
+        ]
+      }
+    },
+    "json": true
+  },
+  "scrub": {
+    "replacements": {
+      "key:authorization": 1
+    },
+    "credential": "LUMEN_TOKEN"
+  },
+  "note": null
+}

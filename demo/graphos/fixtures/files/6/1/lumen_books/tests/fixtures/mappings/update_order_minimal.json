@@ -1,0 +1,43 @@
+{
+  "request": {
+    "method": "PATCH",
+    "urlPath": "/orders/o-902",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "status": "paid"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "o-902",
+      "customerId": "c-902",
+      "status": "paid",
+      "items": [
+        {
+          "bookId": "b-9021",
+          "quantity": 2,
+          "unitPriceCents": 1299
+        }
+      ],
+      "totalCents": 2598,
+      "createdAt": "2026-03-04T10:20:30Z",
+      "payment": {
+        "type": "card",
+        "last4": "4242",
+        "brand": "visa"
+      }
+    }
+  }
+}

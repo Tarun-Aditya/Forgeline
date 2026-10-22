@@ -1,0 +1,27 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-jnm0uf",
+    "slug": "search-books-root",
+    "title": "searchBooks: query or mutation",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "design",
+    "question": "POST /books/search takes a search body and returns a page of books. Should lumen_books_searchBooks sit under Query or Mutation?",
+    "context": "Recommendation: query. The spec describes it as a POST that only reads, and it has no side effect in the documented shape.",
+    "affects": [
+      "selection.yaml",
+      "post:/books/search"
+    ],
+    "choices": [
+      {
+        "id": "query",
+        "label": "Query (it only reads)"
+      },
+      {
+        "id": "mutation",
+        "label": "Mutation (treat the POST as a write)"
+      }
+    ]
+  }
+}

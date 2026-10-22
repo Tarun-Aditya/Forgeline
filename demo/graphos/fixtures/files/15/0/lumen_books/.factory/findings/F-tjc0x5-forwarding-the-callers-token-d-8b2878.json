@@ -1,0 +1,20 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-tjc0x5",
+    "slug": "forwarding-the-callers-token-d-8b2878",
+    "title": "Forwarding the caller's token (D-8b2878) cannot go through AUTH_EXPR at export",
+    "date": "2026-10-21",
+    "status": "current",
+    "body": "D-8b2878 chose to forward the caller's Authorization header \"as AUTH_EXPR at export\". This target's export accepts AUTH_EXPR only as a static {$env.NAME} and refuses any other value (export-graphos.md § The command), and the @source header is \"Bearer {{AUTH_EXPR}}\", so a forwarded header value (which already carries \"Bearer \") would also be sent as \"Bearer Bearer ...\". Carrying the choice out needs a schema change instead: replace the Authorization header in @source with one taken from the incoming request (e.g. { name: \"Authorization\", from: \"Authorization\" }), drop AUTH_EXPR from template.yaml, and give the local layers (unit, e2e, live) a caller token. That changes the placeholder contract and every test's auth, so the apply of 2026-10-22 left the service token in place; the schema still calls the API as one service account. Until the user confirms the schema-level form (or reopens D-8b2878), every client the supergraph admits can read any customer's orders and IBANs and refund, create or cancel orders.",
+    "cites": "references/export-graphos.md § The command",
+    "source": "agent",
+    "affects": [
+      "lumen-books.graphql",
+      "template.yaml"
+    ],
+    "related": [
+      "D-8b2878"
+    ]
+  }
+}

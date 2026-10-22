@@ -1,0 +1,21 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-5iyre8",
+    "slug": "confirm-scope",
+    "title": "Confirm scope",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "scope",
+    "question": "Which operations should the subgraph include?",
+    "affects": [
+      "selection.yaml"
+    ],
+    "choices": [
+      {
+        "id": "confirm",
+        "label": "Scope is right"
+      }
+    ]
+  }
+}

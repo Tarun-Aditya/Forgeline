@@ -1,0 +1,20 @@
+query {
+  lumen_books_order(orderId: "o-1301") {
+    id
+    items {
+      bookId
+      quantity
+      book {
+        id
+        title
+        authorId
+        isbn
+        priceCents
+        currency
+        genres
+        publishedAt
+        stock
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+mutation {
+  lumen_books_refundOrder(orderId: "o-1101", reason: "damaged in transit") {
+    id
+    customerId
+    status
+    items {
+      bookId
+      quantity
+      unitPriceCents
+    }
+    totalCents
+    payment {
+      type
+      last4
+      brand
+      iban
+    }
+    createdAt
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/integrations/i-1101",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "i-1101",
+      "name": "Warehouse sync",
+      "webhookUrl": "https://hooks.example.com/lumen",
+      "apiKey": "redacted-test-value"
+    }
+  }
+}

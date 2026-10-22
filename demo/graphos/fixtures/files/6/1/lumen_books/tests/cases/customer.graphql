@@ -1,0 +1,8 @@
+query {
+  lumen_books_customer(customerId: "c-501") {
+    id
+    name
+    tier
+    createdAt
+  }
+}

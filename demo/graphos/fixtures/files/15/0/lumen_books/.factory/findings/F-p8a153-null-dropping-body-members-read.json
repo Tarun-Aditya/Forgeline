@@ -1,0 +1,21 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-p8a153",
+    "slug": "null-dropping-body-members-read",
+    "title": "Null-dropping body members read unresolved in source coverage",
+    "date": "2026-10-21",
+    "status": "superseded",
+    "body": "D-3avp7m and defaults.null_handling: omit make the connector drop an explicit null, written $args.x? (connectors-language.md § @connect body). source-coverage's request classifier does not parse the ? guard: post:/books/search query, genre, maxPriceCents; post:/orders payment.type, payment.last4, payment.brand, payment.iban; patch:/orders/{orderId} note read unresolved. These rows are not verified by the coverage layer; the e2e write-body proof is what proves them.",
+    "cites": "references/schema-authoring.md § Coverage: what the schema leaves on the wire",
+    "source": "agent",
+    "affects": [
+      "post:/books/search",
+      "post:/orders",
+      "patch:/orders/{orderId}"
+    ],
+    "related": [
+      "D-3avp7m"
+    ]
+  }
+}

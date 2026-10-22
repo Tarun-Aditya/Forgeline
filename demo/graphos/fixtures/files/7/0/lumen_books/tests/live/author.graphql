@@ -1,0 +1,3 @@
+query ($authorId: ID!) {
+  lumen_books_author(authorId: $authorId) { id name bio born }
+}

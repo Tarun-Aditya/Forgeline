@@ -1,0 +1,29 @@
+{
+  "data": {
+    "lumen_books_createOrder": {
+      "createdAt": "2026-03-04T10:20:30Z",
+      "customerId": "c-801",
+      "id": "o-801",
+      "items": [
+        {
+          "bookId": "b-801",
+          "quantity": 2,
+          "unitPriceCents": 1299
+        },
+        {
+          "bookId": "b-802",
+          "quantity": 1,
+          "unitPriceCents": 899
+        }
+      ],
+      "payment": {
+        "brand": "visa",
+        "iban": null,
+        "last4": "4242",
+        "type": "card"
+      },
+      "status": "pending",
+      "totalCents": 2598
+    }
+  }
+}

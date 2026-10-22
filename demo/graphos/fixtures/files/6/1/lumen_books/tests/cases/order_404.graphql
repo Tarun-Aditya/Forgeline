@@ -1,0 +1,23 @@
+# expect-upstream-status: 404
+query {
+  lumen_books_order(
+    orderId: "orderId-404"
+  ) {
+    id
+    customerId
+    status
+    items {
+      bookId
+      quantity
+      unitPriceCents
+    }
+    totalCents
+    payment {
+      type
+      last4
+      brand
+      iban
+    }
+    createdAt
+  }
+}

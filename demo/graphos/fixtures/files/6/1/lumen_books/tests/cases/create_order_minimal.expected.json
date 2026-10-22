@@ -1,0 +1,19 @@
+{
+  "data": {
+    "lumen_books_createOrder": {
+      "createdAt": "2026-03-04T10:20:30Z",
+      "customerId": "c-802",
+      "id": "o-802",
+      "items": [
+        {
+          "bookId": "b-803",
+          "quantity": 1,
+          "unitPriceCents": null
+        }
+      ],
+      "payment": null,
+      "status": "pending",
+      "totalCents": 2598
+    }
+  }
+}

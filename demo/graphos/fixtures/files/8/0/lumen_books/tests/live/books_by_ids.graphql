@@ -1,0 +1,8 @@
+query ($ids: String) {
+  lumen_books_books(ids: $ids, limit: 50) {
+    data { id title }
+    page
+    limit
+    total
+  }
+}

@@ -1,0 +1,7 @@
+variables:
+  - name: BASE_URL
+    description: "Base URL of the Lumen Books API REST API"
+    test_default: "http://127.0.0.1:4010"
+  - name: AUTH_EXPR
+    description: "Complete Connectors authentication expression for the Lumen Books API bearer token (scheme bearerAuth, sent as `Authorization: Bearer <token>`)"
+    test_default: "{$env.LUMEN_TENANT_TOKEN}"

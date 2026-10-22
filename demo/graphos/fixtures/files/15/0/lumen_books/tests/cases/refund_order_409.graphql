@@ -1,0 +1,21 @@
+# expect-upstream-status: 409
+mutation {
+  lumen_books_refundOrder(orderId: "o-1109", reason: "reason-409") {
+    id
+    customerId
+    status
+    items {
+      bookId
+      quantity
+      unitPriceCents
+    }
+    totalCents
+    payment {
+      type
+      last4
+      brand
+      iban
+    }
+    createdAt
+  }
+}
