@@ -129,6 +129,16 @@ def main():
     except (OSError, ValueError):
         add("WARN", "helper skills installed", "factory/skills/helper-skills.json missing")
 
+    gx_cfg = os.path.join(repo, "factory", "skills", "graphos-skills.json")
+    if os.path.isfile(gx_cfg):
+        try:
+            gx = json.load(open(gx_cfg))["skills"]
+            gmissing = [n for n in gx if not os.path.isfile(os.path.join(repo, ".claude", "skills", n, "SKILL.md"))]
+            add("PASS" if not gmissing else "WARN", "GraphOS skills installed (graphos-factory, ...)",
+                "missing: " + ", ".join(gmissing) + "; run factory/scripts/install_helper_skills.py --config factory/skills/graphos-skills.json --apply" if gmissing else "")
+        except (OSError, ValueError, KeyError):
+            add("WARN", "GraphOS skills installed", "factory/skills/graphos-skills.json is not valid")
+
     docs = ""
     for name in ("AGENTS.md", "CLAUDE.md"):
         if os.path.isfile(os.path.join(repo, name)):

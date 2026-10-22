@@ -73,7 +73,7 @@ def main():
                 shutil.rmtree(target)
             shutil.copytree(src, target, ignore=shutil.ignore_patterns(".git"))
         lic = os.path.join(tmp, "LICENSE")
-        notice = os.path.join(args.dest, "HELPER-SKILLS-NOTICE.md")
+        notice = os.path.join(args.dest, cfg.get("notice", "HELPER-SKILLS-NOTICE.md"))
         with open(notice, "w", encoding="utf-8") as fh:
             fh.write(f"# Helper skills\n\nInstalled from {source} at {cfg['ref']}.\n"
                      f"Licence: {cfg['license']}\n\n")

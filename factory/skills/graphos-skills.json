@@ -1,0 +1,28 @@
+{
+  "source": "https://github.com/apollographql/skills.git",
+  "ref": "f9843dce86b1a561e3bfbb024e65c28a6cbbe38c",
+  "license": "MIT, Apollo Graph Inc. (see LICENSE below)",
+  "notice": "GRAPHOS-SKILLS-NOTICE.md",
+  "note": "Third-party and in preview. Pinned to one commit (graphos-factory skill 0.12.2) so an upstream change cannot alter the graphos-* agents without a review. To update: read the diff upstream, change ref, run: python3 factory/scripts/install_helper_skills.py --config factory/skills/graphos-skills.json --apply --force apollo-connectors is deprecated upstream in favour of graphos-factory, so it is not installed. apollo-router is not installed: its docs carry a credential-looking example that the factory's own commit hook rejects, and the validator needs only the graphos-factory toolchain.",
+  "skills": {
+    "graphos-factory": "skills/graphos-factory",
+    "apollo-federation": "skills/apollo-federation",
+    "graphql-schema": "skills/graphql-schema",
+    "rover": "skills/rover"
+  },
+  "used_by": {
+    "graphos-intake, graphos-selector, graphos-author, graphos-validator, graphos-recorder, graphos-reconciler, graphos-exporter": [
+      "graphos-factory"
+    ],
+    "graphos-author": [
+      "apollo-federation"
+    ],
+    "graphos-validator": [
+      "rover"
+    ],
+    "graphos-reviewer": [
+      "graphql-schema",
+      "apollo-federation"
+    ]
+  }
+}

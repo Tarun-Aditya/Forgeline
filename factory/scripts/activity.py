@@ -31,6 +31,9 @@ STALL_MINUTES = 10
 JOB_ID = r"\d{3,}-[a-z0-9][a-z0-9-]*"
 JOB_IN_PATH = re.compile(rf"(?:factory/jobs/|-factory/|factory/)({JOB_ID})")
 JOB_IN_COMMAND = re.compile(rf"/factory\s+(?:accept|approve-spec|respec|approve|rework|resume|stop)\s+({JOB_ID})")
+GX_NAME = r"[A-Za-z0-9][A-Za-z0-9._-]*"
+GX_IN_PATH = re.compile(rf"graphos/({GX_NAME})")
+GX_IN_COMMAND = re.compile(rf"/graphos\s+(?:new|continue|refresh|record|review|validate|codify|compose|ask|export|fix)\s+({GX_NAME})")
 REDACT = [
     re.compile(r"AKIA[0-9A-Z]{16}"),
     re.compile(r"gh[pousr]_[A-Za-z0-9]{20,}"),
@@ -174,12 +177,19 @@ def summarize(payload):
 
 
 def find_job(root, *texts):
-    """A job id mentioned in the text that really exists under factory/jobs/."""
+    """A job id mentioned in the text that really exists under factory/jobs/, else gx-<name> for a GraphOS workspace."""
     for text in texts:
         for rx in (JOB_IN_PATH, JOB_IN_COMMAND):
             for m in rx.finditer(text or ""):
                 if os.path.isdir(os.path.join(root, "factory", "jobs", m.group(1))):
                     return m.group(1)
+    # A GraphOS workspace has no job.json; its id here is gx-<folder name>.
+    for text in texts:
+        for m in GX_IN_COMMAND.finditer(text or ""):
+            return "gx-" + m.group(1)
+        for m in GX_IN_PATH.finditer(text or ""):
+            if os.path.isdir(os.path.join(root, "graphos", m.group(1))):
+                return "gx-" + m.group(1)
     return None
 
 
