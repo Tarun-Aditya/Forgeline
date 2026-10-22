@@ -44,3 +44,5 @@ rm -f "$HERE/recorder/out/vo.json"
 node "$HERE/recorder/record.mjs"
 command -v ffmpeg >/dev/null && DEMO_NAME="$DEMO_NAME" python3 "$HERE/recorder/mux-vo.py"
 ls -lh "$HERE/recorder/out"
+# never hand a video over unchecked: this fails on a cut-off frame or a stalled recording
+python3 "$HERE/recorder/check-video.py" "$HERE/recorder/out/$DEMO_NAME.mp4"

@@ -12,6 +12,11 @@ No install step; the scripts use the standard library. Tests: `python3 factory/e
 
 - Documentation lives in `docs/` (index: `docs/README.md`), named `<area>-<topic>.md`; decisions go in `docs/adr/`. Put new docs there, never beside the code,
   and add each one to the index.
+- Demo videos: record headed (never headless), keep the Mac awake until the final file is checked, and run
+  `python3 demo/graphos/recorder/check-video.py <mp4>` on the final file before calling it done. Lessons are in
+  `web-studio/.claude/skills/record-demo/SKILL.md`.
+- Before deleting a folder, grep the repo for imports and scripts that use it. Before a commit, check `git status` for staged changes you did not intend.
+- Wait on a file, a log line or an HTTP status, not on `pgrep -f` or `pkill -f` (they match their own command).
 - This repo is the factory itself, not a target project. `.claude/` and `factory/` are what
   gets copied into other repos. `factory/jobs/` is runtime state and should not be committed.
 - Run the offline evals after any change: `python3 factory/evals/run_evals.py`. It needs

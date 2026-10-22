@@ -161,6 +161,7 @@ holds 29 decisions (23 answered by a person), 17 findings, a 618-line schema and
 - The repo's commit hook scans the text of any shell command containing the words for a Git commit; avoid putting those words in scripts passed to the shell, and keep credential-looking sample text (`sk_live_`, `password`) out of files you commit. That is why `apollo-router` is not installed.
 - `pkill -f` and `pgrep -f` match their own shell command; wait loops built on them never end. Wait on a file or an HTTP status instead.
 - The subscription has a **session limit**; long recordings can stop mid-run ("resets at ..."). The golden script saves after each step; re-run the remaining steps.
+- `python3 demo/graphos/recorder/check-video.py <mp4>` fails on a cut-off frame or a stalled recording; `run-graphos-demo.sh` runs it. The full lessons table is in `web-studio/.claude/skills/record-demo/SKILL.md`.
 - The Mac must stay awake for recordings (`caffeinate -dimsu`); a sleep makes the recorder time out.
 - A shared Python dict mutated in `build_specs.py` once deprecated ~30 fields at once. It is fixed and has an eval.
 - `graphos-factory-core lock --check` exits non-zero on drift; the web server keeps its JSON output rather than treating it as an error.
