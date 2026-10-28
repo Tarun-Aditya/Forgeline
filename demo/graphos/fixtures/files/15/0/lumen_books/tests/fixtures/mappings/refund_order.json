@@ -1,0 +1,43 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/orders/o-1101/refund",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "reason": "damaged in transit"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "o-1101",
+      "customerId": "c-1101",
+      "status": "refunded",
+      "items": [
+        {
+          "bookId": "b-11011",
+          "quantity": 2,
+          "unitPriceCents": 1299
+        }
+      ],
+      "totalCents": 2598,
+      "createdAt": "2026-03-04T10:20:30Z",
+      "payment": {
+        "type": "card",
+        "last4": "4242",
+        "brand": "visa"
+      }
+    }
+  }
+}

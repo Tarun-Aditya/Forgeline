@@ -1,0 +1,17 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-pl4te8",
+    "slug": "upstream-refreshed-openapi-json",
+    "title": "Upstream refreshed: openapi.json",
+    "date": "2026-10-21",
+    "status": "current",
+    "body": "`sources refresh` replaced the vendor's pinned copy .factory/sources/openapi.upstream.json (upstream_sha256 fd9b7f18853576bfb6a7f8c79966484d244a926b26066a3f9a5cc8019f94ea18) with openapi.v2.json (upstream_sha256 51190dafa9d26ab2cc3b4d20944694c05505e37f4828284cd45bbe8d0adb4c1f; openapi 3.0.3). Of 1 recorded patch, 1 re-applied and kept on the entry, 0 obsolete (the vendor's document now says what the patch produced; dropped), 0 in conflict (the vendor changed the target; dropped and not applied — re-apply the intent by hand and codify it). The working copy was rewritten from the new upstream plus the re-applied patches; their `verified` evidence was recorded against the previous baseline.\nPatches:\n- reapplied: remove /components/schemas/Payment/discriminator/mapping (was {\"card\":\"#/components/schemas/CardPayment\",\"bank\":\"#/components/schemas/BankPayment\"}) — `was` still matches [The inventory reader drops discriminator.mapping, which left Order.payment unresolved in source coverage; each member's type enum (CardPayment card, BankPayment bank) already states the same mapping, so the discriminator keeps propertyName only.]\n\nReason: Lumen Books published API 2.0.0 (demo/graphos/openapi.v2.json)",
+    "source": "sources",
+    "evidence": [
+      "openapi.json",
+      ".factory/inventory.json",
+      "sources refresh --from openapi.v2.json"
+    ]
+  }
+}

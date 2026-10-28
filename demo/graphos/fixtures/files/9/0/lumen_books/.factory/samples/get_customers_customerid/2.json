@@ -1,0 +1,31 @@
+{
+  "contract_version": 1,
+  "operation": "get:/customers/{customerId}",
+  "recorded_at": "2026-10-21T19:03:03.725Z",
+  "provenance": "probe",
+  "request": {
+    "method": "GET",
+    "url": "http://127.0.0.1:4010/customers/nope",
+    "headers": {
+      "Authorization": "<redacted:authorization>",
+      "Accept": "application/json"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 404,
+    "content_type": "application/json",
+    "body": {
+      "code": "not_found",
+      "message": "No such customer."
+    },
+    "json": true
+  },
+  "scrub": {
+    "replacements": {
+      "key:authorization": 1
+    },
+    "credential": "LUMEN_TOKEN"
+  },
+  "note": null
+}

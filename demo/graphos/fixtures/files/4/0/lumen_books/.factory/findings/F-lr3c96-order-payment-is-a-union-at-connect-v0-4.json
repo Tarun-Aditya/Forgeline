@@ -1,0 +1,19 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-lr3c96",
+    "slug": "order-payment-is-a-union-at-connect-v0-4",
+    "title": "Order.payment is a union at connect v0.4",
+    "date": "2026-10-21",
+    "status": "current",
+    "body": "Order.payment is a oneOf of two objects (card, bank) with discriminator 'type'. At connect/v0.4 a discriminated oneOf of objects is typed as a union mapped with type->match, not the JSON scalar. Applies to whatever part of payment the payment-details decision (D-a39c6a) keeps.",
+    "cites": "references/schema-authoring.md#the-opaque-json-policy",
+    "source": "agent",
+    "affects": [
+      "Lumen_Books_Order.payment"
+    ],
+    "related": [
+      "D-a39c6a"
+    ]
+  }
+}

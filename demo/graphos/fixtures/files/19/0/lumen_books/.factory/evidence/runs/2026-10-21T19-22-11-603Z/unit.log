@@ -1,0 +1,88 @@
+unit: Rover 0.41.0, 1 suite(s)
+TEST SUITE: ./tests/lumen-books.connector.yaml 
+TEST CASE: lumen_books_books request shape and mapping @Query.lumen_books_books
+[SUCCESS]: HTTP::Request::Header authorization 
+[SUCCESS]: HTTP::Request::Method 
+[SUCCESS]: HTTP::Request::URI 
+[SUCCESS]: HTTP::Response::Status: 200 
+[SUCCESS]: HTTP::Response::Body 
+TEST CASE: lumen_books_book request shape and mapping @Query.lumen_books_book
+[SUCCESS]: HTTP::Request::Header authorization 
+[SUCCESS]: HTTP::Request::Method 
+[SUCCESS]: HTTP::Request::URI 
+[SUCCESS]: HTTP::Response::Status: 200 
+[SUCCESS]: HTTP::Response::Body 
+TEST CASE: lumen_books_author request shape and mapping @Query.lumen_books_author
+[SUCCESS]: HTTP::Request::Header authorization 
+[SUCCESS]: HTTP::Request::Method 
+[SUCCESS]: HTTP::Request::URI 
+[SUCCESS]: HTTP::Response::Status: 200 
+[SUCCESS]: HTTP::Response::Body 
+TEST CASE: lumen_books_customer request shape and mapping @Query.lumen_books_customer
+[SUCCESS]: HTTP::Request::Header authorization 
+[SUCCESS]: HTTP::Request::Method 
+[SUCCESS]: HTTP::Request::URI 
+[SUCCESS]: HTTP::Response::Status: 200 
+[SUCCESS]: HTTP::Response::Body 
+TEST CASE: lumen_books_orders request shape @Query.lumen_books_orders
+[SUCCESS]: HTTP::Request::Header authorization 
+[SUCCESS]: HTTP::Request::Method 
+[SUCCESS]: HTTP::Request::URI 
+[SUCCESS]: HTTP::Response::Status: 200 
+[SUCCESS]: HTTP::Response::Body 
+TEST CASE: lumen_books_order request shape @Query.lumen_books_order
+[SUCCESS]: HTTP::Request::Header authorization 
+[SUCCESS]: HTTP::Request::Method 
+[SUCCESS]: HTTP::Request::URI 
+[SUCCESS]: HTTP::Response::Status: 200 
+[SUCCESS]: HTTP::Response::Body 
+TEST CASE: lumen_books_integration request shape and mapping @Query.lumen_books_integration
+[SUCCESS]: HTTP::Request::Header authorization 
+[SUCCESS]: HTTP::Request::Method 
+[SUCCESS]: HTTP::Request::URI 
+[SUCCESS]: HTTP::Response::Status: 200 
+[SUCCESS]: HTTP::Response::Body 
+TEST CASE: lumen_books_searchBooks request body and mapping @Query.lumen_books_searchBooks
+[SUCCESS]: HTTP::Request::Header authorization 
+[SUCCESS]: HTTP::Request::Method 
+[SUCCESS]: HTTP::Request::URI 
+[SUCCESS]: HTTP::Request::Body 
+[SUCCESS]: HTTP::Response::Status: 200 
+[SUCCESS]: HTTP::Response::Body 
+TEST CASE: lumen_books_refundOrder request body and mapping @Mutation.lumen_books_refundOrder
+[SUCCESS]: HTTP::Request::Header authorization 
+[SUCCESS]: HTTP::Request::Method 
+[SUCCESS]: HTTP::Request::URI 
+[SUCCESS]: HTTP::Request::Body 
+[SUCCESS]: HTTP::Response::Status: 200 
+[SUCCESS]: HTTP::Response::Body 
+TEST CASE: lumen_books_cancelOrder request shape @Mutation.lumen_books_cancelOrder
+[SUCCESS]: HTTP::Request::Header authorization 
+[SUCCESS]: HTTP::Request::Method 
+[SUCCESS]: HTTP::Request::URI 
+[SUCCESS]: HTTP::Response::Status: 200 
+[SUCCESS]: HTTP::Response::Body 
+TEST CASE: Lumen_Books_Book.author relationship field @Lumen_Books_Book.author
+[SUCCESS]: HTTP::Request::Header authorization 
+[SUCCESS]: HTTP::Request::Method 
+[SUCCESS]: HTTP::Request::URI 
+[SUCCESS]: HTTP::Response::Status: 200 
+[SUCCESS]: HTTP::Response::Body 
+TEST CASE: Lumen_Books_OrderItem.book relationship field @Lumen_Books_OrderItem.book
+[SUCCESS]: HTTP::Request::Header authorization 
+[SUCCESS]: HTTP::Request::Method 
+[SUCCESS]: HTTP::Request::URI 
+[SUCCESS]: HTTP::Response::Status: 200 
+[SUCCESS]: HTTP::Response::Body 
+TEST CASE: Lumen_Books_Book $batch lookup @Lumen_Books_Book
+[SUCCESS]: HTTP::Request::Header authorization 
+[SUCCESS]: HTTP::Request::Method 
+[SUCCESS]: HTTP::Request::URI 
+[SUCCESS]: HTTP::Response::Status: 200 
+[SUCCESS]: HTTP::Response::Body 
+
+TEST RESULTS: SUCCESSFUL 67  passed; 0 failed; 0 skipped
+
+unit: pass
+graphos-factory-core: unit runs /Users/tarunaditya/.cache/graphos-factory-core/apollographql-graphos-factory/bin/graphos-factory-core (from GRAPHOS_FACTORY_CORE_BIN), version 0.11.0 (expected >= 0.11.0)
+merging supergraph schema files

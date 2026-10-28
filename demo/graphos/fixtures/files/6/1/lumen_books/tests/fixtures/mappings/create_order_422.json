@@ -1,0 +1,34 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/orders",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "customerId": "c-4221",
+          "items": [
+            {
+              "bookId": "b-4221",
+              "quantity": 0
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 422,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "code": "invalid_request",
+      "message": "The request body is invalid."
+    }
+  }
+}

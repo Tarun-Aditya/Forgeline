@@ -1,0 +1,6 @@
+query {
+  lumen_books_orders(limit: 5) {
+    data { id customerId status items { bookId quantity unitPriceCents book { id title } } totalCents payment { type last4 brand iban } createdAt }
+    nextCursor
+  }
+}

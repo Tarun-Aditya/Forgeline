@@ -1,0 +1,24 @@
+mutation {
+  lumen_books_createOrder(
+    customerId: "c-804"
+    items: [{ bookId: "b-805", quantity: 4, unitPriceCents: 750 }, { bookId: "b-806", quantity: 5 }]
+    payment: { type: bank, iban: "GB29NWBK60161331926819" }
+  ) {
+    id
+    customerId
+    status
+    items {
+      bookId
+      quantity
+      unitPriceCents
+    }
+    totalCents
+    payment {
+      type
+      last4
+      brand
+      iban
+    }
+    createdAt
+  }
+}

@@ -1,0 +1,23 @@
+query {
+  lumen_books_orders(customerId: "c-601", status: paid, after: "cur-601", limit: 25) {
+    data {
+      id
+      customerId
+      status
+      items {
+        bookId
+        quantity
+        unitPriceCents
+      }
+      totalCents
+      payment {
+        type
+        last4
+        brand
+        iban
+      }
+      createdAt
+    }
+    nextCursor
+  }
+}

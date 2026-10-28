@@ -1,0 +1,13 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-huv2ds",
+    "slug": "customer-context-assessed",
+    "title": "Customer context assessed",
+    "date": "2026-10-21",
+    "status": "current",
+    "body": "Specialized mode. The only tenant-defined area in the spec is Book.metadata (free-form publisher data, additionalProperties true). No metadata endpoint, modelId or custom-object API exists in the 11 operations. Other items: Customer email/phone are marked personal data; Integration.apiKey is a credential-shaped response field the select step must decide on; Order.payment is a discriminated oneOf (card/bank). Build requirement book-metadata-field-definitions and live requirement live-tenant-credential are open in context.yaml; if skipped, Book.metadata stays a JSON scalar and live is not_run.",
+    "cites": "customer-context.md",
+    "source": "agent"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-q0zlfg",
+    "slug": "list-size-search-items",
+    "title": "Demand-control sizes for searchBooks and Order.items",
+    "status": "open",
+    "date": "2026-10-21",
+    "after": [
+      "D-zkxfd4"
+    ],
+    "phase": "select",
+    "question": "D-zkxfd4 chose to add @listSize. lumen_books_books and lumen_books_orders now carry @listSize(slicingArguments: [\"limit\"], sizedFields: [\"data\"], requireOneSlicingArgument: false) from the documented limit (default 10, maximum 50). lumen_books_searchBooks takes no size argument and Order.items has no documented maximum, so the source gives no number for either (federation-subgraph.md: ask the user, never guess). What assumedSize should each carry?",
+    "affects": [
+      "lumen-books.graphql"
+    ],
+    "choices": [
+      {
+        "id": "sizes",
+        "label": "I will give the numbers (searchBooks page size and the largest Order.items count)"
+      },
+      {
+        "id": "none",
+        "label": "Leave both without @listSize (the router uses its default estimate)"
+      }
+    ]
+  }
+}

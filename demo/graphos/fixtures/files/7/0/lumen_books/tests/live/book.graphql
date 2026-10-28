@@ -1,0 +1,3 @@
+query ($bookId: ID!) {
+  lumen_books_book(bookId: $bookId) { id title authorId isbn priceCents currency genres publishedAt stock author { id name } }
+}

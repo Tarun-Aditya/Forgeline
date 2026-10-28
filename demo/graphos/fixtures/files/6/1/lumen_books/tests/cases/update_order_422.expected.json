@@ -1,0 +1,22 @@
+{
+  "data": null,
+  "errors": [
+    {
+      "extensions": {
+        "code": "invalid_request",
+        "connector": {
+          "coordinate": "lumen-books:Mutation.lumen_books_updateOrder[0]"
+        },
+        "http": {
+          "status": 422
+        },
+        "httpStatus": 422,
+        "service": "lumen-books"
+      },
+      "message": "The request body is invalid.",
+      "path": [
+        "lumen_books_updateOrder"
+      ]
+    }
+  ]
+}

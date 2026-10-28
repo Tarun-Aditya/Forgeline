@@ -1,0 +1,27 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-3avp7m",
+    "slug": "write-null-handling",
+    "title": "Explicit null on optional write arguments",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "design",
+    "question": "When a caller passes null for an optional write argument (updateOrder note; createOrder payment and item unitPriceCents), should the connector omit the key or send JSON null?",
+    "context": "Recommendation: omit. The spec does not say null clears a field, and every optional write member is nullable-by-omission only.",
+    "affects": [
+      "patch:/orders/{orderId}",
+      "post:/orders"
+    ],
+    "choices": [
+      {
+        "id": "omit",
+        "label": "Omit the key (selection default)"
+      },
+      {
+        "id": "send-null",
+        "label": "Send null (lets a caller clear updateOrder note)"
+      }
+    ]
+  }
+}

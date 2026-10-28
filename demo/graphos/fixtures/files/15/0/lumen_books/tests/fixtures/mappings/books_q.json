@@ -1,0 +1,60 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/books",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    },
+    "queryParameters": {
+      "q": {
+        "equalTo": "atlas"
+      },
+      "page": {
+        "absent": true
+      },
+      "limit": {
+        "absent": true
+      },
+      "genre": {
+        "absent": true
+      },
+      "ids": {
+        "absent": true
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        {
+          "id": "b-1601",
+          "title": "River Atlas",
+          "authorId": "a-16",
+          "isbn": "978-0-00-001601",
+          "isbn13": "9780000016011",
+          "priceCents": 1499,
+          "currency": "EUR",
+          "genres": [
+            "fiction"
+          ],
+          "publishedAt": "1999-04-01",
+          "stock": 12,
+          "metadata": {
+            "imprint": "Lumen"
+          }
+        }
+      ],
+      "meta": {
+        "page": 1,
+        "limit": 10,
+        "total": 1
+      }
+    }
+  }
+}

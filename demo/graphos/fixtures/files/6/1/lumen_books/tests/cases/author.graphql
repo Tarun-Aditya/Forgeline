@@ -1,0 +1,8 @@
+query {
+  lumen_books_author(authorId: "a-301") {
+    id
+    name
+    bio
+    born
+  }
+}

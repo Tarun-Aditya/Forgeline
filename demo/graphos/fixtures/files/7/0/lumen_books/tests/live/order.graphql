@@ -1,0 +1,3 @@
+query ($orderId: ID!) {
+  lumen_books_order(orderId: $orderId) { id customerId status items { bookId quantity unitPriceCents } totalCents payment { type last4 brand iban } createdAt }
+}

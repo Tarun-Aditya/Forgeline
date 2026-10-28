@@ -1,0 +1,13 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-zutkg7",
+    "slug": "live-the-lumen-api-otherwise-matches-the",
+    "title": "Live: the lumen API otherwise matches the spec for the seven recorded GETs",
+    "date": "2026-10-21",
+    "status": "current",
+    "body": "No undocumented fields and no null in any required field across 10+2 books, 4 orders, author a1, customer c1, integration i1. 404 body is {code, message} as documented for all five by-id routes. Book list meta {page,limit,total} matches PageMeta; OrderPage nextCursor was null. All enum values seen (currency USD/EUR/GBP, status pending/paid/shipped/cancelled, payment type card/bank) are inside the spec enums. GET /integrations/i1 returns apiKey (scrubbed by the probe as <redacted:apikey>). The documented 401 on /books and /orders was not probed (the credential is valid).",
+    "cites": "probe samples under .factory/samples",
+    "source": "agent"
+  }
+}

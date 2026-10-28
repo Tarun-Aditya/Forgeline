@@ -1,0 +1,21 @@
+# An explicit null reason is dropped from the body (D-3avp7m: omit).
+mutation {
+  lumen_books_refundOrder(orderId: "o-1103", reason: null) {
+    id
+    customerId
+    status
+    items {
+      bookId
+      quantity
+      unitPriceCents
+    }
+    totalCents
+    payment {
+      type
+      last4
+      brand
+      iban
+    }
+    createdAt
+  }
+}

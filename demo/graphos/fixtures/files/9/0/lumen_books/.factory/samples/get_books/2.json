@@ -1,0 +1,78 @@
+{
+  "contract_version": 1,
+  "operation": "get:/books",
+  "recorded_at": "2026-10-21T19:03:03.824Z",
+  "provenance": "probe",
+  "request": {
+    "method": "GET",
+    "url": "http://127.0.0.1:4010/books?page=2&limit=2",
+    "headers": {
+      "Authorization": "<redacted:authorization>",
+      "Accept": "application/json"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "content_type": "application/json",
+    "body": {
+      "data": [
+        {
+          "id": "b3",
+          "title": "Knife Work",
+          "authorId": "a2",
+          "isbn": "9780000000035",
+          "priceCents": 1450,
+          "currency": "EUR",
+          "genres": [
+            "crime"
+          ],
+          "publishedAt": "2018-06-21",
+          "stock": 22,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "crime"
+            ]
+          }
+        },
+        {
+          "id": "b4",
+          "title": "A Quiet Stove",
+          "authorId": "a2",
+          "isbn": "9780000000042",
+          "priceCents": 1250,
+          "currency": "EUR",
+          "genres": [
+            "crime",
+            "food"
+          ],
+          "publishedAt": "2020-01-30",
+          "stock": 0,
+          "metadata": {
+            "publisher": "Lumen Press",
+            "edition": 1,
+            "tags": [
+              "crime",
+              "food"
+            ]
+          }
+        }
+      ],
+      "meta": {
+        "page": 2,
+        "limit": 2,
+        "total": 10
+      }
+    },
+    "json": true
+  },
+  "scrub": {
+    "replacements": {
+      "key:authorization": 1
+    },
+    "credential": "LUMEN_TOKEN"
+  },
+  "note": null
+}

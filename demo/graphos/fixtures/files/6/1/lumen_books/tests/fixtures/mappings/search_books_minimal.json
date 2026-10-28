@@ -1,0 +1,48 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/books/search",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {}
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        {
+          "id": "b-402",
+          "title": "Dune Sea",
+          "isbn": "978-0-00-000402",
+          "priceCents": 1499,
+          "currency": "EUR",
+          "genres": [
+            "fiction",
+            "classic"
+          ],
+          "publishedAt": "1999-04-01",
+          "stock": 12,
+          "metadata": {
+            "imprint": "Lumen"
+          },
+          "authorId": "a-4"
+        }
+      ],
+      "meta": {
+        "page": 1,
+        "limit": 10,
+        "total": 1
+      }
+    }
+  }
+}

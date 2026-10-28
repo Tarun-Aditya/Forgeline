@@ -1,0 +1,51 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-xwq2hy",
+    "slug": "customer-contact-omits",
+    "title": "Customer email and phone left off",
+    "status": "resolved",
+    "date": "2026-10-21",
+    "after": [
+      "D-4yyj7v"
+    ],
+    "question": "Map Customer.email and Customer.phone on get:/customers/{customerId}?",
+    "affects": [
+      "Lumen_Books_Customer.email",
+      "Lumen_Books_Customer.phone"
+    ],
+    "choices": [
+      {
+        "id": "omit",
+        "label": "leave email and phone off"
+      },
+      {
+        "id": "expose",
+        "label": "map both"
+      }
+    ],
+    "resolution": {
+      "chosen": [
+        "omit"
+      ],
+      "note": "Carries out D-4yyj7v (expose name, hide email and phone) as source-coverage omits.",
+      "decision": "email and phone are not mapped on get:/customers/{customerId}.",
+      "by": "agent",
+      "at": "2026-10-21"
+    },
+    "omits": [
+      {
+        "operation": "get:/customers/{customerId}",
+        "direction": "response",
+        "path": "email",
+        "reason": "editorial"
+      },
+      {
+        "operation": "get:/customers/{customerId}",
+        "direction": "response",
+        "path": "phone",
+        "reason": "editorial"
+      }
+    ]
+  }
+}

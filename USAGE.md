@@ -192,16 +192,57 @@ Limits: it shows what agents do, not the model's streamed text, and each hook ca
 
 ## 7b. The web app
 
-`web/` is an optional local web layer (Next.js, Vercel AI SDK, AI Elements) that starts
+`web-studio/` is an optional local web layer (Next.js, Vercel AI SDK, AI Elements) that starts
 `/factory` runs from a browser, streams the run live, shows the board with approval buttons,
 reads the activity log (7a), animates how the agents hand work to each other (Agents view), lets several runs go at once and reports cost and token usage. Runs are detached processes, so
 closing the browser or crashing the web server does not stop a job. It launches the same `claude -p "/factory ..."` commands;
-see `web/README.md`. It is not copied into other repos. The agent process does not inherit the web server's `NODE_ENV` or
+see `web-studio/README.md`. It is not copied into other repos. The agent process does not inherit the web server's `NODE_ENV` or
 Next variables (`agentEnv()` in `web-studio/lib/runner.ts`), so a repo's tests run as they would from your shell.
 A narrated demo of a feature built this way, and how to record another, are in `web-studio/demo/README.md`.
 When a web-started run stops to ask something (it ends with the job mid-loop, or a job command
 did not move the job), the job card shows a "needs your answer" badge and a reply box that
 resumes the same session; runs started in a terminal, the desktop app or VS Code are not covered.
+
+## 7c. GraphOS mode: a REST API in, an Apollo subgraph out
+
+A second pipeline beside the software factory. Switch to it with **Factory | GraphOS** in the web app's header.
+It wraps Apollo's third-party `graphos-factory` skill (pinned in `factory/skills/graphos-skills.json`, installed with
+`python3 factory/scripts/install_helper_skills.py --config factory/skills/graphos-skills.json --apply`). That skill
+is in preview and says its shape will change; read the diff before you move the pin.
+
+**What it does.** You give it an OpenAPI/Swagger spec or a docs link. Nine agents (`graphos-intake`, `-selector`,
+`-author`, `-validator`, `-reviewer`, `-recorder`, `-reconciler`, `-exporter`, `-historian`) build a Git workspace at
+`graphos/<name>/`, one standalone repo per subgraph, and stop twice for you:
+
+| Stage | Who | Your part |
+| --- | --- | --- |
+| Inventory | intake | none: pins the sources and lists the operations |
+| Scope | selector | tick the operations to include, then **Confirm scope** |
+| Design | selector | answer each decision card (PII, secrets, mutations, pagination, links, entities) |
+| Apply | author | none: writes the schema, tests and coverage, edits only what changed |
+| Validate | validator, reviewer | none: composition, Connector tests, mocked Router, conformance, lint, live if you give a credential |
+| Export | exporter | enter the production base URL; it prints the `rover` commands and never publishes |
+
+**Commands** (the buttons run these; you can type them): `/graphos new <name> --spec FILE_OR_URL` (or `--docs URL`,
+optionally `--env VAR`), `continue`, `validate`, `fix <name> "<what to change>"`, `refresh <name> --spec FILE_OR_URL`
+(the API changed), `record <name> <op-key>... --env VAR` (live GET traffic as fixtures), `review`, `compose <name> --with CONFIG` (compose with
+your other subgraphs locally; not a GraphOS check), `ask <name> "<question>"` (a fresh agent answers from the workspace's record),
+`export <name> --base-url URL`, `status`. Stage and next agent always come from `factory/scripts/graphos_state.py`.
+
+**Questions are decisions, not chat.** An agent that needs an answer records an open decision in the workspace and
+stops. The web app answers it with the skill's own CLI (`graphos-factory-core decisions resolve`), so the same record
+can be answered from a terminal, and a teammate or another agent (Codex, Cursor) can pick the workspace up from Git.
+
+**Licence and keys.** Composition, the Apollo Router and rover's plugin are Elastic License v2. Only you accept it:
+set `APOLLO_ELV2_LICENSE=accept` for the process that starts agents, or `FORGELINE_ELV2_ACCEPTED=1` for the web app.
+Without it those layers report `not_run`. The skill never asks for or prints a GraphOS key; the check against your
+own supergraph runs only if `APOLLO_KEY` and a graph ref are already in your environment, else it is `not_run`.
+
+**What is not covered.** Only REST is built upstream. gRPC, databases and existing GraphQL APIs are planned there, not
+built, and the start box says so. The agent prompts are covered by live runs (see `demo/graphos/README.md`), not by
+offline evals; the offline evals cover `graphos_state.py`, the activity tagging and the demo API.
+
+**Try it** with the Lumen Books demo API in `demo/graphos/` (`demo/graphos/README.md`).
 
 ## 8. Policy: `factory/policy.json`
 

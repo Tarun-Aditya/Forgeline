@@ -1,0 +1,47 @@
+e2e: WireMock 3.13.2 (java), Apollo Router 2.17.0, Rover 0.41.0, 32 cases
+PASS: author
+PASS: author_404
+SERVED: author_404 get:/authors/{authorId} 404
+PASS: book
+PASS: book_404
+SERVED: book_404 get:/books/{bookId} 404
+PASS: books
+PASS: books_401
+SERVED: books_401 get:/books 401
+PASS: books_author
+PASS: cancel_order
+PASS: cancel_order_404
+SERVED: cancel_order_404 delete:/orders/{orderId} 404
+PASS: create_order
+PASS: create_order_422
+SERVED: create_order_422 post:/orders 422
+PASS: create_order_bank
+PASS: create_order_minimal
+PASS: create_order_nulls
+PASS: customer
+PASS: customer_404
+SERVED: customer_404 get:/customers/{customerId} 404
+PASS: integration
+PASS: integration_404
+SERVED: integration_404 get:/integrations/{integrationId} 404
+PASS: order
+PASS: order_404
+SERVED: order_404 get:/orders/{orderId} 404
+PASS: order_items_book
+PASS: orders
+PASS: orders_401
+SERVED: orders_401 get:/orders 401
+PASS: search_books
+PASS: search_books_422
+SERVED: search_books_422 post:/books/search 422
+PASS: search_books_minimal
+PASS: search_books_nulls
+PASS: update_order
+PASS: update_order_404
+SERVED: update_order_404 patch:/orders/{orderId} 404
+PASS: update_order_422
+SERVED: update_order_422 patch:/orders/{orderId} 422
+PASS: update_order_minimal
+PASS: update_order_null_note
+e2e: 32 passed, 0 failed
+graphos-factory-core: e2e runs /Users/tarunaditya/.cache/graphos-factory-core/apollographql-graphos-factory/bin/graphos-factory-core (from GRAPHOS_FACTORY_CORE_BIN), version 0.11.0 (expected >= 0.11.0)

@@ -1,0 +1,18 @@
+contract_version: 1
+intent: Decide whether the tenant's own publisher metadata fields (Book.metadata) should be typed in the subgraph, or left as a generic JSON scalar.
+inputs:
+  - path: openapi.json
+    sha256: fd9b7f18853576bfb6a7f8c79966484d244a926b26066a3f9a5cc8019f94ea18
+requirements:
+  - id: book-metadata-field-definitions
+    phase: build
+    affects: [Book.metadata typed fields]
+    reason: Book.metadata is free-form publisher data (additionalProperties true); the spec does not describe which keys a tenant stores.
+    resolve_with: A sample of Book.metadata from the tenant, or the publisher's metadata key list, supplied by the person. Without it the field stays a JSON scalar.
+    status: missing
+  - id: live-tenant-credential
+    phase: live
+    affects: [live validation against the tenant API]
+    reason: No read-only credential or base URL for the tenant API has been supplied.
+    resolve_with: The person provides a read-only bearer token in an environment variable and the tenant base URL.
+    status: missing

@@ -1,0 +1,521 @@
+{
+  "contract_version": 2,
+  "commit": "ac392fe-dirty",
+  "run_at": "2026-10-21T18:55:43.796Z",
+  "toolchain": {
+    "rover": "0.41.0",
+    "federation": "2.15.2",
+    "connect_spec": "v0.4",
+    "wiremock": "3.13.2",
+    "service_factory": "0.11.0",
+    "router": "2.17.0",
+    "java": "22.0.2"
+  },
+  "layers": {
+    "compose": {
+      "status": "pass",
+      "command": "compose.sh .",
+      "exit_code": 0,
+      "log": ".factory/evidence/runs/2026-10-21T18-55-43-796Z/compose.log",
+      "findings": [
+        "compose: Rover 0.41.0, federation 2.15.2, connect v0.4",
+        "compose: pass —      311 lines of supergraph SDL"
+      ]
+    },
+    "connector_unit": {
+      "status": "pass",
+      "command": "unit.sh .",
+      "exit_code": 0,
+      "log": ".factory/evidence/runs/2026-10-21T18-55-43-796Z/unit.log",
+      "findings": [
+        "TEST RESULTS: SUCCESSFUL 62  passed; 0 failed; 0 skipped"
+      ],
+      "cases": 62,
+      "failed": 0
+    },
+    "wiremock_e2e": {
+      "status": "pass",
+      "command": "e2e.sh .",
+      "exit_code": 0,
+      "log": ".factory/evidence/runs/2026-10-21T18-55-43-796Z/e2e.log",
+      "findings": [
+        "e2e: 32 passed, 0 failed"
+      ],
+      "cases": 32,
+      "failed": 0,
+      "error_coverage": {
+        "get:/books": {
+          "documented": [
+            "401"
+          ],
+          "executed": [
+            "401"
+          ],
+          "not_run": []
+        },
+        "get:/books/{bookId}": {
+          "documented": [
+            "404"
+          ],
+          "executed": [
+            "404"
+          ],
+          "not_run": []
+        },
+        "get:/authors/{authorId}": {
+          "documented": [
+            "404"
+          ],
+          "executed": [
+            "404"
+          ],
+          "not_run": []
+        },
+        "post:/books/search": {
+          "documented": [
+            "422"
+          ],
+          "executed": [
+            "422"
+          ],
+          "not_run": []
+        },
+        "get:/customers/{customerId}": {
+          "documented": [
+            "404"
+          ],
+          "executed": [
+            "404"
+          ],
+          "not_run": []
+        },
+        "get:/orders": {
+          "documented": [
+            "401"
+          ],
+          "executed": [
+            "401"
+          ],
+          "not_run": []
+        },
+        "get:/orders/{orderId}": {
+          "documented": [
+            "404"
+          ],
+          "executed": [
+            "404"
+          ],
+          "not_run": []
+        },
+        "post:/orders": {
+          "documented": [
+            "422"
+          ],
+          "executed": [
+            "422"
+          ],
+          "not_run": []
+        },
+        "patch:/orders/{orderId}": {
+          "documented": [
+            "404",
+            "422"
+          ],
+          "executed": [
+            "404",
+            "422"
+          ],
+          "not_run": []
+        },
+        "delete:/orders/{orderId}": {
+          "documented": [
+            "404"
+          ],
+          "executed": [
+            "404"
+          ],
+          "not_run": []
+        },
+        "get:/integrations/{integrationId}": {
+          "documented": [
+            "404"
+          ],
+          "executed": [
+            "404"
+          ],
+          "not_run": []
+        }
+      },
+      "case_proofs": {
+        "create_order": {
+          "verdict": "pass",
+          "findings": []
+        },
+        "create_order_422": {
+          "verdict": "pass",
+          "findings": []
+        },
+        "create_order_bank": {
+          "verdict": "pass",
+          "findings": []
+        },
+        "create_order_minimal": {
+          "verdict": "pass",
+          "findings": []
+        },
+        "create_order_nulls": {
+          "verdict": "pass",
+          "findings": []
+        },
+        "search_books": {
+          "verdict": "pass",
+          "findings": []
+        },
+        "search_books_422": {
+          "verdict": "pass",
+          "findings": []
+        },
+        "search_books_minimal": {
+          "verdict": "pass",
+          "findings": []
+        },
+        "search_books_nulls": {
+          "verdict": "pass",
+          "findings": []
+        },
+        "update_order": {
+          "verdict": "pass",
+          "findings": []
+        },
+        "update_order_404": {
+          "verdict": "pass",
+          "findings": []
+        },
+        "update_order_422": {
+          "verdict": "pass",
+          "findings": []
+        },
+        "update_order_minimal": {
+          "verdict": "pass",
+          "findings": []
+        },
+        "update_order_null_note": {
+          "verdict": "pass",
+          "findings": []
+        }
+      }
+    },
+    "write_body_proof": {
+      "status": "pass",
+      "command": "graphos-factory serialization (in-process, same-run)",
+      "exit_code": 0,
+      "log": ".factory/evidence/runs/2026-10-21T18-55-43-796Z/serialization.log",
+      "findings": [
+        "pass  28 of 28 required outbound assertion(s) executed and proven",
+        "pass  1 of 1 required outbound assertion(s) executed and proven",
+        "pass  16 of 16 required outbound assertion(s) executed and proven",
+        "pass  3 of 3 required outbound assertion(s) executed and proven"
+      ],
+      "cases": 3,
+      "failed": 0,
+      "write_gaps": 0,
+      "read_gaps": 0
+    },
+    "conformance": {
+      "status": "pass",
+      "command": "graphos-factory validate . --json",
+      "exit_code": 0,
+      "log": ".factory/evidence/runs/2026-10-21T18-55-43-796Z/conformance.log",
+      "findings": [
+        "60 bodies conform, 0 do not, 1 unchecked"
+      ],
+      "oracle": "openapi.json",
+      "cases": 61,
+      "failed": 0
+    },
+    "lint": {
+      "status": "pass",
+      "command": "graphos-factory lint . --json --skip-evidence",
+      "exit_code": 0,
+      "log": ".factory/evidence/runs/2026-10-21T18-55-43-796Z/lint.log",
+      "findings": [
+        "warn [link-key-drift] Lumen_Books_Book.author resolves GET /authors/{$this.authorId} through a field-level connector while type Lumen_Books_Author resolves the same operation through @key and a type-level @connect (line 121); keep one form — the relationship field within this subgraph, the entity only when a decision records why",
+        "warn [link-null-untested] Lumen_Books_Book.author reads {$this.authorId} and authorId is nullable, but no e2e case answers the empty-segment GET /authors/ for a null-authorId parent; the field is not validated — add a mapping for that GET (\"urlPath\": \"/authors/\") serving a case that selects the field on a parent whose authorId is null (connectors-language.md § Relationship fields)",
+        "warn [link-null-untested] Lumen_Books_OrderItem.book reads {$this.bookId} and bookId is nullable, but no e2e case answers the empty-segment GET /books/ for a null-bookId parent; the field is not validated — add a mapping for that GET (\"urlPath\": \"/books/\") serving a case that selects the field on a parent whose bookId is null (connectors-language.md § Relationship fields)",
+        "warn [read-root-on-write] post:/books/search is a POST the inventory reads as a write but is selected as a Query — record why in decisions.json",
+        "warn [missing-unit] post:/orders has no `rover connector test` entry asserting the request shape of lumen_books_createOrder",
+        "warn [missing-unit] delete:/orders/{orderId} has no `rover connector test` entry asserting the request shape of lumen_books_cancelOrder"
+      ]
+    },
+    "json_accounting": {
+      "status": "pass",
+      "command": "graphos-factory spans json-accounting . --json --check",
+      "exit_code": 0,
+      "log": ".factory/evidence/runs/2026-10-21T18-55-43-796Z/json_accounting.log",
+      "findings": [],
+      "counts": {
+        "total_fields": 53,
+        "json_fields": 0,
+        "accounted": 0,
+        "unaccounted": 0,
+        "stale": 0,
+        "recoverable": 0,
+        "unresolved": 0,
+        "by_type": {}
+      }
+    },
+    "live": {
+      "status": "pass",
+      "command": "live.sh .",
+      "exit_code": 0,
+      "log": ".factory/evidence/runs/2026-10-21T18-55-43-796Z/live.log",
+      "findings": [
+        "live: 7 passed, 0 failed, 4 excluded"
+      ],
+      "cases": 7,
+      "failed": 0,
+      "exclusions": [
+        {
+          "operation": "post:/books/search",
+          "reason": "writes change real data (a POST; its read semantics are not assumed live)"
+        },
+        {
+          "operation": "post:/orders",
+          "reason": "writes change real data"
+        },
+        {
+          "operation": "patch:/orders/{orderId}",
+          "reason": "writes change real data"
+        },
+        {
+          "operation": "delete:/orders/{orderId}",
+          "reason": "writes change real data"
+        }
+      ]
+    }
+  },
+  "operations": {
+    "get:/books": {
+      "unit": "pass",
+      "e2e": "pass",
+      "conformance": "pass",
+      "live": "pass"
+    },
+    "get:/books/{bookId}": {
+      "unit": "pass",
+      "e2e": "pass",
+      "conformance": "pass",
+      "live": "pass"
+    },
+    "get:/authors/{authorId}": {
+      "unit": "pass",
+      "e2e": "pass",
+      "conformance": "pass",
+      "live": "pass"
+    },
+    "post:/books/search": {
+      "unit": "pass",
+      "e2e": "pass",
+      "conformance": "pass",
+      "live": "excluded"
+    },
+    "get:/customers/{customerId}": {
+      "unit": "pass",
+      "e2e": "pass",
+      "conformance": "pass",
+      "live": "pass"
+    },
+    "get:/orders": {
+      "unit": "pass",
+      "e2e": "pass",
+      "conformance": "pass",
+      "live": "pass"
+    },
+    "get:/orders/{orderId}": {
+      "unit": "pass",
+      "e2e": "pass",
+      "conformance": "pass",
+      "live": "pass"
+    },
+    "post:/orders": {
+      "e2e": "pass",
+      "conformance": "pass",
+      "live": "excluded",
+      "unit": "n/a"
+    },
+    "patch:/orders/{orderId}": {
+      "unit": "pass",
+      "e2e": "pass",
+      "conformance": "pass",
+      "live": "excluded"
+    },
+    "delete:/orders/{orderId}": {
+      "e2e": "pass",
+      "conformance": "pass",
+      "live": "excluded",
+      "unit": "n/a"
+    },
+    "get:/integrations/{integrationId}": {
+      "unit": "pass",
+      "e2e": "pass",
+      "conformance": "pass",
+      "live": "pass"
+    }
+  },
+  "inputs": {
+    "digest": "c687d52b057fdc1c2d15d5c47d205b670c10a7c24c6296ee5299b0ad0bc06e47",
+    "files": {
+      ".factory/decisions/D-2hoz50-book-metadata.json": "98f5fe92abc9b15fca69c33627e61bf53ba81433e49dd7d0c53e10db73dc299d",
+      ".factory/decisions/D-3avp7m-write-null-handling.json": "9aa292858acb8a2bc86b9cebf476083eb207bd9e4637952b465d27859c57896c",
+      ".factory/decisions/D-4yyj7v-customer-pii.json": "354e5fdf49daedd8114716d13522c9a940be807d610f43c01a6b1793e5c63c62",
+      ".factory/decisions/D-5iyre8-confirm-scope.json": "1e66325a865a20a43c77cedcc6c0cc53c479d326e095a3a1365ffcf73b1965e1",
+      ".factory/decisions/D-a39c6a-order-payment-details.json": "4bbf0ecdb4bc4126eb073538de9d04b4ab01d897a60999c0a52f5d61692c9dbd",
+      ".factory/decisions/D-crbiq7-book-metadata-omits.json": "d5c517ce1b3203bd31c8a973424923469cd8b97782e967ab82cca548cf5b9b95",
+      ".factory/decisions/D-jnm0uf-search-books-root.json": "235857590943e600789f3438765d82c8d5085277bed2768918efe536ac4cfda9",
+      ".factory/decisions/D-nmhlzf-integration-api-key-omit.json": "c1580c5a4123ba6e3397e44f7637c3e68e0e6aa00ba5eb457c8c964e51c77349",
+      ".factory/decisions/D-o4qjtl-order-mutations.json": "0ccc235879aa06bce63000c77b62675dfdceb16ae3a916940dc40ed4f63313f6",
+      ".factory/decisions/D-oqs0jf-books-pagination.json": "32681bf64fa32c799bc35235b7edb1605412a36ecc4334c6ee006ad9a8d5b410",
+      ".factory/decisions/D-ox8zkp-relationship-links.json": "7dd02f79106e5fe082805b9f3f4ce222c0f2c7cb1ac18c6052a6c25000376c3d",
+      ".factory/decisions/D-qbc6qk-federation-entities.json": "814f517bf368cd6077aeafdb1190310f155a02d1ee4e27d533313dcc811cb9ed",
+      ".factory/decisions/D-qf95m2-orders-pagination.json": "1a697d768aa825da4f40d2b2478be10510a513fbad192a93e1ca0185717bddce",
+      ".factory/decisions/D-rvl036-order-payment-shape.json": "a7a39f4271221be773372d840251c581a8c06dd02bef15600fe21e713e8b0955",
+      ".factory/decisions/D-wf0vvx-integration-api-key.json": "7ac81202dc323191a5ca242fc359f43324b35a88d93a25a0a732468e945b5cdd",
+      ".factory/decisions/D-wnrxww-book-batching.json": "924fa39c8bc8f32f7dc041852973587981b3a4072abc81ec12b715fc6a56930a",
+      ".factory/decisions/D-x1ekw6-book-batch-page-size.json": "219f9d1d8f3bd0af56278f9be8c9e4ef35f65f0ace30c536a98604c0549c5942",
+      ".factory/decisions/D-xghnp0-create-order-payment-input.json": "0e1816afb8c512365e731d01df97d052d541fa08a894597cb2186c1819e8d6b8",
+      ".factory/decisions/D-xwq2hy-customer-contact-omits.json": "8842d68778b9922ae555352885c9808f843f17d14c83483cf458bcb9a46a2eb5",
+      ".factory/findings/F-4kib2d-response-envelopes-confirmed-from-the.json": "0b975f9540aac06d2a76f46f439ef79e9e11c25657fc4d9bcc4947221e0238ac",
+      ".factory/findings/F-h889t3-schema-review-complete.json": "86d0aa6d7f6ecce53864d6c8080a552168357c82daa33fb83c4f6850521dc5f0",
+      ".factory/findings/F-jx72bt-closed-enums-stay-in-wire-casing.json": "51d376425fd6724b1cde7e86e519bd2601e04ad0c8b9b395af2bdcaddb7ea0b8",
+      ".factory/findings/F-lr3c96-order-payment-is-a-union-at-connect-v0-4.json": "341056d978c7b33765e9cfe53e5a7b475195e8cada9995e64b05e740327e2607",
+      ".factory/findings/F-p8a153-null-dropping-body-members-read.json": "97af91bc42e9364183fdf03d6065ff142cab77fc099a22ddb485e055b3634554",
+      ".factory/findings/F-yk39gu-design-pass-complete.json": "d1f3c9e7d67d09c39b9cb87dac93d8ec609accba1b1f6f1f3ad2108f2d4f1493",
+      ".factory/inventory.json": "668d6eabfc50e1f8efee0267a45c888afbb518897f1badf3dafc23f98bc3dd58",
+      ".factory/selection.yaml": "014cef6b4933d142d11a4baa88cbde86c479e72436bace0c8e6b7e3f3ec077c0",
+      ".factory/sources.lock.yaml": "9c8602bd4a93ac43384ad7d2b64b7eb6d6f60e6d2d4f3b40f95cd3ff10095896",
+      ".factory/workspace.yaml": "6aeea6cd5e60c4cb61ad629ad3c1b0753974786c44222345e35ea3dc2140d00d",
+      "lumen-books.graphql": "2150a0223476c8890d098edd977b86202e684d5ab4515fb65bee6465a5c48506",
+      "openapi.json": "e1d7d1cd5a0d4bffba5f30f3559a27012d4c4ac3cdd3ce7826a2adb0f7b1d53d",
+      "supergraph.yaml": "a5742f2adc4bed3e4a68cf83baf7ac90515fde7e2bb689dc5954c34caef60dfd",
+      "template.yaml": "fd997549b732d18a9dee69d3f553b18c705872b754f79072a24303c3a1f21cc5",
+      "tests/cases/author.expected.json": "33d113dba8e8136b90972ed9da8924288a260ad99cee1dc004f6efb35f4b4e56",
+      "tests/cases/author.graphql": "f39b87ae5016cc4571370758cdc6c1cceda2e4370391c45f8d95747c08c13651",
+      "tests/cases/author_404.expected.json": "7fbe2cae7bfba47d0eeab63c753833643d9136de2f9e62121b7c960feb856ec5",
+      "tests/cases/author_404.graphql": "f95d7108aa0b7667733c2ef3f68d4b82b249b06a9179a24af05b24e5f3d8f376",
+      "tests/cases/book.expected.json": "2998520d97cc4244c6034aad02df9f73240c3cb6c81116b76ee0a9a751dd716e",
+      "tests/cases/book.graphql": "efbdc9b860bdc1ba03633910f61442ad2935f5f5c75a37556e6a119329cfa2a0",
+      "tests/cases/book_404.expected.json": "bf4295b123824a82275fb9a34e8f15e9cbcebd15c001692a942016e503e7aa6f",
+      "tests/cases/book_404.graphql": "19880ed731769538d851cf1c52bc68612dd9cc661c557796c2530d06e95f4b4f",
+      "tests/cases/books.expected.json": "87c5321c8c61b3bfeb8b0b91814acb67f89f57d212fb4d145cdb9f89a2a6ab09",
+      "tests/cases/books.graphql": "cb1890325f49987b8edee9e5aff557d33bd61be8193063e5321f9435a0683e56",
+      "tests/cases/books_401.expected.json": "842fc4e3d357719e10318c81370811c5aecdd2e25984cb8d43ec4a966200565b",
+      "tests/cases/books_401.graphql": "80432f2f42a2fcdc26d58f97765ca1f8d98596830fda2ec2a8a35b2dc8c1a541",
+      "tests/cases/books_author.expected.json": "3c65efcde4632f5896505466e6522132fee85b95b8dd601b1673216a24e2fdeb",
+      "tests/cases/books_author.graphql": "e659399caf069ce7315c89c84292d56f46dceba7e0b92dd375d8c4e4eac47729",
+      "tests/cases/cancel_order.expected.json": "9e76bee7008a1d5ff4c100cb2acc11af2a8c1de9e725c9148a6ca4b00d635815",
+      "tests/cases/cancel_order.graphql": "119e44a5f3b54ab89ffe830d8525c8ba7dd6d5be3b7f9898f7167689078a4dcc",
+      "tests/cases/cancel_order_404.expected.json": "28d68d94a1b6a85272755d0a0a4132c21463dd69385dac6fa8695038a3583d26",
+      "tests/cases/cancel_order_404.graphql": "f6f17093cf0c68b3ec35a414b5dd1f8fdcac6bd2cde3587cc13c35350721ff08",
+      "tests/cases/create_order.expected.json": "1b872b4a1349bfdb3605227a9e66026a6c8198bbdfb327b8436475b6e071ac4d",
+      "tests/cases/create_order.graphql": "7e0270d1c7e4e69fdd522f7e91d5c845c3cab0d9d40c9b054150fdf8d535f76b",
+      "tests/cases/create_order_422.expected.json": "59a9c9bfe6b500695452ab17e71a3bfac484210e8ac2cd74df37159b34244182",
+      "tests/cases/create_order_422.graphql": "e3cfd74b4f36709d1f2ad604b94ea25c3fa266486f5a324c224f00f4a2eb7a68",
+      "tests/cases/create_order_bank.expected.json": "94c05762f62b42ad90748438796868ac9f64a198ab0e2e60b4879ddc34177b1e",
+      "tests/cases/create_order_bank.graphql": "887731d749135d07a7c1d93e08abb6785973d450e80d2b6bbe19ddf643d366b2",
+      "tests/cases/create_order_minimal.expected.json": "1c04f838b86e1b4e27873fe69f84da86c82c131323deb07d670bd090363c441f",
+      "tests/cases/create_order_minimal.graphql": "e3875582cc32080fde36ce2a5c3ab1d7c41a73665bbcb5ce1eeb4d4630b94e84",
+      "tests/cases/create_order_nulls.expected.json": "cf88e04eb634e71ebb3e1f96070a1bd1c5ae2d83de8c7ee3c8b12a7782037b5f",
+      "tests/cases/create_order_nulls.graphql": "2f4c9119ee698b2b6858ee650f5568a9dc3a8ed216b525cf0a620ac22d920782",
+      "tests/cases/customer.expected.json": "faf72dc0c9e38d5d5778484f4262d2be4ebd533ff35f629c779e69d95e5443b3",
+      "tests/cases/customer.graphql": "6b2aaf4169bb569ed4e89da3ca4a13e31ffa85630a707c5e1a605d8df988929d",
+      "tests/cases/customer_404.expected.json": "bbbfe88239314c985b09de3e20586810eeb995db86e39af45afd0fe407d83f02",
+      "tests/cases/customer_404.graphql": "a9ff8a3bd6d62d80def7eaebd0ce089330b223748b10fd759c0a7d5d8884b95f",
+      "tests/cases/integration.expected.json": "832956bfeefce6703b97a3231d539d4cccc1ac33db61aca77500384ef9c33952",
+      "tests/cases/integration.graphql": "6c36ea2fbf5d8526ec27ac4cfd4ca0f35da750606164d8f7e80dfebc12441313",
+      "tests/cases/integration_404.expected.json": "ed7ed15ab1a00b73d9b63afeeb4c841cc99021974e5dc53fac96c0a13e270f73",
+      "tests/cases/integration_404.graphql": "6af85b969f794a48d2a36c4e1af7405cdd56599b7686f4c1398f46933a2dc1d3",
+      "tests/cases/order.expected.json": "5fb3bced2950d13a207ea0f11871c949cb0c58fd2c0aef8dec4a351f9c4707d2",
+      "tests/cases/order.graphql": "ce5279785e56943573d7635526b72a7efeda4bc078549ffc5cfb6759cbdb1e61",
+      "tests/cases/order_404.expected.json": "b72b0dbc8d11728c831678f4b564f49a5452f2955a720f5e7d8337a1574459ef",
+      "tests/cases/order_404.graphql": "acf44a6d07c9ada4200d27bcd874a2d5aa2b8f36a530bffd89d755cb8fc7dad5",
+      "tests/cases/order_items_book.expected.json": "e1e124fb504f2c624a3b2120147bbdc5ed551ac964f10ca48daefe3e800ece2b",
+      "tests/cases/order_items_book.graphql": "0a019d418a25d077732c57c8b88af43a010ce68a605889776032a14ebfee0adc",
+      "tests/cases/orders.expected.json": "6396b2631f8673ba9243ee3cc2a443378d418884be87b430fa23754b64e295a7",
+      "tests/cases/orders.graphql": "1941dc41211606bc814427ce5612a7f60a9b73d7dd5d13e0374041a740cffe46",
+      "tests/cases/orders_401.expected.json": "e0838405c344119ded1c850bad4b22502a6eb7c25d67589466df3bbd03e332e0",
+      "tests/cases/orders_401.graphql": "624d86c77357ab2986e51aa7a90b36770982c29ba71e0c66e22e2dcd0a9710bb",
+      "tests/cases/search_books.expected.json": "1ebdc1731bf8bb3f0ba1fc73c8844f94d317be51cc2558f2f8cde8ccc38ea33a",
+      "tests/cases/search_books.graphql": "3c653033073dc434d4aa10e1f54db76170a0f37656adf0dc9ea11ac445bb275c",
+      "tests/cases/search_books_422.expected.json": "b9fabbe20e5f5f35989769b75c9189b812d064d454cce48246e0e6be9b3c7d50",
+      "tests/cases/search_books_422.graphql": "525bff41b3997b7e17a254d0d60341331dd4971a08938e2c510e1120f6968947",
+      "tests/cases/search_books_minimal.expected.json": "f62629daff5107fa2b17d84b3ecd0d894df9e4ee5f40cfc0872859856feb4a51",
+      "tests/cases/search_books_minimal.graphql": "8ae5aa17731ccd6ba36647ac01bc45ffe8de6b28f020a0c52890ac64aa511087",
+      "tests/cases/search_books_nulls.expected.json": "9cdf51c618c9123fb0c54eadc7eff22beac2ef9826094b398e8f13d8c6e36aeb",
+      "tests/cases/search_books_nulls.graphql": "dafbb5c2640b807c5148f320029db5073379bded799198d4dce7fb47a8aa3f83",
+      "tests/cases/update_order.expected.json": "99100d25e005c128c5268d15e4f616f58e932ddda5a002dd3b9952984f7c1e06",
+      "tests/cases/update_order.graphql": "34be6f22f210b439233bd5d38923ed4586f0e4a08448ba6b9f00fbe0de9320e2",
+      "tests/cases/update_order_404.expected.json": "a1c2e2029e533ece6b37a2067b2cf9b7ab5c97fab93c58f8d87de70cde85ec2d",
+      "tests/cases/update_order_404.graphql": "4b36d1d3a04ca20b2fa227b552e79e34f2331d065ab8b7498e4cad162cbeee6d",
+      "tests/cases/update_order_422.expected.json": "56c1f7ca17359af08cadd24dbaa4eeb8e2b78053bb3adf93b6e0926c4cd1e77b",
+      "tests/cases/update_order_422.graphql": "824e2c4cc33edb71b77962c682865cc338a06ee66084d9052bfaa8f3494b3a5b",
+      "tests/cases/update_order_minimal.expected.json": "bb226082223b3b66220d34612af26649f9bd958b2ff735fcd0472871ed07c605",
+      "tests/cases/update_order_minimal.graphql": "ee50d29af29a0c7a97b9dd96298cb7d4697f3361d629bb24c56ccd8ba36597d7",
+      "tests/cases/update_order_null_note.expected.json": "4d7595cd0812aa2c51669a6e5d8a849ccba0a60c365b733640a20ff774bf11ef",
+      "tests/cases/update_order_null_note.graphql": "9e0350dc737a89f7c5a3f7b6196a51700e29f383673529de58c2cde55ac2c26a",
+      "tests/fixtures/mappings/author.json": "c3dea9d9ba05300e1bd32b92d4b9723b3861db1a40645a3b0204a9840c81a571",
+      "tests/fixtures/mappings/author_404.json": "882b935d0eb980cbe566954115ece4c47c8ff32928d8954cb37572124f42dc8f",
+      "tests/fixtures/mappings/book.json": "245350701ae9e2342a0f84cbcc70718e0040206e85f1e76ae4f0c2016a956215",
+      "tests/fixtures/mappings/book_404.json": "ecea5c5043338a62574433af085145093e82ffa937def9ff459df5da25753745",
+      "tests/fixtures/mappings/books.json": "ef6d6d96884a8cd3a5ebfb209050f4346a032d462566f42cd7ba6d5f02d9c79e",
+      "tests/fixtures/mappings/books_401.json": "8a84cc9396ae3103ca0ee2e2a76d1e0e093ebeef274b412e2a2aca2d4baa50d7",
+      "tests/fixtures/mappings/books_author.json": "ee85f6e8786e784e92678417b60b8b35e264f5a9541b869e77ca3d628129fd5e",
+      "tests/fixtures/mappings/books_author_a1201.json": "626af84b5f4c8c47591d23a198a54a02659071ed548902d3473c4d6cc9889165",
+      "tests/fixtures/mappings/cancel_order.json": "d2d773f392f30c4b07671ef8f40d80a76c625517058ff72d2d3f5a773bb83a77",
+      "tests/fixtures/mappings/cancel_order_404.json": "545b99e35f99bb90d372fcf1fccced3b0a4fd036da547fe0fdcbde24cd44f996",
+      "tests/fixtures/mappings/create_order.json": "73d26a3911d5f7ee2d08feae89ecec028fface8d5786361f2ee51137b8678d41",
+      "tests/fixtures/mappings/create_order_422.json": "0523a7e5bfe986e0fcbc29c5f2e37981f3c3aa8d1d4de50006397f8e5de19d3e",
+      "tests/fixtures/mappings/create_order_bank.json": "7ce275c99cc6850d317209ca799dc37eda57a9e651fe749ee829548373b93c97",
+      "tests/fixtures/mappings/create_order_minimal.json": "7a38bde468b4d7899ace9461a82d0753cc08bb83002ef6d23beb86b59a0a8887",
+      "tests/fixtures/mappings/create_order_nulls.json": "d025b6487797bea0da3911b8dfcf478369b881fe0c5777ee5d0f84e4a0b60d7b",
+      "tests/fixtures/mappings/customer.json": "583d105c9aec6d7732e5a5fe9cc21e512b562a80ad387afb23a177cf7c9476cb",
+      "tests/fixtures/mappings/customer_404.json": "915f7b16663a5ecc34ea8779b4a599cf9c6efe7c2f13cc9e29aac638fb2c4526",
+      "tests/fixtures/mappings/integration.json": "5456f43d885201978cbd65f1330ef43ee63435b75e40e37e2b4b33268de19a81",
+      "tests/fixtures/mappings/integration_404.json": "0087dbf39b77a0a2837043bed409e05117646eeb31a84ab2109d9e0e1cabce09",
+      "tests/fixtures/mappings/order.json": "8645d3f6cbb3e928c4edd52bb2b10769dcc95d458f48c03a3dc8cdd0874c7346",
+      "tests/fixtures/mappings/order_404.json": "fde1305af59b806650e7abefa6a98e7df0597ffc210967d4fc9bd912187c9d20",
+      "tests/fixtures/mappings/order_items_book.json": "a9c7ebeb4026380ce12819bbd62e8f87cb81e584d5d6395bd5c9441bf4fbf4d5",
+      "tests/fixtures/mappings/order_items_book_b1301.json": "63587e7e3c9fd7e1e24242f7086004162faba658111e24fd2cc81f25c897bdf6",
+      "tests/fixtures/mappings/orders.json": "5c16232e345eadd7b2ef34dafdc91f6259ea135e83a314a731e6c248b88f84f8",
+      "tests/fixtures/mappings/orders_401.json": "0ae7ab1758d6d59ead70ad4993b400aa8e4a34b653bf20910845fecce60a611e",
+      "tests/fixtures/mappings/search_books.json": "92d294a2052da05acd09d82dea24c5499da0b0dfd7e76109040e3a3c32c9e86f",
+      "tests/fixtures/mappings/search_books_422.json": "f6874e1e9fcb57811b2de3be275dc0b491bd0257320ddd02a97f310509ac7b38",
+      "tests/fixtures/mappings/search_books_minimal.json": "e89b82c63c1a167587945536c0e42735086bc8524e0aaefc6fd65080ab179786",
+      "tests/fixtures/mappings/search_books_nulls.json": "e3dc3368f274e82e2190b86de6cc96778ae584edf8fb7d386d137434337a0fc8",
+      "tests/fixtures/mappings/update_order.json": "8ad8cc64a4192a82ae55c15033a761cf0615a090376208f2d78d8861c405f64c",
+      "tests/fixtures/mappings/update_order_404.json": "3657667be7eee8b215588618931aa7182b6eb6a768a38af4eb527768772548fc",
+      "tests/fixtures/mappings/update_order_422.json": "837cc84d04ba2510d3ed2b6f0bc7cb4fbb76c46d9240789ab96d6732b52f3176",
+      "tests/fixtures/mappings/update_order_minimal.json": "0ad0d487372bfc66b1339acde6831d9bd9d9190fddc45a6037ef2a898a206a50",
+      "tests/fixtures/mappings/update_order_null_note.json": "081a1d37db485e08a5438024811868471de20b62ba3800979462394843dae497",
+      "tests/live.yaml": "d7d1ec2d62e404a4aba7e428f4aa5249df8f230ae35abfccd4fe49f54f8ac9b0",
+      "tests/live/author.graphql": "3f2326415943cacebb85b337faa62eb504b01d670c19c05183122b23c8246c0c",
+      "tests/live/book.graphql": "f50ece3dda084155f82f06bfee248a66390f1cccb6b96c90f99a5a592dec7357",
+      "tests/live/customer.graphql": "16f5b8ebc929df33c4d3433157da20e76158deeee537ffa45fc094cc9ba83424",
+      "tests/live/integration.graphql": "ae810a479c28761c4ed6298818a355296c551032ba5b186994a8cde9338d9177",
+      "tests/live/list_books.graphql": "4fead0ea0a50e6161aaee496268bcae216f170259a16477933d9c19f28c907d8",
+      "tests/live/list_orders.graphql": "7ac0d9ac307c800ecbb8acb5cbaca19406dbdf7857b076a00f222d5900596782",
+      "tests/live/order.graphql": "7dd72901ff602ecd34bfa71c20d86945c18721a172631f40a9997faf40b9e6e0",
+      "tests/lumen-books.connector.yaml": "1ac806a49add0e3e56e342309fa778575e60d20b507fa1f6a176cd72a32a9af2",
+      "tests/router.yaml": "3a5d850c28d8ef3a72f7fd0dd3738f8b3c1dc9c13f9f337bdad873312417d667"
+    }
+  },
+  "target_evidence_layers": {
+    "supergraph_check": {
+      "status": "not_run",
+      "exit_code": 3,
+      "findings": [],
+      "reason": "supergraph_check: no graph to check against — set GRAPHOS_FACTORY_GRAPH_REF=<graph>@<variant> for this run (the agent asks you first), or GRAPHOS_FACTORY_SUPERGRAPH_CHECK=auto to check against $APOLLO_GRAPH_REF on every run (not_run)",
+      "command": "supergraph-check.sh .",
+      "target": "graphos-factory"
+    }
+  }
+}

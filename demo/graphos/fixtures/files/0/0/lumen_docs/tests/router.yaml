@@ -1,0 +1,8 @@
+# The e2e layer's router config. A source's key is <subgraph>.<@source name>;
+# render moves override_url onto WireMock's port for each run.
+connectors:
+  sources:
+    lumen-docs.lumen_docs:
+      override_url: "http://localhost:8080"
+include_subgraph_errors:
+  all: true

@@ -14,6 +14,7 @@ workflow does), and gate such changes on a clean pass. They cover:
 Standard library only. Exit 0 when every check passes, 1 otherwise.
 """
 
+import glob
 import json
 import os
 import re
@@ -87,6 +88,7 @@ def eval_config():
 
     agents_dir = os.path.join(ROOT, ".claude", "agents")
     skill = read(os.path.join(ROOT, ".claude", "skills", "factory", "SKILL.md"))
+    graphos_skill = read(os.path.join(ROOT, ".claude", "skills", "graphos", "SKILL.md"))
     for fname in sorted(os.listdir(agents_dir)):
         stem = fname[:-3]
         text = read(os.path.join(agents_dir, fname))
@@ -94,7 +96,7 @@ def eval_config():
         fields = dict(re.findall(r"^(\w+):\s*(.*)$", front.group(1), re.M)) if front else {}
         check(f"agent {stem}: frontmatter name matches file", fields.get("name") == stem)
         check(f"agent {stem}: has description, tools, model", all(fields.get(k) for k in ("description", "tools", "model")))
-        check(f"agent {stem}: referenced by SKILL.md", stem in skill)
+        check(f"agent {stem}: referenced by SKILL.md", stem in (graphos_skill if stem.startswith("graphos-") else skill))
         if stem.startswith("reviewer-"):
             check(f"agent {stem}: reads factory/REVIEW.md", "factory/REVIEW.md" in text)
             check(f"agent {stem}: states the VERDICT first-line rule", "VERDICT: PASS" in text)
@@ -1646,6 +1648,174 @@ def eval_activity():
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+# --------------------------------------------------------------------------- graphos
+
+def eval_graphos():
+    print("graphos")
+    script = os.path.join(ROOT, "factory", "scripts", "graphos_state.py")
+    tmp = tempfile.mkdtemp(prefix="graphos-eval-")
+    try:
+        ws = os.path.join(tmp, "demo")
+        fac = os.path.join(ws, ".factory")
+        os.makedirs(os.path.join(fac, "decisions"))
+        os.makedirs(os.path.join(fac, "findings"))
+
+        def state():
+            r = run([sys.executable, script, "show", ws, "--json"])
+            try:
+                return json.loads(r.stdout)
+            except ValueError:
+                return {"error": r.stdout + r.stderr}
+
+        def put(rel, text):
+            path = os.path.join(fac, rel)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write(text)
+
+        def decision(did, phase, status, title="Q"):
+            doc = {"contract_version": 2, "decision": {"id": did, "title": title, "status": status, "phase": phase,
+                                                      "question": "?", "choices": [{"id": "a", "label": "A"}]}}
+            if status == "resolved":
+                doc["decision"]["resolution"] = {"chosen": ["a"], "by": "user"}
+            put("decisions/%s.json" % did, json.dumps(doc))
+
+        def finding(fid, title):
+            put("findings/%s.json" % fid, json.dumps({"contract_version": 2, "finding": {"id": fid, "title": title, "status": "current"}}))
+
+        check("graphos_state: a plain folder is not a workspace", "error" in state())
+        put("workspace.yaml", "service: demo\nintake: spec\nsource_kind: rest\ncontext_mode: generic\n")
+        s = state()
+        check("graphos_state: no inventory means the inventory stage", s.get("stage") == "inventory" and s.get("next") == "graphos-intake")
+        put("inventory.json", json.dumps({"operations": [{"key": "get:/a"}, {"key": "get:/b"}, {"key": "post:/c"}]}))
+        s = state()
+        check("graphos_state: inventory without a selection goes to the selector (scope)", s.get("stage") == "scope" and s.get("next") == "graphos-selector" and not s.get("gate"))
+        put("selection.yaml", 'contract_version: 2\noperations:\n  "get:/a": { include: true }\n  "get:/b": { include: false, reason: "x" }\n  "post:/c":\n    include: true\n')
+        decision("D-scope1", "scope", "open", "Confirm scope")
+        s = state()
+        check("graphos_state: an open scope decision is a gate", s.get("stage") == "scope" and s.get("gate") and s.get("next") is None)
+        check("graphos_state: counts included and excluded operations", s.get("selection") == {"included": 2, "excluded": 1}, str(s.get("selection")))
+        put("selection.yaml", 'contract_version: 2\noperations:\n  "get:/a": { include: true }\n  "get:/b": { include: false }\nlinks:\n  - shape: A\n    include: true\n  - shape: B\n    include: true\n')
+        check("graphos_state: links: entries are not counted as operations", state().get("selection") == {"included": 1, "excluded": 1}, str(state().get("selection")))
+        put("selection.yaml", 'contract_version: 2\noperations:\n  "get:/a": { include: true }\n  "get:/b": { include: false, reason: "x" }\n  "post:/c":\n    include: true\n')
+        decision("D-scope1", "scope", "resolved", "Confirm scope")
+        s = state()
+        check("graphos_state: confirmed scope without a design pass runs the selector again", s.get("stage") == "design" and s.get("next") == "graphos-selector" and not s.get("gate"))
+        decision("D-pii1", "select", "open", "PII")
+        finding("F-design", "Design pass complete")
+        s = state()
+        check("graphos_state: open design decisions are a gate", s.get("stage") == "design" and s.get("gate") and s["decisions"]["open"] == 1)
+        decision("D-pii1", "select", "resolved", "PII")
+        s = state()
+        check("graphos_state: all settled and nothing applied runs the author", s.get("stage") == "apply" and s.get("next") == "graphos-author")
+        put("applied.lock.yaml", "x: 1\n")
+        lockp = os.path.join(fac, "applied.lock.yaml")
+        for dp in glob.glob(os.path.join(fac, "decisions", "*.json")):
+            os.utime(dp, (time.time() - 300, time.time() - 300))  # the answers came before the apply
+        os.utime(lockp, (time.time() - 100, time.time() - 100))  # the apply was a while ago
+        s = state()
+        check("graphos_state: an answer older than the lock needs no new apply", s.get("stage") == "validate", s.get("stage"))
+        late = {"contract_version": 2, "decision": {"id": "D-late1", "title": "Late", "status": "resolved", "phase": "select", "choices": [{"id": "a", "label": "A"}], "resolution": {"chosen": ["a"], "by": "user"}}}
+        put("decisions/D-late1.json", json.dumps(late))
+        s = state()
+        check("graphos_state: a person's answer newer than the lock reopens apply", s.get("stage") == "apply" and s.get("next") == "graphos-author" and "new answer" in s.get("reason", ""), str(s.get("reason")))
+        os.remove(os.path.join(fac, "decisions", "D-late1.json"))
+        s = state()
+        check("graphos_state: applied without evidence runs the validator", s.get("stage") == "validate" and s.get("next") == "graphos-validator")
+        put("evidence/latest.json", json.dumps({"run_at": "t", "layers": {"compose": {"status": "pass"}, "wiremock_e2e": {"status": "fail"}}}))
+        s = state()
+        check("graphos_state: a failed layer is a gate and names the layer", s.get("gate") and s["evidence"]["failed"] == ["wiremock_e2e"])
+        put("evidence/latest.json", json.dumps({"run_at": "t", "layers": {"compose": {"status": "pass"}, "write_body_proof": {"status": "fail"}, "live": {"status": "not_run"}}}))
+        s = state()
+        check("graphos_state: a failed non-gating layer does not block (write_body_proof)", not s.get("gate") and s["evidence"]["failed"] == ["write_body_proof"] and s["evidence"]["blocking"] == [], str(s.get("evidence")))
+        put("evidence/latest.json", json.dumps({"run_at": "t", "layers": {"compose": {"status": "pass"}, "live": {"status": "not_run"}}}))
+        s = state()
+        check("graphos_state: passing evidence without a review runs the reviewer", s.get("next") == "graphos-reviewer" and s["evidence"]["not_run"] == ["live"])
+        finding("F-review", "Schema review complete")
+        with open(os.path.join(ws, "review.md"), "w", encoding="utf-8") as fh:
+            fh.write("VERDICT: CHANGES\n\n1. should: x\n")
+        s = state()
+        check("graphos_state: a CHANGES review is shown in the reason", s.get("review") == "CHANGES" and "review asks for changes" in s.get("reason", ""))
+        with open(os.path.join(ws, "review.md"), "w", encoding="utf-8") as fh:
+            fh.write("VERDICT: PASS\n")
+        s = state()
+        check("graphos_state: validated and reviewed waits at export for the person", s.get("stage") == "export" and s.get("gate") and s.get("next") is None and not s.get("exported"))
+        finding("F-export", "Exported")
+        check("graphos_state: an Exported finding marks it exported", state().get("exported") is True)
+        finding("F-up", "Upstream changed: 1.0.0 to 2.0.0")
+        s = state()
+        check("graphos_state: an upstream change reopens apply", s.get("refresh") and s.get("stage") == "apply" and s.get("next") == "graphos-author")
+        r = run([sys.executable, script, "list", tmp, "--json"])
+        import activity as act
+        root = os.path.join(tmp, "repo")
+        os.makedirs(os.path.join(root, "graphos", "lumen_books"))
+        check("activity: a path inside graphos/<name> is job gx-<name>", act.find_job(root, "Edit " + root + "/graphos/lumen_books/.factory/x.json") == "gx-lumen_books")
+        check("activity: /graphos continue <name> is job gx-<name>", act.find_job(root, "/graphos continue brand_new") == "gx-brand_new")
+        check("activity: the skill's own folder is not a workspace", act.find_job(root, root + "/.claude/skills/graphos/SKILL.md") is None)
+        r = run([sys.executable, script, "list", tmp, "--json"])
+        check("graphos_state: list finds the workspace", [w["name"] for w in json.loads(r.stdout)["workspaces"]] == ["demo"])
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+    # the demo API the GraphOS mode is shown on
+    demo = os.path.join(ROOT, "demo", "graphos")
+    sys.path.insert(0, demo)
+    try:
+        import threading
+        import urllib.request
+        import server as lumen
+        v1, v2 = [json.load(open(os.path.join(demo, "openapi.v%d.json" % n))) for n in (1, 2)]
+        ops = lambda spec: {(m, p) for p, item in spec["paths"].items() for m in item if m in ("get", "post", "patch", "delete")}
+        check("demo spec: v2 adds an endpoint, removes one and deprecates one",
+              ("get", "/books/{bookId}/reviews") in ops(v2) - ops(v1) and ("patch", "/orders/{orderId}") in ops(v1) - ops(v2)
+              and v2["paths"]["/books/search"]["post"].get("deprecated") is True)
+        def deprecated_props(spec):
+            return sorted(f"{n}.{k}" for n, sch in spec["components"]["schemas"].items() for k, v in (sch.get("properties") or {}).items() if v.get("deprecated"))
+        check("demo spec: v2 deprecates exactly Book.isbn and v1 deprecates nothing", deprecated_props(v2) == ["Book.isbn"] and deprecated_props(v1) == [], str(deprecated_props(v2))[:80])
+        srv = lumen.make_server(0, 1)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        base = "http://127.0.0.1:%d" % srv.server_address[1]
+
+        def call(path, method="GET", body=None, token=True):
+            req = urllib.request.Request(base + path, method=method, data=json.dumps(body).encode() if body is not None else None,
+                                         headers={"Content-Type": "application/json", **({"Authorization": "Bearer " + lumen.TOKEN} if token else {})})
+            try:
+                with urllib.request.urlopen(req) as resp:
+                    raw = resp.read()
+                    return resp.status, json.loads(raw) if raw else None
+            except urllib.error.HTTPError as err:
+                return err.code, json.loads(err.read() or b"null")
+
+        try:
+            check("demo api: needs the bearer token", call("/books", token=False)[0] == 401)
+            st, body = call("/books?limit=3&page=2")
+            check("demo api: page-number pagination", st == 200 and len(body["data"]) == 3 and body["meta"]["total"] == 10 and body["data"][0]["id"] == "b4")
+            st, body = call("/orders?limit=2")
+            check("demo api: cursor pagination", st == 200 and body["nextCursor"] == "o2" and call("/orders?after=o2&limit=10")[1]["nextCursor"] is None)
+            check("demo api: POST /books/search only reads", call("/books/search", "POST", {"genre": "crime"})[1]["meta"]["total"] == 3)
+            check("demo api: v1 has no isbn13 and no reviews", "isbn13" not in call("/books/b1")[1] and call("/books/b1/reviews")[0] == 404)
+            st, body = call("/orders", "POST", {"customerId": "c1", "items": [{"bookId": "b1", "quantity": 2}]})
+            check("demo api: creating an order totals it", st == 201 and body["totalCents"] == 3798)
+            check("demo api: a bad order is 422", call("/orders", "POST", {"customerId": "zz", "items": [{"bookId": "b1", "quantity": 1}]})[0] == 422)
+            check("demo api: DELETE answers 204 with no body", call("/orders/o3", "DELETE") == (204, None))
+            check("demo api: the secret-shaped field is in the response", call("/integrations/i1")[1]["apiKey"].startswith("sk_"))
+            call("/_reset", "POST", {}, token=False)
+        finally:
+            srv.shutdown()
+        srv2 = lumen.make_server(0, 2)
+        threading.Thread(target=srv2.serve_forever, daemon=True).start()
+        base = "http://127.0.0.1:%d" % srv2.server_address[1]
+        try:
+            check("demo api: v2 adds isbn13, reviews and refunds and drops PATCH",
+                  "isbn13" in call("/books/b1")[1] and len(call("/books/b3/reviews")[1]) == 2
+                  and call("/orders/o2/refund", "POST", {})[1]["status"] == "refunded" and call("/orders/o1", "PATCH", {"status": "paid"})[0] == 404)
+            call("/_reset", "POST", {}, token=False)
+        finally:
+            srv2.shutdown()
+    finally:
+        sys.path.remove(demo)
+
+
 def main():
     eval_config()
     eval_hooks()
@@ -1657,6 +1827,7 @@ def main():
     eval_artifacts()
     eval_scripts()
     eval_activity()
+    eval_graphos()
     failed = [r for r in RESULTS if not r[1]]
     print(f"\n{len(RESULTS) - len(failed)}/{len(RESULTS)} checks passed")
     sys.exit(1 if failed else 0)

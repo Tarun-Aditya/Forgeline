@@ -1,0 +1,12 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-yk39gu",
+    "slug": "design-pass-complete",
+    "title": "Design pass complete",
+    "date": "2026-10-21",
+    "status": "current",
+    "body": "12 open, 3 settled by the agent (envelopes confirmed from the inventory, Order.payment as a union, enums in wire casing). The 3 relationship links stay confirmed: false until D-ox8zkp is resolved.",
+    "source": "agent"
+  }
+}

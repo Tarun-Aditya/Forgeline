@@ -1,0 +1,49 @@
+{
+  "contract_version": 1,
+  "operation": "get:/books/{bookId}",
+  "recorded_at": "2026-10-21T19:03:03.642Z",
+  "provenance": "probe",
+  "request": {
+    "method": "GET",
+    "url": "http://127.0.0.1:4010/books/b2",
+    "headers": {
+      "Authorization": "<redacted:authorization>",
+      "Accept": "application/json"
+    },
+    "body": null
+  },
+  "response": {
+    "status": 200,
+    "content_type": "application/json",
+    "body": {
+      "id": "b2",
+      "title": "Low Orbit Letters",
+      "authorId": "a1",
+      "isbn": "9780000000028",
+      "priceCents": 1599,
+      "currency": "USD",
+      "genres": [
+        "scifi",
+        "essays"
+      ],
+      "publishedAt": "2021-09-12",
+      "stock": 3,
+      "metadata": {
+        "publisher": "Lumen Press",
+        "edition": 1,
+        "tags": [
+          "scifi",
+          "essays"
+        ]
+      }
+    },
+    "json": true
+  },
+  "scrub": {
+    "replacements": {
+      "key:authorization": 1
+    },
+    "credential": "LUMEN_TOKEN"
+  },
+  "note": null
+}

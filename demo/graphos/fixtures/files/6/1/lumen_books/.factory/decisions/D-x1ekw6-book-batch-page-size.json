@@ -1,0 +1,38 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-x1ekw6",
+    "slug": "book-batch-page-size",
+    "title": "Book $batch lookup sends limit=50 with batches of at most 50 ids",
+    "status": "resolved",
+    "date": "2026-10-21",
+    "after": [
+      "D-wnrxww",
+      "D-oqs0jf"
+    ],
+    "question": "GET /books is paged (limit max 50). How should the Book $batch connector keep a batch from losing books past the first page?",
+    "affects": [
+      "get:/books",
+      "Lumen_Books_Book"
+    ],
+    "choices": [
+      {
+        "id": "page-max",
+        "label": "batch maxSize 50 and send limit=50, so one page holds the whole batch"
+      },
+      {
+        "id": "per-key",
+        "label": "give up batching and resolve one GET /books/{bookId} per key"
+      }
+    ],
+    "resolution": {
+      "chosen": [
+        "page-max"
+      ],
+      "note": "Carries out D-wnrxww (batch). batch find rates get:/books paginated; capping the batch at the documented page maximum and asking for that page size makes one page hold every id. The API's behaviour with ids and limit together is not verified live.",
+      "decision": "type Lumen_Books_Book's $batch connector: GET /books, queryParams ids: $batch.id->joinNotNull(\",\") and limit: 50, batch maxSize 50.",
+      "by": "agent",
+      "at": "2026-10-21"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-jx72bt",
+    "slug": "closed-enums-stay-in-wire-casing",
+    "title": "Closed enums stay in wire casing",
+    "date": "2026-10-21",
+    "status": "current",
+    "body": "currency (USD, EUR, GBP), order status (pending, paid, shipped, cancelled) and customer tier (standard, gold) are closed vocabularies of valid GraphQL names. They become GraphQL enums with the wire values unchanged, so values serialise straight back into request bodies (updateOrder status, orders status filter) without a ->match table.",
+    "cites": "references/naming.md#field-naming-inside-the-selection",
+    "source": "agent"
+  }
+}

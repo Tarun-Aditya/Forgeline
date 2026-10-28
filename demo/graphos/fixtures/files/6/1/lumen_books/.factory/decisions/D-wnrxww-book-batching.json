@@ -1,0 +1,39 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-wnrxww",
+    "slug": "book-batching",
+    "title": "Batching Book lookups",
+    "status": "resolved",
+    "date": "2026-10-21",
+    "phase": "design",
+    "question": "GET /books accepts ids (comma-separated), so Book lookups can be batched. If Book becomes an entity, should the subgraph use a $batch connector over GET /books?ids= or one GET /books/{bookId} per key?",
+    "context": "Recommendation: batch, if Book is an entity: OrderItem.book and cross-subgraph references then cost one request per page, not per item. batch find reports nothing yet because no type is keyed; this only applies once the entities decision makes Book one. GET /books is paged (max 50), so a batch above 50 ids needs checking.",
+    "affects": [
+      "get:/books",
+      "lumen-books.graphql"
+    ],
+    "choices": [
+      {
+        "id": "batch",
+        "label": "$batch via GET /books?ids= (one request for many books)"
+      },
+      {
+        "id": "per-key",
+        "label": "One request per key"
+      }
+    ],
+    "after": [
+      "D-qbc6qk",
+      "D-oqs0jf"
+    ],
+    "resolution": {
+      "chosen": [
+        "batch"
+      ],
+      "note": "demo answer",
+      "by": "user",
+      "at": "2026-10-21"
+    }
+  }
+}

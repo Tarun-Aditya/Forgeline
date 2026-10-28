@@ -1,0 +1,35 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/orders/o-701",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "o-701",
+      "customerId": "c-701",
+      "status": "shipped",
+      "items": [
+        {
+          "bookId": "b-7011",
+          "quantity": 2,
+          "unitPriceCents": 1299
+        }
+      ],
+      "totalCents": 2598,
+      "createdAt": "2026-03-04T10:20:30Z",
+      "payment": {
+        "type": "bank",
+        "iban": "DE89370400440532013000"
+      }
+    }
+  }
+}

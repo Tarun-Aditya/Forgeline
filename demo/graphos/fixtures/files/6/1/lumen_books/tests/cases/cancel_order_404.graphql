@@ -1,0 +1,6 @@
+# expect-upstream-status: 404
+mutation {
+  lumen_books_cancelOrder(
+    orderId: "orderId-404"
+  )
+}

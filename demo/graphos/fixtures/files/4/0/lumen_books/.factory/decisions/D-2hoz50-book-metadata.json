@@ -1,0 +1,26 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-2hoz50",
+    "slug": "book-metadata",
+    "title": "Book.metadata (free-form publisher data)",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "design",
+    "question": "Book.metadata is a free-form object (additionalProperties: true). Type it as Lumen_Books_JSON or leave it out?",
+    "context": "Recommendation: exclude, unless a consumer needs publisher data: the workspace's opaque_json_policy is forbid, and an untyped field gives callers nothing to rely on.",
+    "affects": [
+      "Lumen_Books_Book.metadata"
+    ],
+    "choices": [
+      {
+        "id": "json",
+        "label": "Expose as Lumen_Books_JSON (reason: free-form-object)"
+      },
+      {
+        "id": "exclude",
+        "label": "Exclude metadata"
+      }
+    ]
+  }
+}

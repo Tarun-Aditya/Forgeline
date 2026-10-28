@@ -1,0 +1,24 @@
+{
+  "data": {
+    "lumen_books_updateOrder": {
+      "createdAt": "2026-03-04T10:20:30Z",
+      "customerId": "c-901",
+      "id": "o-901",
+      "items": [
+        {
+          "bookId": "b-9011",
+          "quantity": 2,
+          "unitPriceCents": 1299
+        }
+      ],
+      "payment": {
+        "brand": "visa",
+        "iban": null,
+        "last4": "4242",
+        "type": "card"
+      },
+      "status": "shipped",
+      "totalCents": 2598
+    }
+  }
+}

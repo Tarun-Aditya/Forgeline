@@ -1,0 +1,18 @@
+query {
+  lumen_books_searchBooks(query: "dune", genre: "scifi", maxPriceCents: 2500) {
+    data {
+      id
+      title
+      authorId
+      isbn
+      priceCents
+      currency
+      genres
+      publishedAt
+      stock
+    }
+    page
+    limit
+    total
+  }
+}

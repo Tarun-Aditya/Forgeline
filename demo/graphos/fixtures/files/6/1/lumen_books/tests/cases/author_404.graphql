@@ -1,0 +1,11 @@
+# expect-upstream-status: 404
+query {
+  lumen_books_author(
+    authorId: "authorId-404"
+  ) {
+    id
+    name
+    bio
+    born
+  }
+}

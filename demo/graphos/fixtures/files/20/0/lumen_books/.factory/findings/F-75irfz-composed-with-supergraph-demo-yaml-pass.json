@@ -1,0 +1,12 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-75irfz",
+    "slug": "composed-with-supergraph-demo-yaml-pass",
+    "title": "Composed with supergraph.demo.yaml: pass",
+    "date": "2026-10-21",
+    "status": "current",
+    "body": "rover supergraph compose (federation =2.15.2) of lumen_books with reviews succeeded; Lumen_Books_Book @key(id) agrees. Local composition only, not a GraphOS check.",
+    "source": "agent"
+  }
+}

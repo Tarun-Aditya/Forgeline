@@ -1,0 +1,43 @@
+{
+  "request": {
+    "method": "PATCH",
+    "urlPath": "/orders/o-903",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "status": "cancelled"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "o-903",
+      "customerId": "c-903",
+      "status": "cancelled",
+      "items": [
+        {
+          "bookId": "b-9031",
+          "quantity": 2,
+          "unitPriceCents": 1299
+        }
+      ],
+      "totalCents": 2598,
+      "createdAt": "2026-03-04T10:20:30Z",
+      "payment": {
+        "type": "card",
+        "last4": "4242",
+        "brand": "visa"
+      }
+    }
+  }
+}

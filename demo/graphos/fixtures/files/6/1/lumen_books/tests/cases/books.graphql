@@ -1,0 +1,18 @@
+query {
+  lumen_books_books(page: 2, limit: 20, genre: "fantasy", ids: "b-101,b-102") {
+    data {
+      id
+      title
+      authorId
+      isbn
+      priceCents
+      currency
+      genres
+      publishedAt
+      stock
+    }
+    page
+    limit
+    total
+  }
+}

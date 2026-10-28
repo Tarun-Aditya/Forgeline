@@ -1,0 +1,55 @@
+# Live smoke cases against the Lumen Books API (http://127.0.0.1:4010).
+# The credential is read from the environment variable named by AUTH_EXPR in
+# template.yaml; it is never written here.
+# Ids come from the list responses; integration has no list route, so its id
+# (i1) was found by probing.
+cases:
+  - name: list_books
+    safety: read
+    require: >
+      .data.lumen_books_books as $b
+      | ($b.data | length > 0) and ($b.data[0].title != null)
+      and ($b.data[0].author.name != null)
+      and ($b.page != null) and ($b.limit != null) and ($b.total != null)
+  - name: book
+    safety: read
+    variables:
+      bookId: { from: list_books, path: ".data.lumen_books_books.data[0].id" }
+    require: >
+      .data.lumen_books_book.title != null
+  - name: author
+    safety: read
+    variables:
+      authorId: { from: list_books, path: ".data.lumen_books_books.data[0].authorId" }
+    require: >
+      .data.lumen_books_author.name != null
+  - name: list_orders
+    safety: read
+    require: >
+      (.data.lumen_books_orders.data | length > 0)
+      and (.data.lumen_books_orders.data[0].items[0].book.title != null)
+  - name: order
+    safety: read
+    variables:
+      orderId: { from: list_orders, path: ".data.lumen_books_orders.data[0].id" }
+    require: >
+      .data.lumen_books_order.status != null
+  - name: customer
+    safety: read
+    variables:
+      customerId: { from: list_orders, path: ".data.lumen_books_orders.data[0].customerId" }
+    require: >
+      .data.lumen_books_customer.name != null
+  - name: integration
+    safety: read
+    require: >
+      .data.lumen_books_integration.name != null
+exclusions:
+  - operation: "post:/books/search"
+    reason: "writes change real data (a POST; its read semantics are not assumed live)"
+  - operation: "post:/orders"
+    reason: "writes change real data"
+  - operation: "patch:/orders/{orderId}"
+    reason: "writes change real data"
+  - operation: "delete:/orders/{orderId}"
+    reason: "writes change real data"

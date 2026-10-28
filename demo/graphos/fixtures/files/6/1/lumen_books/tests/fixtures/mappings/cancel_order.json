@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "DELETE",
+    "urlPath": "/orders/o-1001",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    }
+  },
+  "response": {
+    "status": 204
+  }
+}

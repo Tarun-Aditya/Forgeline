@@ -1,0 +1,25 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-zkxfd4",
+    "slug": "demand-control-list-sizes",
+    "title": "Demand-control list sizes",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "select",
+    "question": "Does your router enforce demand control? If so, add @listSize: slicingArguments limit (source default 10, maximum 50) with sizedFields data on lumen_books_books and lumen_books_orders; searchBooks has no size argument and Order.items has no documented maximum, so both need a number from you or the API owner.",
+    "affects": [
+      "lumen-books.graphql"
+    ],
+    "choices": [
+      {
+        "id": "add",
+        "label": "Router enforces demand control; add @listSize (give the searchBooks and Order.items sizes)"
+      },
+      {
+        "id": "none",
+        "label": "No demand control; leave @listSize out"
+      }
+    ]
+  }
+}

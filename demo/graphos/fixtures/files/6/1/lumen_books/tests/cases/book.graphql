@@ -1,0 +1,13 @@
+query {
+  lumen_books_book(bookId: "b-201") {
+    id
+    title
+    authorId
+    isbn
+    priceCents
+    currency
+    genres
+    publishedAt
+    stock
+  }
+}

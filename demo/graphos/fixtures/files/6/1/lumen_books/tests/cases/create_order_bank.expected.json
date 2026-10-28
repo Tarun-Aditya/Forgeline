@@ -1,0 +1,29 @@
+{
+  "data": {
+    "lumen_books_createOrder": {
+      "createdAt": "2026-03-05T09:00:00Z",
+      "customerId": "c-804",
+      "id": "o-804",
+      "items": [
+        {
+          "bookId": "b-805",
+          "quantity": 4,
+          "unitPriceCents": 750
+        },
+        {
+          "bookId": "b-806",
+          "quantity": 5,
+          "unitPriceCents": null
+        }
+      ],
+      "payment": {
+        "brand": null,
+        "iban": "GB29NWBK60161331926819",
+        "last4": null,
+        "type": "bank"
+      },
+      "status": "pending",
+      "totalCents": 3000
+    }
+  }
+}

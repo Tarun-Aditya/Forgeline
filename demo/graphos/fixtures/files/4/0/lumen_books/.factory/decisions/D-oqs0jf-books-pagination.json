@@ -1,0 +1,31 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-oqs0jf",
+    "slug": "books-pagination",
+    "title": "Pagination for books",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "design",
+    "question": "GET /books is page-number paged (page from 1, limit default 10, max 50) and returns meta {page, limit, total}. What should lumen_books_books expose?",
+    "context": "Recommendation: wrapper. total is the stop signal the caller needs; the same type also serves searchBooks, which returns the same BookPage shape. The genre and ids filters are exposed either way.",
+    "affects": [
+      "get:/books",
+      "post:/books/search"
+    ],
+    "choices": [
+      {
+        "id": "wrapper",
+        "label": "page and limit arguments; return a page type with data and page/limit/total"
+      },
+      {
+        "id": "flatten",
+        "label": "page and limit arguments; return the list only (no total)"
+      },
+      {
+        "id": "first-page",
+        "label": "No paging arguments; return the first page only"
+      }
+    ]
+  }
+}

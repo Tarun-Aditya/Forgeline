@@ -1,0 +1,39 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-ox8zkp",
+    "slug": "relationship-links",
+    "title": "Relationship links",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "design",
+    "question": "Which candidate links should become relationship fields? Each is one extra request per parent.",
+    "context": "Recommendation: Book.author and OrderItem.book; drop Order.customer unless the customer data decision exposes it. OrderItem.book runs once per order item, so it is cheaper with batching. None of the three is circular or self-referencing.",
+    "multiple": true,
+    "affects": [
+      "selection.yaml"
+    ],
+    "choices": [
+      {
+        "id": "book-author",
+        "label": "Book.author (via GET /authors/{authorId})"
+      },
+      {
+        "id": "order-customer",
+        "label": "Order.customer (via GET /customers/{customerId})"
+      },
+      {
+        "id": "orderitem-book",
+        "label": "OrderItem.book (via GET /books/{bookId})"
+      },
+      {
+        "id": "none",
+        "label": "None: expose the ids only"
+      }
+    ],
+    "after": [
+      "D-4yyj7v",
+      "D-wnrxww"
+    ]
+  }
+}

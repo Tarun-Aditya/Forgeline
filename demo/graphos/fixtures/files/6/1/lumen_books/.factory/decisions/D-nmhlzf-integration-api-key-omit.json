@@ -1,0 +1,44 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-nmhlzf",
+    "slug": "integration-api-key-omit",
+    "title": "Integration apiKey left off",
+    "status": "resolved",
+    "date": "2026-10-21",
+    "after": [
+      "D-wf0vvx"
+    ],
+    "question": "Map Integration.apiKey on get:/integrations/{integrationId}?",
+    "affects": [
+      "Lumen_Books_Integration.apiKey"
+    ],
+    "choices": [
+      {
+        "id": "omit",
+        "label": "leave apiKey off"
+      },
+      {
+        "id": "expose",
+        "label": "map it"
+      }
+    ],
+    "resolution": {
+      "chosen": [
+        "omit"
+      ],
+      "note": "Carries out D-wf0vvx (exclude apiKey) as a source-coverage omit.",
+      "decision": "apiKey is not mapped on get:/integrations/{integrationId}.",
+      "by": "agent",
+      "at": "2026-10-21"
+    },
+    "omits": [
+      {
+        "operation": "get:/integrations/{integrationId}",
+        "direction": "response",
+        "path": "apiKey",
+        "reason": "editorial"
+      }
+    ]
+  }
+}

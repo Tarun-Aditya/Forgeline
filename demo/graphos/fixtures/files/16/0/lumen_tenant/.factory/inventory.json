@@ -1,0 +1,1015 @@
+{
+  "contract_version": 1,
+  "api": {
+    "title": "Lumen Books API",
+    "version": "1.0.0",
+    "description": "A small bookshop REST API used to demo Forgeline's GraphOS mode.",
+    "base_urls": [
+      "http://127.0.0.1:4010"
+    ],
+    "auth": [
+      {
+        "kind": "bearer",
+        "header": "Authorization",
+        "prefix": "Bearer ",
+        "scheme_name": "bearerAuth",
+        "source": "spec"
+      }
+    ],
+    "security": [
+      {
+        "bearerAuth": []
+      }
+    ],
+    "pagination": {
+      "style": "cursor",
+      "request": "after",
+      "size_param": "limit",
+      "response": "nextCursor",
+      "counts": {
+        "cursor": 1,
+        "page": 1
+      }
+    }
+  },
+  "operations": [
+    {
+      "key": "get:/books",
+      "operation_id": "listBooks",
+      "method": "GET",
+      "path": "/books",
+      "summary": "List books",
+      "description": "Page-number pagination. `ids` fetches several books in one call.",
+      "deprecated": false,
+      "tags": [
+        "Catalog"
+      ],
+      "semantics": "read",
+      "provenance": "spec",
+      "confidence": 1,
+      "parameters": [
+        {
+          "name": "page",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "format": null,
+          "description": "Page number, from 1.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null,
+          "default": 1,
+          "minimum": 1
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "format": null,
+          "description": "Page size.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null,
+          "default": 10,
+          "minimum": 1,
+          "maximum": 50
+        },
+        {
+          "name": "genre",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "format": null,
+          "description": "Only books in this genre.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null
+        },
+        {
+          "name": "ids",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "format": null,
+          "description": "Comma-separated book ids. If not passed, all books are listed.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null
+        }
+      ],
+      "request_body": null,
+      "response": {
+        "status": "200",
+        "content_type": "application/json",
+        "shape_ref": "#/shapes/BookPage",
+        "root_property_count": 2,
+        "array_root_properties": [
+          "data"
+        ]
+      },
+      "errors": [
+        {
+          "status": "401",
+          "description": "Error",
+          "shape_ref": "#/shapes/Error"
+        }
+      ],
+      "support": "supported",
+      "support_reason": null,
+      "pagination": {
+        "style": "page",
+        "request": "page",
+        "size_param": "limit",
+        "response": null
+      }
+    },
+    {
+      "key": "get:/books/{bookId}",
+      "operation_id": "getBook",
+      "method": "GET",
+      "path": "/books/{bookId}",
+      "summary": "Get one book",
+      "description": null,
+      "deprecated": false,
+      "tags": [
+        "Catalog"
+      ],
+      "semantics": "read",
+      "provenance": "spec",
+      "confidence": 1,
+      "parameters": [
+        {
+          "name": "bookId",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "format": null,
+          "description": "Book id.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null
+        }
+      ],
+      "request_body": null,
+      "response": {
+        "status": "200",
+        "content_type": "application/json",
+        "shape_ref": "#/shapes/Book",
+        "root_property_count": 10,
+        "array_root_properties": [
+          "genres"
+        ]
+      },
+      "errors": [
+        {
+          "status": "404",
+          "description": "Error",
+          "shape_ref": "#/shapes/Error"
+        }
+      ],
+      "support": "supported",
+      "support_reason": null
+    },
+    {
+      "key": "post:/books/search",
+      "operation_id": "searchBooks",
+      "method": "POST",
+      "path": "/books/search",
+      "summary": "Search books",
+      "description": "A POST that only reads. The GraphOS select step asks whether it is a query.",
+      "deprecated": false,
+      "tags": [
+        "Catalog"
+      ],
+      "semantics": "write",
+      "read_hint": "operationId searchBooks carries `search`: possibly a read — confirm before choosing root: query",
+      "provenance": "spec",
+      "confidence": 1,
+      "parameters": [],
+      "request_body": {
+        "content_type": "application/json",
+        "required": true,
+        "shape_ref": "#/shapes/BookSearch"
+      },
+      "response": {
+        "status": "200",
+        "content_type": "application/json",
+        "shape_ref": "#/shapes/BookPage",
+        "root_property_count": 2,
+        "array_root_properties": [
+          "data"
+        ]
+      },
+      "errors": [
+        {
+          "status": "422",
+          "description": "Error",
+          "shape_ref": "#/shapes/Error"
+        }
+      ],
+      "support": "supported",
+      "support_reason": null
+    },
+    {
+      "key": "get:/authors/{authorId}",
+      "operation_id": "getAuthor",
+      "method": "GET",
+      "path": "/authors/{authorId}",
+      "summary": "Get one author",
+      "description": null,
+      "deprecated": false,
+      "tags": [
+        "Catalog"
+      ],
+      "semantics": "read",
+      "provenance": "spec",
+      "confidence": 1,
+      "parameters": [
+        {
+          "name": "authorId",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "format": null,
+          "description": "Author id.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null
+        }
+      ],
+      "request_body": null,
+      "response": {
+        "status": "200",
+        "content_type": "application/json",
+        "shape_ref": "#/shapes/Author",
+        "root_property_count": 4
+      },
+      "errors": [
+        {
+          "status": "404",
+          "description": "Error",
+          "shape_ref": "#/shapes/Error"
+        }
+      ],
+      "support": "supported",
+      "support_reason": null
+    },
+    {
+      "key": "get:/customers/{customerId}",
+      "operation_id": "getCustomer",
+      "method": "GET",
+      "path": "/customers/{customerId}",
+      "summary": "Get one customer",
+      "description": "Returns personal data (email, phone). Whether to expose it is a design decision.",
+      "deprecated": false,
+      "tags": [
+        "Customers"
+      ],
+      "semantics": "read",
+      "provenance": "spec",
+      "confidence": 1,
+      "parameters": [
+        {
+          "name": "customerId",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "format": null,
+          "description": "Customer id.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null
+        }
+      ],
+      "request_body": null,
+      "response": {
+        "status": "200",
+        "content_type": "application/json",
+        "shape_ref": "#/shapes/Customer",
+        "root_property_count": 6
+      },
+      "errors": [
+        {
+          "status": "404",
+          "description": "Error",
+          "shape_ref": "#/shapes/Error"
+        }
+      ],
+      "support": "supported",
+      "support_reason": null
+    },
+    {
+      "key": "get:/orders",
+      "operation_id": "listOrders",
+      "method": "GET",
+      "path": "/orders",
+      "summary": "List orders",
+      "description": "Cursor pagination: pass `after` from the previous `nextCursor`.",
+      "deprecated": false,
+      "tags": [
+        "Orders"
+      ],
+      "semantics": "read",
+      "provenance": "spec",
+      "confidence": 1,
+      "parameters": [
+        {
+          "name": "customerId",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "format": null,
+          "description": "Only this customer's orders.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null
+        },
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "format": null,
+          "description": "Only orders in this status.",
+          "explode": null,
+          "style": null,
+          "shape_ref": "#/shapes/OrderStatus",
+          "enum": [
+            "pending",
+            "paid",
+            "shipped",
+            "cancelled"
+          ]
+        },
+        {
+          "name": "after",
+          "in": "query",
+          "required": false,
+          "type": "string",
+          "format": null,
+          "description": "Cursor from the previous page.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "type": "integer",
+          "format": null,
+          "description": "Page size.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null,
+          "default": 10,
+          "minimum": 1,
+          "maximum": 50
+        }
+      ],
+      "request_body": null,
+      "response": {
+        "status": "200",
+        "content_type": "application/json",
+        "shape_ref": "#/shapes/OrderPage",
+        "root_property_count": 2,
+        "array_root_properties": [
+          "data"
+        ],
+        "cursor_root_properties": [
+          "nextCursor"
+        ]
+      },
+      "errors": [
+        {
+          "status": "401",
+          "description": "Error",
+          "shape_ref": "#/shapes/Error"
+        }
+      ],
+      "support": "supported",
+      "support_reason": null,
+      "pagination": {
+        "style": "cursor",
+        "request": "after",
+        "size_param": "limit",
+        "response": "nextCursor"
+      }
+    },
+    {
+      "key": "post:/orders",
+      "operation_id": "createOrder",
+      "method": "POST",
+      "path": "/orders",
+      "summary": "Place an order",
+      "description": null,
+      "deprecated": false,
+      "tags": [
+        "Orders"
+      ],
+      "semantics": "write",
+      "provenance": "spec",
+      "confidence": 1,
+      "parameters": [],
+      "request_body": {
+        "content_type": "application/json",
+        "required": true,
+        "shape_ref": "#/shapes/NewOrder"
+      },
+      "response": {
+        "status": "201",
+        "content_type": "application/json",
+        "shape_ref": "#/shapes/Order",
+        "root_property_count": 7,
+        "array_root_properties": [
+          "items"
+        ]
+      },
+      "errors": [
+        {
+          "status": "422",
+          "description": "Error",
+          "shape_ref": "#/shapes/Error"
+        }
+      ],
+      "support": "supported",
+      "support_reason": null
+    },
+    {
+      "key": "get:/orders/{orderId}",
+      "operation_id": "getOrder",
+      "method": "GET",
+      "path": "/orders/{orderId}",
+      "summary": "Get one order",
+      "description": null,
+      "deprecated": false,
+      "tags": [
+        "Orders"
+      ],
+      "semantics": "read",
+      "provenance": "spec",
+      "confidence": 1,
+      "parameters": [
+        {
+          "name": "orderId",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "format": null,
+          "description": "Order id.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null
+        }
+      ],
+      "request_body": null,
+      "response": {
+        "status": "200",
+        "content_type": "application/json",
+        "shape_ref": "#/shapes/Order",
+        "root_property_count": 7,
+        "array_root_properties": [
+          "items"
+        ]
+      },
+      "errors": [
+        {
+          "status": "404",
+          "description": "Error",
+          "shape_ref": "#/shapes/Error"
+        }
+      ],
+      "support": "supported",
+      "support_reason": null
+    },
+    {
+      "key": "delete:/orders/{orderId}",
+      "operation_id": "cancelOrder",
+      "method": "DELETE",
+      "path": "/orders/{orderId}",
+      "summary": "Cancel an order",
+      "description": null,
+      "deprecated": false,
+      "tags": [
+        "Orders"
+      ],
+      "semantics": "write",
+      "provenance": "spec",
+      "confidence": 1,
+      "parameters": [
+        {
+          "name": "orderId",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "format": null,
+          "description": "Order id.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null
+        }
+      ],
+      "request_body": null,
+      "response": {
+        "status": "204",
+        "content_type": null,
+        "shape_ref": null
+      },
+      "errors": [
+        {
+          "status": "404",
+          "description": "Error",
+          "shape_ref": "#/shapes/Error"
+        }
+      ],
+      "support": "supported",
+      "support_reason": null
+    },
+    {
+      "key": "patch:/orders/{orderId}",
+      "operation_id": "updateOrder",
+      "method": "PATCH",
+      "path": "/orders/{orderId}",
+      "summary": "Change an order's status",
+      "description": null,
+      "deprecated": false,
+      "tags": [
+        "Orders"
+      ],
+      "semantics": "write",
+      "provenance": "spec",
+      "confidence": 1,
+      "parameters": [
+        {
+          "name": "orderId",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "format": null,
+          "description": "Order id.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null
+        }
+      ],
+      "request_body": {
+        "content_type": "application/json",
+        "required": true,
+        "shape_ref": "#/shapes/OrderUpdate"
+      },
+      "response": {
+        "status": "200",
+        "content_type": "application/json",
+        "shape_ref": "#/shapes/Order",
+        "root_property_count": 7,
+        "array_root_properties": [
+          "items"
+        ]
+      },
+      "errors": [
+        {
+          "status": "404",
+          "description": "Error",
+          "shape_ref": "#/shapes/Error"
+        },
+        {
+          "status": "422",
+          "description": "Error",
+          "shape_ref": "#/shapes/Error"
+        }
+      ],
+      "support": "supported",
+      "support_reason": null
+    },
+    {
+      "key": "get:/integrations/{integrationId}",
+      "operation_id": "getIntegration",
+      "method": "GET",
+      "path": "/integrations/{integrationId}",
+      "summary": "Get one integration",
+      "description": "Includes `apiKey`, a credential-shaped field the select step must decide on.",
+      "deprecated": false,
+      "tags": [
+        "Integrations"
+      ],
+      "semantics": "read",
+      "provenance": "spec",
+      "confidence": 1,
+      "parameters": [
+        {
+          "name": "integrationId",
+          "in": "path",
+          "required": true,
+          "type": "string",
+          "format": null,
+          "description": "Integration id.",
+          "explode": null,
+          "style": null,
+          "shape_ref": null
+        }
+      ],
+      "request_body": null,
+      "response": {
+        "status": "200",
+        "content_type": "application/json",
+        "shape_ref": "#/shapes/Integration",
+        "root_property_count": 4
+      },
+      "errors": [
+        {
+          "status": "404",
+          "description": "Error",
+          "shape_ref": "#/shapes/Error"
+        }
+      ],
+      "support": "supported",
+      "support_reason": null
+    }
+  ],
+  "shapes": {
+    "BookPage": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/shapes/Book"
+          }
+        },
+        "meta": {
+          "$ref": "#/shapes/PageMeta"
+        }
+      },
+      "required": [
+        "data",
+        "meta"
+      ]
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ]
+    },
+    "Book": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "authorId": {
+          "description": "Id of the author; fetch it with GET /authors/{authorId}.",
+          "type": "string",
+          "candidate_entity_link": {
+            "operation": "get:/authors/{authorId}",
+            "parameter": "authorId",
+            "list_context": false
+          }
+        },
+        "isbn": {
+          "type": "string"
+        },
+        "priceCents": {
+          "type": "integer"
+        },
+        "currency": {
+          "enum": [
+            "USD",
+            "EUR",
+            "GBP"
+          ],
+          "type": "string"
+        },
+        "genres": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "publishedAt": {
+          "format": "date",
+          "type": "string"
+        },
+        "stock": {
+          "type": "integer"
+        },
+        "metadata": {
+          "description": "Free-form publisher data.",
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "authorId",
+        "priceCents",
+        "currency"
+      ]
+    },
+    "BookSearch": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "genre": {
+          "type": "string"
+        },
+        "maxPriceCents": {
+          "type": "integer"
+        }
+      }
+    },
+    "Author": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "bio": {
+          "type": "string"
+        },
+        "born": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Customer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "description": "Personal data.",
+          "format": "email",
+          "type": "string"
+        },
+        "phone": {
+          "description": "Personal data.",
+          "type": "string"
+        },
+        "tier": {
+          "enum": [
+            "standard",
+            "gold"
+          ],
+          "type": "string"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email"
+      ]
+    },
+    "OrderStatus": {
+      "enum": [
+        "pending",
+        "paid",
+        "shipped",
+        "cancelled"
+      ],
+      "type": "string"
+    },
+    "OrderPage": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/shapes/Order"
+          }
+        },
+        "nextCursor": {
+          "nullable": true,
+          "type": "string"
+        }
+      },
+      "required": [
+        "data"
+      ]
+    },
+    "NewOrder": {
+      "type": "object",
+      "properties": {
+        "customerId": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/shapes/OrderItem"
+          }
+        },
+        "payment": {
+          "$ref": "#/shapes/Payment"
+        }
+      },
+      "required": [
+        "customerId",
+        "items"
+      ]
+    },
+    "Order": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "customerId": {
+          "description": "Id of the customer; fetch it with GET /customers/{customerId}.",
+          "type": "string",
+          "candidate_entity_link": {
+            "operation": "get:/customers/{customerId}",
+            "parameter": "customerId",
+            "list_context": false
+          }
+        },
+        "status": {
+          "$ref": "#/shapes/OrderStatus"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/shapes/OrderItem"
+          }
+        },
+        "totalCents": {
+          "type": "integer"
+        },
+        "payment": {
+          "$ref": "#/shapes/Payment"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "customerId",
+        "status",
+        "items",
+        "totalCents"
+      ]
+    },
+    "OrderUpdate": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/shapes/OrderStatus"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ]
+    },
+    "Integration": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "webhookUrl": {
+          "type": "string"
+        },
+        "apiKey": {
+          "description": "Secret.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "PageMeta": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "page",
+        "limit",
+        "total"
+      ]
+    },
+    "OrderItem": {
+      "type": "object",
+      "properties": {
+        "bookId": {
+          "type": "string",
+          "candidate_entity_link": {
+            "operation": "get:/books/{bookId}",
+            "parameter": "bookId",
+            "list_context": false
+          }
+        },
+        "quantity": {
+          "type": "integer"
+        },
+        "unitPriceCents": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bookId",
+        "quantity"
+      ]
+    },
+    "Payment": {
+      "oneOf": [
+        {
+          "$ref": "#/shapes/CardPayment"
+        },
+        {
+          "$ref": "#/shapes/BankPayment"
+        }
+      ],
+      "discriminator": "type"
+    },
+    "CardPayment": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": [
+            "card"
+          ],
+          "type": "string"
+        },
+        "last4": {
+          "type": "string"
+        },
+        "brand": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "last4"
+      ]
+    },
+    "BankPayment": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "enum": [
+            "bank"
+          ],
+          "type": "string"
+        },
+        "iban": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "iban"
+      ]
+    }
+  },
+  "unresolved": []
+}

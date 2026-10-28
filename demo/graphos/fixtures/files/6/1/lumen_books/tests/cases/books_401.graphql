@@ -1,0 +1,24 @@
+# expect-upstream-status: 401
+query {
+  lumen_books_books(
+    page: 3
+    limit: 30
+    genre: "rare"
+    ids: "b-4011,b-4012"
+  ) {
+    data {
+      id
+      title
+      authorId
+      isbn
+      priceCents
+      currency
+      genres
+      publishedAt
+      stock
+    }
+    page
+    limit
+    total
+  }
+}

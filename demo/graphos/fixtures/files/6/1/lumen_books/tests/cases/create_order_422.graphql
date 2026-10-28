@@ -1,0 +1,24 @@
+# expect-upstream-status: 422
+mutation {
+  lumen_books_createOrder(
+    customerId: "c-4221"
+    items: [{ bookId: "b-4221", quantity: 0 }]
+  ) {
+    id
+    customerId
+    status
+    items {
+      bookId
+      quantity
+      unitPriceCents
+    }
+    totalCents
+    payment {
+      type
+      last4
+      brand
+      iban
+    }
+    createdAt
+  }
+}

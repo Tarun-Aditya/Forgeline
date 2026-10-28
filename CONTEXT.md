@@ -70,6 +70,42 @@ skill from EricTechPro/super-board (MIT, pinned commit `21dd4b0`) from `diagrams
 `diagrams/src/build_map.py` writes. To change it, edit `build_map.py` and re-render; `diagrams/README.md` has the
 commands and `diagrams/THIRD_PARTY_NOTICES.md` the licence text. Its built-in check (crossings, overlaps) is clean.
 
+## GraphOS mode (added 2026-10-21)
+
+A second pipeline in the same web app: turn a REST API into an Apollo Connectors subgraph. It wraps Apollo's third-party
+`graphos-factory` skill (preview; pinned in `factory/skills/graphos-skills.json` at apollographql/skills `f9843dc`, skill 0.12.2),
+with eight agents (`graphos-intake`, `-selector`, `-author`, `-validator`, `-reviewer`, `-recorder`, `-reconciler`, `-exporter`)
+and a `/graphos` orchestrator skill. Workspaces are standalone Git repos under `graphos/<name>/` (git-ignored here). Stage and next
+agent come from one script, `factory/scripts/graphos_state.py`, which both the skill and the web board call. Questions are
+decisions saved in the workspace and answered with the skill's own CLI. Usage: `USAGE.md` section 7c. Hand-off and context: `docs/graphos-handoff.md`. The 17 use cases and how to use them: `docs/graphos-use-cases.md`. The demo (a bookshop REST
+API, its v1/v2 specs, the real golden run, the replay and the video recorder): `demo/graphos/README.md`.
+
+Proven (a real run on the demo API, Sonnet/Opus via the subscription): docs-only intake and spec intake; scope proposal and
+confirmation; a design pass that produced about ten real decisions (PII, a secret field, a POST that reads, mutations, nulls,
+pagination, links, entities); apply, with 45 to 62 Connector unit cases, mocked-Router cases, conformance and lint passing; a reviewer
+verdict with concrete findings; a live check against the running API; recording of live traffic, which found the planted
+spec-versus-reality gap; a hand edit detected and codified; a v2 spec refresh, classified against the selection, then re-applied;
+export that handed over the rover commands and published nothing. The offline evals cover `graphos_state.py`, the activity tagging
+and the demo API (481 checks); `web-studio/` has 41 unit tests.
+
+Not proven or not covered: the agent prompts have no live agent evals (only the end-to-end runs above); the check against a real
+supergraph (`supergraph_check`) never ran because it needs a published graph and `APOLLO_KEY`; only REST is built upstream (gRPC,
+databases and GraphQL sources are not); `write_body_proof` kept a read gap on a list argument (an accepted, recorded finding) and the
+reviewer's CHANGES verdict was not fully applied before export; the selector's questions differ run to run. Found and fixed on the way:
+a shared-dict bug in the demo spec (caught by the reconciler agent), `links:` entries counted as operations, an answer given after an
+apply not reopening Apply, and non-gating layers blocking the gate. The skill runs rover's composition under Apollo's Elastic License
+v2, which only the person accepts (`APOLLO_ELV2_LICENSE=accept`, or `FORGELINE_ELV2_ACCEPTED=1` for the web app).
+
+## The earlier `web/` app was removed (2026-10-22)
+
+`web-studio/` (the Mastra Studio style layout) is now the one web app, and GraphOS mode lives there. The older `web/` app, which GraphOS was first
+built in, is deleted; it is in Git history at commit `bc53e82` if anything below is wanted back. What it had that the Studio app does not:
+live push updates (a server-sent-events feed; the Studio app polls), sessions from the terminal, VS Code and desktop with a cost estimate,
+detection and answering of an agent's question on a job card, browser alerts, keyboard shortcuts and a theme toggle, repository notes
+(uncommitted changes, wrong branch), the animated agent flow with replay, the Compare view, hand-off labels and per-agent cost estimates,
+a multi-run side panel, and the offline Playwright tests with a fake `claude`. The Studio app has what it had before: the board, job
+panel, agent map, activity, runs, metrics, code changes and a command palette.
+
 ## Status
 
 Re-audited against the 16 plays (`AUDIT.md`): 12 covered, 2 partial, 2 gaps. Partial:
@@ -116,7 +152,7 @@ Proven:
   first did not open the page (no Skill tool, an escape hatch in the prompt); fixed, and on a
   second UI job both opened it in the browser and said what they saw.
 - The dashboard was checked live in a browser against real job data.
-- Web layer (`web/`, Next.js + Vercel AI SDK + AI Elements) and the shared activity log
+- Web layer (`web-studio/`, Next.js + Vercel AI SDK + AI Elements) and the shared activity log
   (`factory/scripts/activity.py`, hooks in `.claude/settings.json`): one real job (add a function to
   a tiny Python library, Sonnet and Opus) was driven entirely from the web app, with the browser
   closed during stages: intent, accept, approve-spec, plan, build, four reviews, approver, merge
@@ -132,7 +168,7 @@ Proven:
   reasons (the card now shows the orchestrator's last message and has a Rebase button). Checked in a
   real browser: push updates (3 requests in 20 s idle, a new job in about 0.2 s), per-agent cost
   (adds up to the run costs), the Agents flow and replay on real job logs, and the diff view.
-  `web/` has 58 unit tests and two offline Playwright tests with a fake `claude`.
+  (that was the earlier `web/` app, since removed; see "The earlier `web/` app was removed").
 
 Not proven (built and covered by offline evals only):
 - Parallel runs with real `claude` (checked with a fake CLI that sleeps), push updates on Linux

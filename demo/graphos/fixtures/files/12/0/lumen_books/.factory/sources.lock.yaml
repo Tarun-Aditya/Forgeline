@@ -1,0 +1,28 @@
+contract_version: 1
+sources:
+  - kind: openapi
+    version: "3.0.3"
+    retrieved_at: 2026-10-21T19:05:59.657Z
+    path: openapi.json
+    upstream: .factory/sources/openapi.upstream.json
+    upstream_sha256: 51190dafa9d26ab2cc3b4d20944694c05505e37f4828284cd45bbe8d0adb4c1f
+    patches:
+      - op: remove
+        path: "/components/schemas/Payment/discriminator/mapping"
+        was:
+          card: "#/components/schemas/CardPayment"
+          bank: "#/components/schemas/BankPayment"
+        reason: "The inventory reader drops discriminator.mapping, which left Order.payment unresolved in source coverage; each member's type enum (CardPayment card, BankPayment bank) already states the same mapping, so the discriminator keeps propertyName only."
+        context: "Patched during the first apply; no wire evidence yet, the API was not probed."
+  - kind: probe
+    base_url: "http://127.0.0.1:4010"
+    retrieved_at: "2026-10-21T19:03:03.824Z"
+    operations:
+      - "get:/books"
+      - "get:/orders"
+      - "get:/books/{bookId}"
+      - "get:/authors/{authorId}"
+      - "get:/customers/{customerId}"
+      - "get:/orders/{orderId}"
+      - "get:/integrations/{integrationId}"
+    credential: LUMEN_TOKEN

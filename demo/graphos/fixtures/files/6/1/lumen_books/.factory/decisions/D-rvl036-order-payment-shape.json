@@ -1,0 +1,36 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-rvl036",
+    "slug": "order-payment-shape",
+    "title": "Order.payment as one typed object, not a union",
+    "status": "resolved",
+    "date": "2026-10-21",
+    "after": [
+      "D-a39c6a"
+    ],
+    "question": "Order.payment is a card or a bank account. Map it inline as one typed object (type, last4, brand, iban), or as a union that a field-level connector re-fetches through GET /orders/{orderId}?",
+    "affects": [
+      "Lumen_Books_Order.payment"
+    ],
+    "choices": [
+      {
+        "id": "object",
+        "label": "one object type Lumen_Books_Payment {type, last4, brand, iban}, mapped inline by every Order connector"
+      },
+      {
+        "id": "union",
+        "label": "union Lumen_Books_CardPayment | Lumen_Books_BankPayment on a field-level connector, one extra GET /orders/{orderId} per order"
+      }
+    ],
+    "resolution": {
+      "chosen": [
+        "object"
+      ],
+      "note": "At connect/v0.4 a union maps only at a connector's own return type, so the union needs one extra request per order, and reconcile and source coverage then read payment as unmapped on all four Order operations and the re-fetch as an undeclared relationship field. The object keeps every field the API sends (D-a39c6a: expose last4, brand and iban), typed; type tells the caller which fields apply. Replaces finding F-lr3c96. Reopen to choose the union.",
+      "decision": "Lumen_Books_Order.payment is Lumen_Books_Payment {type: Lumen_Books_PaymentType (card|bank), last4, brand, iban}, mapped inline as payment { type last4 brand iban }.",
+      "by": "agent",
+      "at": "2026-10-21"
+    }
+  }
+}

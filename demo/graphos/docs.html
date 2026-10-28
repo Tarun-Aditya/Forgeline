@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Lumen Books API: developer docs</title>
+<style>body{font:16px/1.5 system-ui;max-width:46rem;margin:2rem auto;padding:0 1rem}code,pre{background:#f3f3f3;padding:.1rem .3rem;border-radius:4px}pre{padding:.7rem;overflow:auto}</style></head>
+<body>
+<h1>Lumen Books API</h1>
+<p>Base URL <code>http://127.0.0.1:4010</code>. Send <code>Authorization: Bearer lumen-demo-token</code> on every call.
+Errors are JSON: <code>{"code": "...", "message": "..."}</code>.</p>
+<p>This page is the only description of the API here: there is no OpenAPI file for this variant. It is what the
+GraphOS "no spec, docs only" start uses, so an agent has to discover the shapes by reading this and probing the live service.</p>
+
+<h2>Books</h2>
+<h3>GET /books</h3>
+<p>Lists books, 10 per page by default. Query: <code>page</code> (from 1), <code>limit</code> (max 50), <code>genre</code>.
+Returns <code>{"data": [Book], "meta": {"page": 1, "limit": 10, "total": 10}}</code>.</p>
+<h3>GET /books/{id}</h3>
+<p>One book. 404 if the id is unknown.</p>
+<pre>{"id": "b1", "title": "The Salt Archive", "authorId": "a1", "priceCents": 1899,
+ "currency": "USD", "genres": ["scifi"], "publishedAt": "2019-03-04", "stock": 14}</pre>
+<p><code>authorId</code> refers to <code>GET /authors/{id}</code>.</p>
+
+<h2>Authors</h2>
+<h3>GET /authors/{id}</h3>
+<p>One author: <code>id</code>, <code>name</code>, optional <code>bio</code>, optional <code>born</code>.</p>
+
+<h2>Orders</h2>
+<h3>GET /orders</h3>
+<p>Lists orders. Query: <code>customerId</code>, <code>status</code> (<code>pending</code>, <code>paid</code>,
+<code>shipped</code>, <code>cancelled</code>), <code>after</code> (cursor), <code>limit</code>.
+Returns <code>{"data": [Order], "nextCursor": "o2" | null}</code>.</p>
+<h3>GET /orders/{id}</h3>
+<p>One order. <code>customerId</code> refers to <code>GET /customers/{id}</code>.</p>
+<h3>POST /orders</h3>
+<p>Body: <code>{"customerId": "c1", "items": [{"bookId": "b1", "quantity": 1}]}</code>. Returns 201 and the order.
+422 when the customer or a book is unknown.</p>
+</body></html>

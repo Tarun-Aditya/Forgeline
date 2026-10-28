@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/customers/c-501",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "id": "c-501",
+      "name": "Mara Lind",
+      "email": "mara@example.com",
+      "phone": "+46 70 000 0000",
+      "tier": "gold",
+      "createdAt": "2025-11-02T08:00:00Z"
+    }
+  }
+}

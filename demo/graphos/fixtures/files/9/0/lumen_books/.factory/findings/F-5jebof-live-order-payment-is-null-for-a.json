@@ -1,0 +1,16 @@
+{
+  "contract_version": 2,
+  "finding": {
+    "id": "F-5jebof",
+    "slug": "live-order-payment-is-null-for-a",
+    "title": "Live: Order.payment is null for a cancelled order",
+    "date": "2026-10-21",
+    "status": "current",
+    "body": "GET /orders returned o4 (status cancelled) with payment: null. The spec has payment as a $ref to Payment (oneOf card|bank), not nullable and not required, so absence is allowed but explicit null is not. GET /orders/{orderId} was probed for o1 and o3 only (both non-null); null on the by-id route is unconfirmed. Stubs and conformance for Order must accept null payment.",
+    "cites": "probe get:/orders sample 1",
+    "source": "agent",
+    "evidence": [
+      ".factory/samples/get_orders/1.json"
+    ]
+  }
+}

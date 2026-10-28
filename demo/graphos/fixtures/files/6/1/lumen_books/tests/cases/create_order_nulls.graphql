@@ -1,0 +1,25 @@
+# Explicit nulls are dropped from the body (D-3avp7m: omit).
+mutation {
+  lumen_books_createOrder(
+    customerId: "c-803"
+    items: [{ bookId: "b-804", quantity: 3, unitPriceCents: null }]
+    payment: null
+  ) {
+    id
+    customerId
+    status
+    items {
+      bookId
+      quantity
+      unitPriceCents
+    }
+    totalCents
+    payment {
+      type
+      last4
+      brand
+      iban
+    }
+    createdAt
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-4yyj7v",
+    "slug": "customer-pii",
+    "title": "Customer personal data",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "design",
+    "question": "Lumen_Books_Customer carries name, email and phone. How should the subgraph treat them?",
+    "context": "Recommendation: hide-contact. Email and phone are personal data the spec flags; masking needs string handling in the mapping and is harder to test. Email is required in the source, so hiding it is a recorded omit.",
+    "affects": [
+      "Lumen_Books_Customer.email",
+      "Lumen_Books_Customer.phone",
+      "Lumen_Books_Customer.name"
+    ],
+    "choices": [
+      {
+        "id": "expose",
+        "label": "Expose name, email and phone"
+      },
+      {
+        "id": "hide-contact",
+        "label": "Expose name, hide email and phone"
+      },
+      {
+        "id": "hide-all",
+        "label": "Hide name, email and phone (id, tier, createdAt only)"
+      },
+      {
+        "id": "mask",
+        "label": "Expose masked email and phone (e.g. j***@x.com, last digits of phone)"
+      }
+    ]
+  }
+}

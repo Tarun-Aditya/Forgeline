@@ -1,0 +1,14 @@
+# API 2.0.0: free-text search through GET /books?q= (D-02z6er), and isbn13 beside the deprecated isbn (D-aaaada).
+query {
+  lumen_books_books(q: "atlas") {
+    data {
+      id
+      title
+      isbn
+      isbn13
+    }
+    page
+    limit
+    total
+  }
+}

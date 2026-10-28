@@ -1,0 +1,27 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-ilif9j",
+    "slug": "new-order-status-value-refunded",
+    "title": "New order status value: refunded",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "select",
+    "question": "API 2.0.0 adds refunded to OrderStatus. Lumen_Books_OrderStatus is a closed enum (pending, paid, shipped, cancelled), so any order the API returns as refunded makes Order.status fail on lumen_books_orders, lumen_books_order and lumen_books_createOrder, and the orders status filter cannot ask for refunded orders. How should the schema take the new value?",
+    "affects": [
+      "get:/orders",
+      "get:/orders/{orderId}",
+      "post:/orders"
+    ],
+    "choices": [
+      {
+        "id": "add-value",
+        "label": "Add refunded to Lumen_Books_OrderStatus (and to the status filter doc comment)"
+      },
+      {
+        "id": "string",
+        "label": "Type Order.status as String so future values pass through"
+      }
+    ]
+  }
+}

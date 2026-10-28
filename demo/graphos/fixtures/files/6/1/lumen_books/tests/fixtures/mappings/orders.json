@@ -1,0 +1,73 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/orders",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    },
+    "queryParameters": {
+      "customerId": {
+        "equalTo": "c-601"
+      },
+      "status": {
+        "equalTo": "paid"
+      },
+      "after": {
+        "equalTo": "cur-601"
+      },
+      "limit": {
+        "equalTo": "25"
+      }
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        {
+          "id": "o-601",
+          "customerId": "c-601",
+          "status": "paid",
+          "items": [
+            {
+              "bookId": "b-6011",
+              "quantity": 2,
+              "unitPriceCents": 1299
+            }
+          ],
+          "totalCents": 2598,
+          "createdAt": "2026-03-04T10:20:30Z",
+          "payment": {
+            "type": "card",
+            "last4": "4242",
+            "brand": "visa"
+          }
+        },
+        {
+          "id": "o-602",
+          "customerId": "c-601",
+          "status": "paid",
+          "items": [
+            {
+              "bookId": "b-6021",
+              "quantity": 2,
+              "unitPriceCents": 1299
+            }
+          ],
+          "totalCents": 2598,
+          "createdAt": "2026-03-04T10:20:30Z",
+          "payment": {
+            "type": "bank",
+            "iban": "DE89370400440532013000"
+          }
+        }
+      ],
+      "nextCursor": "cur-602"
+    }
+  }
+}

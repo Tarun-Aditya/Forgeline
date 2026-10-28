@@ -1,0 +1,15 @@
+live: Apollo Router 2.17.0 against the real API, 8 case(s)
+PASS: list_books (read)
+PASS: book (read)
+PASS: author (read)
+PASS: books_by_ids (read)
+PASS: list_orders (read)
+PASS: order (read)
+PASS: customer (read)
+PASS: integration (read)
+EXCLUDED: post:/books/search — writes change real data (a POST; its read semantics are not assumed live)
+EXCLUDED: post:/orders — writes change real data
+EXCLUDED: post:/orders/{orderId}/refund — writes change real data (refunds an order)
+EXCLUDED: delete:/orders/{orderId} — writes change real data
+live: 8 passed, 0 failed, 4 excluded
+graphos-factory-core: live runs /Users/tarunaditya/.cache/graphos-factory-core/apollographql-graphos-factory/bin/graphos-factory-core (from GRAPHOS_FACTORY_CORE_BIN), version 0.11.0 (expected >= 0.11.0)

@@ -1,0 +1,686 @@
+{
+  "contract_version": 1,
+  "generated_at": "2026-10-21T18:29:37.474Z",
+  "samples": 13,
+  "hints": {
+    "maps": [],
+    "enums": []
+  },
+  "vocabulary": {},
+  "operations": {
+    "get:/authors/{id}": {
+      "samples": 2,
+      "response": {
+        "status": "200",
+        "shape": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-observed-values": [
+                "a1"
+              ],
+              "x-samples": 1
+            },
+            "name": {
+              "type": "string",
+              "x-observed-values": [
+                "Ursula Hale"
+              ],
+              "x-samples": 1
+            },
+            "bio": {
+              "type": "string",
+              "x-observed-values": [
+                "Writes slow, careful science fiction."
+              ],
+              "x-samples": 1
+            },
+            "born": {
+              "type": "integer",
+              "x-samples": 1
+            }
+          },
+          "x-samples": 1
+        }
+      },
+      "errors": {
+        "404": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "x-observed-values": [
+                "not_found"
+              ],
+              "x-samples": 1
+            },
+            "message": {
+              "type": "string",
+              "x-observed-values": [
+                "No such author."
+              ],
+              "x-samples": 1
+            }
+          },
+          "x-samples": 1
+        }
+      }
+    },
+    "get:/books": {
+      "samples": 4,
+      "response": {
+        "status": "200",
+        "shape": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "x-observed-values": [
+                      "b1",
+                      "b10",
+                      "b2",
+                      "b3",
+                      "b4",
+                      "b5",
+                      "b6",
+                      "b7",
+                      "b8",
+                      "b9"
+                    ],
+                    "x-samples": 26
+                  },
+                  "title": {
+                    "type": "string",
+                    "x-observed-values": [
+                      "A Quiet Stove",
+                      "Concrete and Weather",
+                      "Harbour Lights",
+                      "Knife Work",
+                      "Low Orbit Letters",
+                      "Orbital Debt",
+                      "Salt and Smoke",
+                      "Streets Without Names",
+                      "The Long Pier",
+                      "The Salt Archive"
+                    ],
+                    "x-samples": 26
+                  },
+                  "authorId": {
+                    "type": "string",
+                    "x-observed-values": [
+                      "a1",
+                      "a2",
+                      "a3",
+                      "a4"
+                    ],
+                    "x-samples": 26
+                  },
+                  "isbn": {
+                    "type": "string",
+                    "x-observed-values": [
+                      "9780000000011",
+                      "9780000000028",
+                      "9780000000035",
+                      "9780000000042",
+                      "9780000000059",
+                      "9780000000066",
+                      "9780000000073",
+                      "9780000000080",
+                      "9780000000097",
+                      "9780000000103"
+                    ],
+                    "x-samples": 26
+                  },
+                  "priceCents": {
+                    "type": "integer",
+                    "x-samples": 26
+                  },
+                  "currency": {
+                    "type": "string",
+                    "x-observed-values": [
+                      "EUR",
+                      "GBP",
+                      "USD"
+                    ],
+                    "x-samples": 26
+                  },
+                  "genres": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "x-observed-values": [
+                        "crime",
+                        "essays",
+                        "fiction",
+                        "food",
+                        "scifi",
+                        "travel"
+                      ],
+                      "x-samples": 39
+                    },
+                    "x-samples": 26
+                  },
+                  "publishedAt": {
+                    "type": "string",
+                    "format": "date",
+                    "x-samples": 26
+                  },
+                  "stock": {
+                    "type": "integer",
+                    "x-samples": 26
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "properties": {
+                      "publisher": {
+                        "type": "string",
+                        "x-observed-values": [
+                          "Lumen Press"
+                        ],
+                        "x-samples": 26
+                      },
+                      "edition": {
+                        "type": "integer",
+                        "x-samples": 26
+                      },
+                      "tags": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "x-observed-values": [
+                            "crime",
+                            "essays",
+                            "fiction",
+                            "food",
+                            "scifi",
+                            "travel"
+                          ],
+                          "x-samples": 39
+                        },
+                        "x-samples": 26
+                      }
+                    },
+                    "required": [
+                      "publisher",
+                      "edition",
+                      "tags"
+                    ],
+                    "x-samples": 26
+                  }
+                },
+                "required": [
+                  "id",
+                  "title",
+                  "authorId",
+                  "isbn",
+                  "priceCents",
+                  "currency",
+                  "genres",
+                  "publishedAt",
+                  "stock",
+                  "metadata"
+                ],
+                "x-samples": 26
+              },
+              "x-samples": 4
+            },
+            "meta": {
+              "type": "object",
+              "properties": {
+                "page": {
+                  "type": "integer",
+                  "x-samples": 4
+                },
+                "limit": {
+                  "type": "integer",
+                  "x-samples": 4
+                },
+                "total": {
+                  "type": "integer",
+                  "x-samples": 4
+                }
+              },
+              "required": [
+                "page",
+                "limit",
+                "total"
+              ],
+              "x-samples": 4
+            }
+          },
+          "required": [
+            "data",
+            "meta"
+          ],
+          "x-samples": 4
+        }
+      }
+    },
+    "get:/books/{id}": {
+      "samples": 2,
+      "response": {
+        "status": "200",
+        "shape": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-observed-values": [
+                "b1"
+              ],
+              "x-samples": 1
+            },
+            "title": {
+              "type": "string",
+              "x-observed-values": [
+                "The Salt Archive"
+              ],
+              "x-samples": 1
+            },
+            "authorId": {
+              "type": "string",
+              "x-observed-values": [
+                "a1"
+              ],
+              "x-samples": 1
+            },
+            "isbn": {
+              "type": "string",
+              "x-observed-values": [
+                "9780000000011"
+              ],
+              "x-samples": 1
+            },
+            "priceCents": {
+              "type": "integer",
+              "x-samples": 1
+            },
+            "currency": {
+              "type": "string",
+              "x-observed-values": [
+                "USD"
+              ],
+              "x-samples": 1
+            },
+            "genres": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "x-observed-values": [
+                  "scifi"
+                ],
+                "x-samples": 1
+              },
+              "x-samples": 1
+            },
+            "publishedAt": {
+              "type": "string",
+              "format": "date",
+              "x-samples": 1
+            },
+            "stock": {
+              "type": "integer",
+              "x-samples": 1
+            },
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "publisher": {
+                  "type": "string",
+                  "x-observed-values": [
+                    "Lumen Press"
+                  ],
+                  "x-samples": 1
+                },
+                "edition": {
+                  "type": "integer",
+                  "x-samples": 1
+                },
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "x-observed-values": [
+                      "scifi"
+                    ],
+                    "x-samples": 1
+                  },
+                  "x-samples": 1
+                }
+              },
+              "x-samples": 1
+            }
+          },
+          "x-samples": 1
+        }
+      },
+      "errors": {
+        "404": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "x-observed-values": [
+                "not_found"
+              ],
+              "x-samples": 1
+            },
+            "message": {
+              "type": "string",
+              "x-observed-values": [
+                "No such book."
+              ],
+              "x-samples": 1
+            }
+          },
+          "x-samples": 1
+        }
+      }
+    },
+    "get:/customers/{id}": {
+      "samples": 1,
+      "response": {
+        "status": "200",
+        "shape": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-observed-values": [
+                "c1"
+              ],
+              "x-samples": 1
+            },
+            "name": {
+              "type": "string",
+              "x-observed-values": [
+                "Priya Raman"
+              ],
+              "x-samples": 1
+            },
+            "email": {
+              "type": "string",
+              "x-observed-values": [
+                "priya.raman@example.com"
+              ],
+              "x-samples": 1
+            },
+            "phone": {
+              "type": "string",
+              "x-observed-values": [
+                "+44 20 7946 0101"
+              ],
+              "x-samples": 1
+            },
+            "tier": {
+              "type": "string",
+              "x-observed-values": [
+                "gold"
+              ],
+              "x-samples": 1
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time",
+              "x-samples": 1
+            }
+          },
+          "x-samples": 1
+        }
+      }
+    },
+    "get:/orders": {
+      "samples": 3,
+      "response": {
+        "status": "200",
+        "shape": {
+          "type": "object",
+          "properties": {
+            "data": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "x-observed-values": [
+                      "o1",
+                      "o2",
+                      "o3",
+                      "o4"
+                    ],
+                    "x-samples": 7
+                  },
+                  "customerId": {
+                    "type": "string",
+                    "x-observed-values": [
+                      "c1",
+                      "c2",
+                      "c3"
+                    ],
+                    "x-samples": 7
+                  },
+                  "status": {
+                    "type": "string",
+                    "x-observed-values": [
+                      "cancelled",
+                      "paid",
+                      "pending",
+                      "shipped"
+                    ],
+                    "x-samples": 7
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "bookId": {
+                          "type": "string",
+                          "x-observed-values": [
+                            "b1",
+                            "b3",
+                            "b5",
+                            "b7"
+                          ],
+                          "x-samples": 7
+                        },
+                        "quantity": {
+                          "type": "integer",
+                          "x-samples": 7
+                        },
+                        "unitPriceCents": {
+                          "type": "integer",
+                          "x-samples": 7
+                        }
+                      },
+                      "required": [
+                        "bookId",
+                        "quantity",
+                        "unitPriceCents"
+                      ],
+                      "x-samples": 7
+                    },
+                    "x-samples": 7
+                  },
+                  "totalCents": {
+                    "type": "integer",
+                    "x-samples": 7
+                  },
+                  "payment": {
+                    "type": "object",
+                    "nullable": true,
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "x-observed-values": [
+                          "bank",
+                          "card"
+                        ],
+                        "x-samples": 6
+                      },
+                      "last4": {
+                        "type": "string",
+                        "x-observed-values": [
+                          "4242"
+                        ],
+                        "x-samples": 5
+                      },
+                      "brand": {
+                        "type": "string",
+                        "x-observed-values": [
+                          "visa"
+                        ],
+                        "x-samples": 5
+                      },
+                      "iban": {
+                        "type": "string",
+                        "x-observed-values": [
+                          "DE89370400440532013000"
+                        ],
+                        "x-samples": 1
+                      }
+                    },
+                    "required": [
+                      "type"
+                    ],
+                    "x-samples": 7
+                  },
+                  "createdAt": {
+                    "type": "string",
+                    "format": "date-time",
+                    "x-samples": 7
+                  }
+                },
+                "required": [
+                  "id",
+                  "customerId",
+                  "status",
+                  "items",
+                  "totalCents",
+                  "payment",
+                  "createdAt"
+                ],
+                "x-samples": 7
+              },
+              "x-samples": 3
+            },
+            "nextCursor": {
+              "type": "string",
+              "nullable": true,
+              "x-observed-values": [
+                "o2"
+              ],
+              "x-samples": 3
+            }
+          },
+          "required": [
+            "data",
+            "nextCursor"
+          ],
+          "x-samples": 3
+        }
+      }
+    },
+    "get:/orders/{id}": {
+      "samples": 1,
+      "response": {
+        "status": "200",
+        "shape": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "x-observed-values": [
+                "o1"
+              ],
+              "x-samples": 1
+            },
+            "customerId": {
+              "type": "string",
+              "x-observed-values": [
+                "c1"
+              ],
+              "x-samples": 1
+            },
+            "status": {
+              "type": "string",
+              "x-observed-values": [
+                "shipped"
+              ],
+              "x-samples": 1
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "bookId": {
+                    "type": "string",
+                    "x-observed-values": [
+                      "b1"
+                    ],
+                    "x-samples": 1
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "x-samples": 1
+                  },
+                  "unitPriceCents": {
+                    "type": "integer",
+                    "x-samples": 1
+                  }
+                },
+                "x-samples": 1
+              },
+              "x-samples": 1
+            },
+            "totalCents": {
+              "type": "integer",
+              "x-samples": 1
+            },
+            "payment": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "x-observed-values": [
+                    "card"
+                  ],
+                  "x-samples": 1
+                },
+                "last4": {
+                  "type": "string",
+                  "x-observed-values": [
+                    "4242"
+                  ],
+                  "x-samples": 1
+                },
+                "brand": {
+                  "type": "string",
+                  "x-observed-values": [
+                    "visa"
+                  ],
+                  "x-samples": 1
+                }
+              },
+              "x-samples": 1
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time",
+              "x-samples": 1
+            }
+          },
+          "x-samples": 1
+        }
+      }
+    }
+  }
+}

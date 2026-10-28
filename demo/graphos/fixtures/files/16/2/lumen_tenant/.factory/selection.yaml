@@ -1,0 +1,21 @@
+# Selection for lumen_tenant: the proposed starter scope, awaiting the
+# "Confirm scope" decision. Toggle operations with `selection set`; names
+# follow naming.md and the lumen_tenant_ prefix is added on emit.
+contract_version: 2
+defaults:
+  fields: all
+  max_depth: 6
+  opaque_json_policy: forbid
+  null_handling: omit
+operations:
+  "get:/books": { include: true, graphql: { root: query, name: books } }
+  "get:/books/{bookId}": { include: true, graphql: { root: query, name: book } }
+  "get:/authors/{authorId}": { include: true, graphql: { root: query, name: author } }
+  "get:/orders": { include: true, graphql: { root: query, name: orders } }
+  "get:/orders/{orderId}": { include: true, graphql: { root: query, name: order } }
+  "post:/books/search": { include: false, graphql: { root: mutation, name: searchBooks }, reason: "POST that may be a read; ask" }
+  "get:/customers/{customerId}": { include: false, graphql: { root: query, name: customer }, reason: "returns personal data (email, phone); include once its exposure is decided" }
+  "get:/integrations/{integrationId}": { include: false, graphql: { root: query, name: integration }, reason: "returns a credential-shaped field (apiKey); include once its exposure is decided" }
+  "post:/orders": { include: false, graphql: { root: mutation, name: createOrder }, reason: "write; starter scope is read-only" }
+  "patch:/orders/{orderId}": { include: false, graphql: { root: mutation, name: updateOrder }, reason: "write; starter scope is read-only" }
+  "delete:/orders/{orderId}": { include: false, graphql: { root: mutation, name: cancelOrder }, reason: "write; starter scope is read-only" }

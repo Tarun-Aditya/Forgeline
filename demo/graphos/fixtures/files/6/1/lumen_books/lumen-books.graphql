@@ -1,0 +1,600 @@
+# Lumen Books API — Apollo Connectors subgraph.
+#
+# This file is the artifact: edit it directly. Selection lives in
+# .factory/selection.yaml, the reasoning in the decision log
+# (.factory/decisions/).
+#
+# Auth: Authorization: Bearer <credential>; the scheme prefix stays outside AUTH_EXPR.
+
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.15", import: ["@key"])
+  @link(url: "https://specs.apollo.dev/connect/v0.4", import: ["@source", "@connect"])
+
+@source(
+  name: "lumen_books"
+  http: {
+    baseURL: "{{BASE_URL}}"
+    headers: [
+      { name: "Authorization", value: "Bearer {{AUTH_EXPR}}" }
+      { name: "Accept", value: "application/json" }
+      { name: "Content-Type", value: "application/json" }
+      { name: "User-Agent", value: "graphos-factory" }
+    ]
+  }
+  errors: {
+    message: "$.message ?? 'Lumen Books request failed'"
+    extensions: """
+    code: $.code
+    httpStatus: $status
+    """
+  }
+)
+
+"Currency of a book's price."
+enum Lumen_Books_Currency {
+  USD
+  EUR
+  GBP
+}
+
+"Lifecycle status of an order."
+enum Lumen_Books_OrderStatus {
+  pending
+  paid
+  shipped
+  cancelled
+}
+
+"Customer loyalty tier."
+enum Lumen_Books_CustomerTier {
+  standard
+  gold
+}
+
+"Which kind of payment an order carries."
+enum Lumen_Books_PaymentType {
+  card
+  bank
+}
+
+"""
+A book in the catalog. An entity keyed by id (D-qbc6qk), resolved in batches
+of up to 50 ids through GET /books?ids=...&limit=50, one page of the maximum
+size (D-wnrxww). The free-form publisher `metadata` object is not exposed
+(D-2hoz50).
+"""
+type Lumen_Books_Book
+  @key(fields: "id")
+  @connect(
+    source: "lumen_books"
+    http: {
+      GET: "/books"
+      queryParams: """
+      ids: $batch.id->joinNotNull(",")
+      limit: $(50)
+      """
+    }
+    batch: { maxSize: 50 }
+    selection: """
+    $.data {
+      id
+      title
+      authorId
+      isbn
+      priceCents
+      currency
+      genres
+      publishedAt
+      stock
+    }
+    """
+  ) {
+  id: ID!
+  title: String
+  authorId: ID
+  isbn: String
+  priceCents: Int
+  currency: Lumen_Books_Currency
+  genres: [String]
+  publishedAt: String
+  stock: Int
+  """
+  The Lumen_Books_Author referenced by `authorId`, fetched by the router through get:/authors/{authorId}, one request per Lumen_Books_Book that selects it; select this instead of calling Query.lumen_books_author per item.
+  """
+  author: Lumen_Books_Author
+    @connect(
+      source: "lumen_books"
+      http: { GET: "/authors/{$this.authorId}" }
+      isSuccess: "$($this.authorId ?! 0)->match([null, true], [@, $status->gte(200)->and($status->lt(300))])"
+      selection: """
+      $($this.authorId ?! 0)->match([null, null], [@, $ {
+        id
+        name
+        bio
+        born
+      }])
+      """
+    )
+}
+
+"A book author. An entity keyed by id (D-qbc6qk), resolved through GET /authors/{id}."
+type Lumen_Books_Author
+  @key(fields: "id")
+  @connect(
+    source: "lumen_books"
+    http: { GET: "/authors/{$this.id}" }
+    selection: """
+    id
+    name
+    bio
+    born
+    """
+  ) {
+  id: ID!
+  name: String
+  bio: String
+  born: Int
+}
+
+"One page of books, with the page-number paging metadata."
+type Lumen_Books_BookPage {
+  data: [Lumen_Books_Book]
+  "The page number this page holds, from 1."
+  page: Int
+  "The page size the API applied."
+  limit: Int
+  "Total number of books across all pages."
+  total: Int
+}
+
+"""
+A customer. Email and phone are personal data and are not exposed
+(D-4yyj7v).
+"""
+type Lumen_Books_Customer {
+  id: ID!
+  name: String
+  tier: Lumen_Books_CustomerTier
+  createdAt: String
+}
+
+"One line of an order."
+type Lumen_Books_OrderItem {
+  bookId: ID
+  quantity: Int
+  unitPriceCents: Int
+  """
+  The Lumen_Books_Book referenced by `bookId`, fetched by the router through get:/books/{bookId}, one request per Lumen_Books_OrderItem that selects it; select this instead of calling Query.lumen_books_book per item.
+  """
+  book: Lumen_Books_Book
+    @connect(
+      source: "lumen_books"
+      http: { GET: "/books/{$this.bookId}" }
+      isSuccess: "$($this.bookId ?! 0)->match([null, true], [@, $status->gte(200)->and($status->lt(300))])"
+      selection: """
+      $($this.bookId ?! 0)->match([null, null], [@, $ {
+        id
+        title
+        authorId
+        isbn
+        priceCents
+        currency
+        genres
+        publishedAt
+        stock
+      }])
+      """
+    )
+}
+
+"""
+How an order is paid. `type` says which fields apply: card carries last4 and
+brand, bank carries iban (D-rvl036).
+"""
+type Lumen_Books_Payment {
+  type: Lumen_Books_PaymentType
+  "Card payments only."
+  last4: String
+  "Card payments only."
+  brand: String
+  "Bank payments only."
+  iban: String
+}
+
+"An order."
+type Lumen_Books_Order {
+  id: ID!
+  customerId: ID
+  status: Lumen_Books_OrderStatus
+  items: [Lumen_Books_OrderItem]
+  totalCents: Int
+  payment: Lumen_Books_Payment
+  createdAt: String
+}
+
+"One page of orders, with the cursor for the next page."
+type Lumen_Books_OrderPage {
+  data: [Lumen_Books_Order]
+  "Pass as `after` to fetch the next page; null on the last page."
+  nextCursor: String
+}
+
+"""
+A third-party integration. Its `apiKey` credential is not exposed
+(D-wf0vvx).
+"""
+type Lumen_Books_Integration {
+  id: ID!
+  name: String
+  webhookUrl: String
+}
+
+"One line of a new order."
+input Lumen_Books_OrderItemInput {
+  bookId: ID!
+  quantity: Int!
+  unitPriceCents: Int
+}
+
+"""
+How a new order is paid. Set `type` to card (with last4 and brand) or bank
+(with iban).
+"""
+input Lumen_Books_PaymentInput {
+  type: Lumen_Books_PaymentType!
+  last4: String
+  brand: String
+  iban: String
+}
+
+type Query {
+  """
+  List books. Page-number pagination. `ids` fetches several books in one call.
+  Retrieves one page of books. Iterate through all pages to get the complete
+  collection: use the total field to know when all records have been fetched,
+  or iterate until a short or empty page.
+  Returns: data, page, limit, total.
+  Each item in `data` has: id, title, authorId, isbn, priceCents, currency,
+  genres, publishedAt, stock, author { id, name, bio, born }.
+  """
+  lumen_books_books(
+    """
+    1-based page number (records skipped = (page - 1) * limit; provider default: 1, min 1). When the page size changes mid-iteration, restart at page 1: continuing at the old page skips records.
+    """
+    page: Int
+    "Page size (provider default: 10, maximum: 50). Values above 50 are rejected."
+    limit: Int
+    "Only books in this genre."
+    genre: String
+    "Comma-separated book ids. If not passed, all books are listed."
+    ids: String
+  ): Lumen_Books_BookPage
+    @connect(
+      source: "lumen_books"
+      http: {
+        GET: "/books"
+        queryParams: """
+        page: $args.page
+        limit: $args.limit
+        genre: $args.genre
+        ids: $args.ids
+        """
+      }
+      selection: """
+      data {
+        id
+        title
+        authorId
+        isbn
+        priceCents
+        currency
+        genres
+        publishedAt
+        stock
+      }
+      page: meta.page
+      limit: meta.limit
+      total: meta.total
+      """
+    )
+
+  """
+  Get one book.
+  Returns: id, title, authorId, isbn, priceCents, currency, genres,
+  publishedAt, stock, author { id, name, bio, born }.
+  """
+  lumen_books_book(bookId: ID!): Lumen_Books_Book
+    @connect(
+      source: "lumen_books"
+      http: { GET: "/books/{$args.bookId}" }
+      selection: """
+      id
+      title
+      authorId
+      isbn
+      priceCents
+      currency
+      genres
+      publishedAt
+      stock
+      """
+    )
+
+  """
+  Search books. A POST that only reads, so it sits under Query (D-jnm0uf).
+  Retrieves one page of books. Use the total field to know when all records
+  have been fetched, or iterate until a short or empty page.
+  Returns: data, page, limit, total.
+  Each item in `data` has: id, title, authorId, isbn, priceCents, currency,
+  genres, publishedAt, stock, author { id, name, bio, born }.
+  """
+  lumen_books_searchBooks(
+    query: String
+    genre: String
+    maxPriceCents: Int
+  ): Lumen_Books_BookPage
+    @connect(
+      source: "lumen_books"
+      http: {
+        POST: "/books/search"
+        body: """
+        {
+          query: $args.query?,
+          genre: $args.genre?,
+          maxPriceCents: $args.maxPriceCents?
+        }
+        """
+      }
+      selection: """
+      data {
+        id
+        title
+        authorId
+        isbn
+        priceCents
+        currency
+        genres
+        publishedAt
+        stock
+      }
+      page: meta.page
+      limit: meta.limit
+      total: meta.total
+      """
+    )
+
+  """
+  Get one author.
+  Returns: id, name, bio, born.
+  """
+  lumen_books_author(authorId: ID!): Lumen_Books_Author
+    @connect(
+      source: "lumen_books"
+      http: { GET: "/authors/{$args.authorId}" }
+      selection: """
+      id
+      name
+      bio
+      born
+      """
+    )
+
+  """
+  Get one customer. Email and phone are not exposed (D-4yyj7v).
+  Returns: id, name, tier, createdAt.
+  """
+  lumen_books_customer(customerId: ID!): Lumen_Books_Customer
+    @connect(
+      source: "lumen_books"
+      http: { GET: "/customers/{$args.customerId}" }
+      selection: """
+      id
+      name
+      tier
+      createdAt
+      """
+    )
+
+  """
+  List orders. Cursor pagination: pass `after` from the previous `nextCursor`.
+  Retrieves one page of orders. Iterate through all pages to get the complete
+  collection: pass nextCursor as `after` until it is null, or iterate until a
+  short or empty page.
+  Returns: data, nextCursor.
+  Each item in `data` has: id, customerId, status, items { bookId, quantity,
+  unitPriceCents, book }, totalCents, payment { type, last4, brand, iban }, createdAt.
+  """
+  lumen_books_orders(
+    "Only this customer's orders."
+    customerId: ID
+    "Only orders in this status (one of pending|paid|shipped|cancelled)."
+    status: Lumen_Books_OrderStatus
+    "Cursor from the previous page."
+    after: String
+    "Page size (provider default: 10, maximum: 50). Values above 50 are rejected."
+    limit: Int
+  ): Lumen_Books_OrderPage
+    @connect(
+      source: "lumen_books"
+      http: {
+        GET: "/orders"
+        queryParams: """
+        customerId: $args.customerId
+        status: $args.status
+        after: $args.after
+        limit: $args.limit
+        """
+      }
+      selection: """
+      data {
+        id
+        customerId
+        status
+        items {
+          bookId
+          quantity
+          unitPriceCents
+        }
+        totalCents
+        payment {
+          type
+          last4?
+          brand?
+          iban?
+        }
+        createdAt
+      }
+      nextCursor
+      """
+    )
+
+  """
+  Get one order.
+  Returns: id, customerId, status, items { bookId, quantity, unitPriceCents,
+  book }, totalCents, payment { type, last4, brand, iban }, createdAt.
+  """
+  lumen_books_order(orderId: ID!): Lumen_Books_Order
+    @connect(
+      source: "lumen_books"
+      http: { GET: "/orders/{$args.orderId}" }
+      selection: """
+      id
+      customerId
+      status
+      items {
+        bookId
+        quantity
+        unitPriceCents
+      }
+      totalCents
+      payment {
+        type
+        last4?
+        brand?
+        iban?
+      }
+      createdAt
+      """
+    )
+
+  """
+  Get one integration. Its apiKey credential is not exposed (D-wf0vvx).
+  Returns: id, name, webhookUrl.
+  """
+  lumen_books_integration(integrationId: ID!): Lumen_Books_Integration
+    @connect(
+      source: "lumen_books"
+      http: { GET: "/integrations/{$args.integrationId}" }
+      selection: """
+      id
+      name
+      webhookUrl
+      """
+    )
+}
+
+type Mutation {
+  """
+  Place an order.
+  Returns: id, customerId, status, items { bookId, quantity, unitPriceCents,
+  book }, totalCents, payment { type, last4, brand, iban }, createdAt.
+  """
+  lumen_books_createOrder(
+    customerId: ID!
+    items: [Lumen_Books_OrderItemInput!]!
+    payment: Lumen_Books_PaymentInput
+  ): Lumen_Books_Order
+    @connect(
+      source: "lumen_books"
+      http: {
+        POST: "/orders"
+        body: """
+        {
+          customerId: $args.customerId,
+          items: $args.items {
+            bookId
+            quantity
+            unitPriceCents?
+          },
+          payment: $args.payment? {
+            type
+            last4
+            brand
+            iban
+          }
+        }
+        """
+      }
+      selection: """
+      id
+      customerId
+      status
+      items {
+        bookId
+        quantity
+        unitPriceCents
+      }
+      totalCents
+      payment {
+        type
+        last4?
+        brand?
+        iban?
+      }
+      createdAt
+      """
+    )
+
+  """
+  Change an order's status.
+  Returns: id, customerId, status, items { bookId, quantity, unitPriceCents,
+  book }, totalCents, payment { type, last4, brand, iban }, createdAt.
+  """
+  lumen_books_updateOrder(
+    orderId: ID!
+    "One of pending|paid|shipped|cancelled."
+    status: Lumen_Books_OrderStatus!
+    note: String
+  ): Lumen_Books_Order
+    @connect(
+      source: "lumen_books"
+      http: {
+        PATCH: "/orders/{$args.orderId}"
+        body: """
+        {
+          status: $args.status,
+          note: $args.note?
+        }
+        """
+      }
+      selection: """
+      id
+      customerId
+      status
+      items {
+        bookId
+        quantity
+        unitPriceCents
+      }
+      totalCents
+      payment {
+        type
+        last4?
+        brand?
+        iban?
+      }
+      createdAt
+      """
+    )
+
+  """
+  Cancel an order. The API answers 204 with no body, so the field returns
+  true when the cancellation succeeded and an error otherwise.
+  """
+  lumen_books_cancelOrder(orderId: ID!): Boolean
+    @connect(
+      source: "lumen_books"
+      http: { DELETE: "/orders/{$args.orderId}" }
+      selection: "$(true)"
+    )
+}

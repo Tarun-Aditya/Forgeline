@@ -1,0 +1,26 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-wf0vvx",
+    "slug": "integration-api-key",
+    "title": "Integration apiKey",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "design",
+    "question": "GET /integrations/{integrationId} returns apiKey, which the spec calls a secret. Exclude it or expose it?",
+    "context": "Recommendation: exclude. A credential in a federated graph is readable by any client allowed to query the type; webhookUrl may also embed a token, so say if it should go too.",
+    "affects": [
+      "Lumen_Books_Integration.apiKey"
+    ],
+    "choices": [
+      {
+        "id": "exclude",
+        "label": "Exclude apiKey from Lumen_Books_Integration"
+      },
+      {
+        "id": "expose",
+        "label": "Expose apiKey"
+      }
+    ]
+  }
+}

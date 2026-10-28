@@ -256,6 +256,26 @@ dialog cannot block the next click. If it happens again, the `SLOW` line names t
 | a bash command is blocked as a "push" though it only contains the words | the factory hook matches the text of the command | make the edit with the Edit tool instead of a shell heredoc |
 | `git reset --hard` / `git push` refused in a Claude session | factory hook (destructive git, release authorization) | run it yourself in a terminal, or set `FACTORY_RELEASE_AUTHORIZED=1` when launching |
 
+## Lessons from the GraphOS recording (each one cost hours; do not repeat them)
+
+The GraphOS demo (`demo/graphos/`, recorder in `demo/graphos/recorder/`) uses the same kit. These apply to every demo:
+
+| Symptom or mistake | Cause | Rule |
+| --- | --- | --- |
+| Bottom captions and the lower part of dialogs missing; a flat grey band under the page | **Headless Chrome 155 records only the top ~89% of the frame** (any headless mode, any Playwright version) | Record **headed with the window off-screen** (`--window-position=-3000,0` plus the three anti-throttle flags in `recorder/kit.mjs`). After every recording run `python3 demo/graphos/recorder/check-video.py <mp4>`; `run-graphos-demo.sh` already does and fails on a cut-off frame |
+| Steps that normally take 1 s take 1000 s; `SLOW finish 858s`; the video is longer than the recorder log says | The **Mac slept** (the keep-awake had been released before the recording ended) | Start `caffeinate -dimsu -t <seconds>` before and keep it until the **final** mp4 is checked. Never release it right after a commit |
+| "Done" said, then the user finds a cut-off video | The video was judged from the recorder log and a contact sheet, not from full-size frames | Look at full-size frames from the **final compressed file in its final folder**, near the start, middle and end, and run `check-video.py`, before saying done |
+| `ERR_MODULE_NOT_FOUND ... playwright-core` after deleting an old app | The recorder borrowed Playwright from the deleted `web/node_modules` | Before deleting a folder, `grep -rn "<folder>/"` the whole repo for imports and scripts. The recorder's Playwright lives in `web-studio/demo/.pw` (install both packages in one command) |
+| A wait loop never ends, or a `pkill` kills your own command | `pgrep -f` / `pkill -f` match their own shell command line | Wait on a **file, a log line or an HTTP status**, never on `pgrep -f`. Put `pkill` in its own command, and start the next command separately |
+| A commit contains files from an earlier `git rm` | Staged deletions ride along with `git add <paths>` + commit | Run `git status` (index and tree) before every commit; if a `git rm` was staged earlier, commit by explicit group or `git reset` first |
+| The command is refused by the factory hook | The hook scans shell text containing the words for a Git commit, and credential-looking text (`sk_live_`, `password`) in staged files | Do not put those words in scripts passed to the shell (use the edit tools), and keep credential-looking sample text out of committed files |
+| The run stops mid-way: "You've hit your session limit" | The Claude subscription's session limit | Long real runs must save after each step (`golden.py` does). Check the reset time, then re-run only the remaining steps |
+| Silent stretches of 20 to 40 s | A wait for a replayed run with nothing said | Never wait on a bare screen: `fill([...], done)` in `record.mjs` speaks filler lines while a run is going. Cap replay time (`DEMO_MAX_SECS=24`) |
+| A recorded real run looks wrong or refused at the end | The script drifted: duplicated `main()`, no handling for a new question or a stale live layer | After editing a recording script, `python3 -c "import ast..."` and check for duplicate function names; make the tail adaptive (`golden.drive_to_export`) |
+| Hours spent on the wrong UI | The target app or layout was assumed | At the start, ask which app and layout the demo is for, and look at the previous demo's frames |
+
+Order for a GraphOS recording: keep awake, `golden.py` (real run), `build_fixtures.py`, `run-graphos-demo.sh` (records, mixes, checks), `gaps.py`, then compress into `demo/graphos/videos/` and check that file too.
+
 ## Rules of thumb
 
 - Do not commit, push or open PRs unless asked (CLAUDE.md). When asked to commit, commit the demo scripts, the

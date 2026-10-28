@@ -1,0 +1,35 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/orders",
+    "headers": {
+      "authorization": {
+        "equalTo": "Bearer test-token"
+      }
+    },
+    "queryParameters": {
+      "customerId": {
+        "equalTo": "customerId-401"
+      },
+      "status": {
+        "equalTo": "paid"
+      },
+      "after": {
+        "equalTo": "after-403"
+      },
+      "limit": {
+        "equalTo": "40"
+      }
+    }
+  },
+  "response": {
+    "status": 401,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "code": "unauthorized",
+      "message": "Missing or invalid token."
+    }
+  }
+}

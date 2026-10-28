@@ -17,6 +17,8 @@ export type Options = { type: "feature" | "bugfix"; ticket: string; mcpOff: stri
 
 type Status = "submitted" | "streaming" | "ready" | "error";
 type Props = {
+  /** GraphOS mode: connector wording, and no Feature/Ticket controls. */
+  graphos?: boolean;
   context?: React.ReactNode;
   messages: UIMessage[];
   status: Status;
@@ -80,7 +82,7 @@ export function Messages({ messages, busy }: { messages: UIMessage[]; busy: bool
   );
 }
 
-export function RunPanel({ context, messages, status, error, servers, options, onOptions, onSubmit, onStop }: Props) {
+export function RunPanel({ graphos, context, messages, status, error, servers, options, onOptions, onSubmit, onStop }: Props) {
   const [text, setText] = useState("");
   const busy = status === "submitted" || status === "streaming";
   const toggle = (name: string) =>
@@ -97,7 +99,7 @@ export function RunPanel({ context, messages, status, error, servers, options, o
         <ConversationContent className="gap-4 p-0">
           <ChatColumn className="flex-1 py-4">
             {messages.length === 0 ? (
-              <EmptyState title="Start a job" description="Describe a task, paste a ticket, or type a Jira key like ABC-123. Anything starting with /factory runs as typed." />
+              <EmptyState title={graphos ? "Start a connector" : "Start a job"} description={graphos ? "Give it a spec or a docs link above. The agents build a Git workspace, ask you to pick the scope and settle the design, then validate and export a subgraph. Anything starting with /graphos runs as typed." : "Describe a task, paste a ticket, or type a Jira key like ABC-123. Anything starting with /factory runs as typed."} />
             ) : (
               <Messages messages={messages} busy={busy} />
             )}
@@ -109,7 +111,7 @@ export function RunPanel({ context, messages, status, error, servers, options, o
       <ChatDock className="px-3">
         {context}
         <Composer onSubmit={(e) => { e.preventDefault(); send(); }}>
-          <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center gap-1.5 pb-2 text-caption">
+          {!graphos && <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center gap-1.5 pb-2 text-caption">
             <Button type="button" size="sm" variant={options.type === "bugfix" ? "primary" : "default"} onClick={() => onOptions({ ...options, type: options.type === "bugfix" ? "feature" : "bugfix" })}>
               {options.type === "bugfix" ? "Bug fix" : "Feature"}
             </Button>
@@ -120,7 +122,7 @@ export function RunPanel({ context, messages, status, error, servers, options, o
                 <span className={options.mcpOff.includes(s.name) ? "line-through opacity-60" : ""}>{s.name}</span>
               </Button>
             ))}
-          </div>
+          </div>}
           <ComposerRing busy={busy}>
             <ComposerBox>
               <ComposerInput
@@ -129,7 +131,7 @@ export function RunPanel({ context, messages, status, error, servers, options, o
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(); }
                 }}
-                placeholder="Describe a task, paste a ticket, or type /factory …"
+                placeholder={graphos ? "Or type a /graphos command …" : "Describe a task, paste a ticket, or type /factory …"}
                 aria-label="Task"
               />
               <ComposerActions>

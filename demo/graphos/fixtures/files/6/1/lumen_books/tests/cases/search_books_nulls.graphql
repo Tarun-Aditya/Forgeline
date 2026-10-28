@@ -1,0 +1,19 @@
+# Explicit nulls are dropped from the body (defaults.null_handling: omit).
+query {
+  lumen_books_searchBooks(query: null, genre: "poetry", maxPriceCents: null) {
+    data {
+      id
+      title
+      authorId
+      isbn
+      priceCents
+      currency
+      genres
+      publishedAt
+      stock
+    }
+    page
+    limit
+    total
+  }
+}

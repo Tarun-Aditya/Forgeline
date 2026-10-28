@@ -1,0 +1,12 @@
+# A second team's subgraph, for the "compose with your other subgraphs" demo. It extends the bookshop's Book entity with a review count,
+# using the type name and key the Connectors subgraph exports. Composition fails if the two disagree on the name or the key's type.
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.15", import: ["@key"])
+
+type Lumen_Books_Book @key(fields: "id") {
+  id: ID!
+  reviewCount: Int
+}
+
+type Query {
+  reviewsHealth: String
+}

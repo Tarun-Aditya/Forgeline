@@ -1,0 +1,21 @@
+# An explicit null note is dropped from the body (D-3avp7m: omit).
+mutation {
+  lumen_books_updateOrder(orderId: "o-903", status: cancelled, note: null) {
+    id
+    customerId
+    status
+    items {
+      bookId
+      quantity
+      unitPriceCents
+    }
+    totalCents
+    payment {
+      type
+      last4
+      brand
+      iban
+    }
+    createdAt
+  }
+}

@@ -1,0 +1,23 @@
+# expect-upstream-status: 422
+query {
+  lumen_books_searchBooks(
+    query: "query-422"
+    genre: "genre-423"
+    maxPriceCents: 424
+  ) {
+    data {
+      id
+      title
+      authorId
+      isbn
+      priceCents
+      currency
+      genres
+      publishedAt
+      stock
+    }
+    page
+    limit
+    total
+  }
+}

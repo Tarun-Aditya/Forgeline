@@ -1,0 +1,5 @@
+compose: Rover 0.41.0, federation 2.15.2, connect v0.4
+compose: pass —      311 lines of supergraph SDL
+graphos-factory-core: compose runs /Users/tarunaditya/.cache/graphos-factory-core/apollographql-graphos-factory/bin/graphos-factory-core (from GRAPHOS_FACTORY_CORE_BIN), version 0.11.0 (expected >= 0.11.0)
+merging supergraph schema files
+

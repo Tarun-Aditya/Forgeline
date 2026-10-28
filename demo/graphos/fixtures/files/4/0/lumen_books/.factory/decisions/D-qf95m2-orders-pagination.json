@@ -1,0 +1,26 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-qf95m2",
+    "slug": "orders-pagination",
+    "title": "Pagination for orders",
+    "status": "open",
+    "date": "2026-10-21",
+    "phase": "design",
+    "question": "GET /orders is cursor paged (after, limit default 10, max 50) and returns nextCursor. What should lumen_books_orders expose?",
+    "context": "Recommendation: wrapper. Without nextCursor a caller cannot reach the second page. The customerId and status filters are exposed either way.",
+    "affects": [
+      "get:/orders"
+    ],
+    "choices": [
+      {
+        "id": "wrapper",
+        "label": "after and limit arguments; return a page type with data and nextCursor"
+      },
+      {
+        "id": "flatten",
+        "label": "limit only; return the list (first page, no cursor)"
+      }
+    ]
+  }
+}

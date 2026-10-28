@@ -33,10 +33,10 @@ const ago = (ts: string | null, now = Date.now()) => {
 
 const COLS = "grid-cols-[minmax(10rem,1.2fr)_minmax(0,3fr)_6rem_5rem_7rem_6rem]";
 
-export function AgentsView({ rows, error, selected, onSelect, job }: { rows: AgentRow[] | null; error: string | null; selected: string | null; onSelect: (name: string) => void; job?: string | null }) {
+export function AgentsView({ rows, error, selected, onSelect, job, kind = "factory" }: { rows: AgentRow[] | null; error: string | null; selected: string | null; onSelect: (name: string) => void; job?: string | null; kind?: "factory" | "graphos" }) {
   const [q, setQ] = useState("");
   const [mode, setMode] = useState<"map" | "table">("map");
-  const shown = useMemo(() => (rows ?? []).filter((r) => `${r.name} ${r.description}`.toLowerCase().includes(q.toLowerCase())), [rows, q]);
+  const shown = useMemo(() => (rows ?? []).filter((r) => (kind === "graphos") === r.name.startsWith("graphos-")).filter((r) => `${r.name} ${r.description}`.toLowerCase().includes(q.toLowerCase())), [rows, q, kind]);
   if (error) return <p className="text-body-sm text-destructive-foreground">{error}</p>;
   if (!rows) return <p className="text-body-sm text-muted-foreground">Loading…</p>;
   return (
@@ -53,7 +53,7 @@ export function AgentsView({ rows, error, selected, onSelect, job }: { rows: Age
         </div>
       </div>
       {mode === "map" ? (
-        <AgentMap rows={shown} selected={selected} onSelect={onSelect} job={job} />
+        <AgentMap rows={shown} selected={selected} onSelect={onSelect} job={job} kind={kind} />
       ) : (
       <div role="table" className="overflow-hidden rounded-xl bg-card shadow-raised">
         <div role="row" className={cn("grid h-table-header items-center gap-3 border-b border-border px-4 text-column text-muted-foreground", COLS)}>

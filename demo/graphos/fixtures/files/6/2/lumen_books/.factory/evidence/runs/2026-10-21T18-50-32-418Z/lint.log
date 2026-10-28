@@ -1,0 +1,69 @@
+{
+  "findings": [
+    {
+      "severity": "warn",
+      "rule": "link-key-drift",
+      "message": "Lumen_Books_Book.author resolves GET /authors/{$this.authorId} through a field-level connector while type Lumen_Books_Author resolves the same operation through @key and a type-level @connect (line 121); keep one form — the relationship field within this subgraph, the entity only when a decision records why",
+      "file": "lumen-books.graphql",
+      "line": 104,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "link-null-untested",
+      "message": "Lumen_Books_Book.author reads {$this.authorId} and authorId is nullable, but no e2e case answers the empty-segment GET /authors/ for a null-authorId parent; the field is not validated — add a mapping for that GET (\"urlPath\": \"/authors/\") serving a case that selects the field on a parent whose authorId is null (connectors-language.md § Relationship fields)",
+      "file": "lumen-books.graphql",
+      "line": 104,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "link-null-untested",
+      "message": "Lumen_Books_OrderItem.book reads {$this.bookId} and bookId is nullable, but no e2e case answers the empty-segment GET /books/ for a null-bookId parent; the field is not validated — add a mapping for that GET (\"urlPath\": \"/books/\") serving a case that selects the field on a parent whose bookId is null (connectors-language.md § Relationship fields)",
+      "file": "lumen-books.graphql",
+      "line": 169,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "read-root-on-write",
+      "message": "post:/books/search is a POST the inventory reads as a write but is selected as a Query — record why in decisions.json",
+      "file": "selection.yaml",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "missing-unit",
+      "message": "post:/orders has no `rover connector test` entry asserting the request shape of lumen_books_createOrder",
+      "file": "tests",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "missing-unit",
+      "message": "delete:/orders/{orderId} has no `rover connector test` entry asserting the request shape of lumen_books_cancelOrder",
+      "file": "tests",
+      "line": null,
+      "origin": "core"
+    }
+  ],
+  "errors": 0,
+  "warnings": 6,
+  "target": {
+    "name": "graphos-factory",
+    "rules": [
+      "foreign-type-without-key",
+      "foreign-type-key-field-missing",
+      "requires-on-foreign-type",
+      "foreign-type-not-object"
+    ],
+    "overrides": [
+      "multiple-sources",
+      "source-name-secondary",
+      "commented-source",
+      "type-prefix"
+    ]
+  }
+}

@@ -4,3 +4,15 @@ __pycache__/
 /factory/jobs/
 /factory/activity/
 .DS_Store
+
+# GraphOS workspaces and exports are runtime state (each workspace is its own Git repo)
+/graphos/
+/graphos-exports/
+/demo/graphos/recorder/out/
+/demo/graphos/golden-steps.json
+# Apollo's GraphOS skills are third-party and installed on demand (factory/skills/graphos-skills.json), like the other helper skills
+/.claude/skills/graphos-factory/
+/.claude/skills/apollo-federation/
+/.claude/skills/graphql-schema/
+/.claude/skills/rover/
+/.claude/skills/GRAPHOS-SKILLS-NOTICE.md

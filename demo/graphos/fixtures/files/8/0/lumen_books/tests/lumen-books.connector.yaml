@@ -1,0 +1,413 @@
+# rover connector test suite — layer 2 of the validation stack.
+# Started by graphos-factory-core scaffold on 2026-10-21 and audited at the first apply.
+# The framework injects $config but not $env; scripts/unit.sh rewrites the
+# schema's {$env.…} to {$config.…} in a temporary copy, backed by the value below.
+config:
+  schema: lumen-books.graphql
+  common:
+    variables:
+      $config:
+        LUMEN_BOOKS_TOKEN: test-token
+tests:
+
+  - name: "lumen_books_books request shape and mapping"
+    target: "Query.lumen_books_books"
+    variables:
+      $args:
+        page: 1
+        limit: 2
+        genre: genre-3
+        ids: ids-4
+    apiResponseBody: |
+      {
+        "data": [
+          {
+            "id": "id-1",
+            "title": "title-1",
+            "authorId": "authorId-1",
+            "isbn": "isbn-1",
+            "priceCents": 1,
+            "currency": "USD",
+            "genres": [
+              "genres-1"
+            ],
+            "publishedAt": "2026-01-01",
+            "stock": 1,
+            "metadata": {}
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "limit": 1,
+          "total": 1
+        }
+      }
+    expect:
+      connectorRequest:
+        method: GET
+        url: http://127.0.0.1:4010/books?page=1&limit=2&genre=genre-3&ids=ids-4
+        headers:
+          authorization: Bearer test-token
+      connectorResponse: |
+        {
+          "data": [
+            {
+              "id": "id-1",
+              "title": "title-1",
+              "authorId": "authorId-1",
+              "isbn": "isbn-1",
+              "priceCents": 1,
+              "currency": "USD",
+              "genres": [
+                "genres-1"
+              ],
+              "publishedAt": "2026-01-01",
+              "stock": 1
+            }
+          ],
+          "page": 1,
+          "limit": 1,
+          "total": 1
+        }
+
+  - name: "lumen_books_book request shape and mapping"
+    target: "Query.lumen_books_book"
+    variables:
+      $args:
+        bookId: bookId-1
+    apiResponseBody: |
+      {
+        "id": "id-1",
+        "title": "title-1",
+        "authorId": "authorId-1",
+        "isbn": "isbn-1",
+        "priceCents": 1,
+        "currency": "USD",
+        "genres": [
+          "genres-1"
+        ],
+        "publishedAt": "2026-01-01",
+        "stock": 1,
+        "metadata": {}
+      }
+    expect:
+      connectorRequest:
+        method: GET
+        url: http://127.0.0.1:4010/books/bookId-1
+        headers:
+          authorization: Bearer test-token
+      connectorResponse: |
+        {
+          "id": "id-1",
+          "title": "title-1",
+          "authorId": "authorId-1",
+          "isbn": "isbn-1",
+          "priceCents": 1,
+          "currency": "USD",
+          "genres": [
+            "genres-1"
+          ],
+          "publishedAt": "2026-01-01",
+          "stock": 1
+        }
+
+  - name: "lumen_books_author request shape and mapping"
+    target: "Query.lumen_books_author"
+    variables:
+      $args:
+        authorId: authorId-1
+    apiResponseBody: |
+      {
+        "id": "id-1",
+        "name": "name-1",
+        "bio": "bio-1",
+        "born": 1
+      }
+    expect:
+      connectorRequest:
+        method: GET
+        url: http://127.0.0.1:4010/authors/authorId-1
+        headers:
+          authorization: Bearer test-token
+      connectorResponse: |
+        {
+          "id": "id-1",
+          "name": "name-1",
+          "bio": "bio-1",
+          "born": 1
+        }
+
+  - name: "lumen_books_customer request shape and mapping"
+    target: "Query.lumen_books_customer"
+    variables:
+      $args:
+        customerId: customerId-1
+    apiResponseBody: |
+      {
+        "id": "id-1",
+        "name": "name-1",
+        "email": "user@example.com",
+        "phone": "phone-1",
+        "tier": "standard",
+        "createdAt": "2026-01-01T00:00:00Z"
+      }
+    expect:
+      connectorRequest:
+        method: GET
+        url: http://127.0.0.1:4010/customers/customerId-1
+        headers:
+          authorization: Bearer test-token
+      connectorResponse: |
+        {
+          "id": "id-1",
+          "name": "name-1",
+          "tier": "standard",
+          "createdAt": "2026-01-01T00:00:00Z"
+        }
+
+  - name: "lumen_books_orders request shape"
+    target: "Query.lumen_books_orders"
+    variables:
+      $args:
+        customerId: customerId-1
+        status: paid
+        after: after-3
+        limit: 4
+    apiResponseBody: |
+      {
+        "data": [
+          {
+            "id": "id-1",
+            "customerId": "customerId-1",
+            "status": "pending",
+            "items": [
+              {
+                "bookId": "bookId-1",
+                "quantity": 1,
+                "unitPriceCents": 1
+              }
+            ],
+            "totalCents": 1,
+            "payment": {
+              "type": "card",
+              "last4": "last4-1",
+              "brand": "brand-1"
+            },
+            "createdAt": "2026-01-01T00:00:00Z"
+          }
+        ],
+        "nextCursor": "nextCursor-1"
+      }
+    expect:
+      connectorRequest:
+        method: GET
+        url: http://127.0.0.1:4010/orders?customerId=customerId-1&status=paid&after=after-3&limit=4
+        headers:
+          authorization: Bearer test-token
+      connectorResponse: |
+        {
+          "data": [
+            {
+              "id": "id-1",
+              "customerId": "customerId-1",
+              "status": "pending",
+              "items": [
+                {
+                  "bookId": "bookId-1",
+                  "quantity": 1,
+                  "unitPriceCents": 1
+                }
+              ],
+              "totalCents": 1,
+              "payment": {
+                "type": "card",
+                "last4": "last4-1",
+                "brand": "brand-1"
+              },
+              "createdAt": "2026-01-01T00:00:00Z"
+            }
+          ],
+          "nextCursor": "nextCursor-1"
+        }
+
+  - name: "lumen_books_order request shape"
+    target: "Query.lumen_books_order"
+    variables:
+      $args:
+        orderId: orderId-1
+    apiResponseBody: |
+      {
+        "id": "id-1",
+        "customerId": "customerId-1",
+        "status": "pending",
+        "items": [
+          {
+            "bookId": "bookId-1",
+            "quantity": 1,
+            "unitPriceCents": 1
+          }
+        ],
+        "totalCents": 1,
+        "payment": {
+          "type": "card",
+          "last4": "last4-1",
+          "brand": "brand-1"
+        },
+        "createdAt": "2026-01-01T00:00:00Z"
+      }
+    expect:
+      connectorRequest:
+        method: GET
+        url: http://127.0.0.1:4010/orders/orderId-1
+        headers:
+          authorization: Bearer test-token
+      connectorResponse: |
+        {
+          "id": "id-1",
+          "customerId": "customerId-1",
+          "status": "pending",
+          "items": [
+            {
+              "bookId": "bookId-1",
+              "quantity": 1,
+              "unitPriceCents": 1
+            }
+          ],
+          "totalCents": 1,
+          "payment": {
+            "type": "card",
+            "last4": "last4-1",
+            "brand": "brand-1"
+          },
+          "createdAt": "2026-01-01T00:00:00Z"
+        }
+
+  - name: "lumen_books_integration request shape and mapping"
+    target: "Query.lumen_books_integration"
+    variables:
+      $args:
+        integrationId: integrationId-1
+    apiResponseBody: |
+      {
+        "id": "id-1",
+        "name": "name-1",
+        "webhookUrl": "webhookUrl-1",
+        "apiKey": "apiKey-1"
+      }
+    expect:
+      connectorRequest:
+        method: GET
+        url: http://127.0.0.1:4010/integrations/integrationId-1
+        headers:
+          authorization: Bearer test-token
+      connectorResponse: |
+        {
+          "id": "id-1",
+          "name": "name-1",
+          "webhookUrl": "webhookUrl-1"
+        }
+
+  - name: "lumen_books_searchBooks request body and mapping"
+    target: "Query.lumen_books_searchBooks"
+    variables:
+      $args:
+        query: dune
+        genre: scifi
+    apiResponseBody: |
+      {"data": [{"id": "b-401", "title": "Dune Sea", "authorId": "a-4", "isbn": "978-0-00-000401", "priceCents": 1499, "currency": "EUR", "genres": ["scifi"], "publishedAt": "1999-04-01", "stock": 3}], "meta": {"page": 1, "limit": 10, "total": 1}}
+    expect:
+      connectorRequest:
+        method: POST
+        url: http://127.0.0.1:4010/books/search
+        headers:
+          authorization: Bearer test-token
+        body: |
+          {"query": "dune", "genre": "scifi"}
+      connectorResponse: |
+        {"data": [{"id": "b-401", "title": "Dune Sea", "authorId": "a-4", "isbn": "978-0-00-000401", "priceCents": 1499, "currency": "EUR", "genres": ["scifi"], "publishedAt": "1999-04-01", "stock": 3}], "page": 1, "limit": 10, "total": 1}
+
+  - name: "lumen_books_updateOrder request body and mapping"
+    target: "Mutation.lumen_books_updateOrder"
+    variables:
+      $args:
+        orderId: o-901
+        status: shipped
+        note: leave at the door
+    apiResponseBody: |
+      {"id": "o-901", "customerId": "c-901", "status": "shipped", "items": [{"bookId": "b-9011", "quantity": 2, "unitPriceCents": 1299}], "totalCents": 2598, "payment": {"type": "bank", "iban": "DE89370400440532013000"}, "createdAt": "2026-03-04T10:20:30Z"}
+    expect:
+      connectorRequest:
+        method: PATCH
+        url: http://127.0.0.1:4010/orders/o-901
+        headers:
+          authorization: Bearer test-token
+        body: |
+          {"status": "shipped", "note": "leave at the door"}
+      connectorResponse: |
+        {"id": "o-901", "customerId": "c-901", "status": "shipped", "items": [{"bookId": "b-9011", "quantity": 2, "unitPriceCents": 1299}], "totalCents": 2598, "payment": {"type": "bank", "iban": "DE89370400440532013000"}, "createdAt": "2026-03-04T10:20:30Z"}
+
+  - name: "lumen_books_cancelOrder request shape"
+    target: "Mutation.lumen_books_cancelOrder"
+    variables:
+      $args:
+        orderId: o-1001
+    expect:
+      connectorRequest:
+        method: DELETE
+        url: http://127.0.0.1:4010/orders/o-1001
+        headers:
+          authorization: Bearer test-token
+      connectorResponse: "true"
+
+  - name: "Lumen_Books_Book.author relationship field"
+    target: "Lumen_Books_Book.author"
+    variables:
+      $this:
+        authorId: a-1201
+    apiResponseBody: |
+      {"id": "a-1201", "name": "Tove Berg", "bio": "Poet.", "born": 1980}
+    expect:
+      connectorRequest:
+        method: GET
+        url: http://127.0.0.1:4010/authors/a-1201
+        headers:
+          authorization: Bearer test-token
+      connectorResponse: |
+        {"id": "a-1201", "name": "Tove Berg", "bio": "Poet.", "born": 1980}
+
+  - name: "Lumen_Books_OrderItem.book relationship field"
+    target: "Lumen_Books_OrderItem.book"
+    variables:
+      $this:
+        bookId: b-1301
+    apiResponseBody: |
+      {"id": "b-1301", "title": "River Atlas", "authorId": "a-1301", "isbn": "978-0-00-001301", "priceCents": 1499, "currency": "EUR", "genres": ["fiction"], "publishedAt": "1999-04-01", "stock": 12, "metadata": {"imprint": "Lumen"}}
+    expect:
+      connectorRequest:
+        method: GET
+        url: http://127.0.0.1:4010/books/b-1301
+        headers:
+          authorization: Bearer test-token
+      connectorResponse: |
+        {"id": "b-1301", "title": "River Atlas", "authorId": "a-1301", "isbn": "978-0-00-001301", "priceCents": 1499, "currency": "EUR", "genres": ["fiction"], "publishedAt": "1999-04-01", "stock": 12}
+
+  # D-wnrxww / D-x1ekw6: no root field here selects a Book by its key alone, so
+  # the router never calls this lookup from this subgraph's own queries and no
+  # e2e case can reach it; this entry proves the request and the mapping only.
+  # One key: rover's URI assertion cannot compare a joined list (it encodes the
+  # expected comma and not the sent one), so the comma join is not asserted here.
+  - name: "Lumen_Books_Book $batch lookup"
+    target: "Lumen_Books_Book"
+    variables:
+      $batch:
+        - id: b-1501
+    apiResponseBody: |
+      {"data": [{"id": "b-1501", "title": "One", "authorId": "a-1", "isbn": "978-0-00-001501", "priceCents": 1000, "currency": "EUR", "genres": ["essay"], "publishedAt": "2000-01-01", "stock": 1, "metadata": {}}], "meta": {"page": 1, "limit": 50, "total": 1}}
+    expect:
+      connectorRequest:
+        method: GET
+        url: http://127.0.0.1:4010/books?ids=b-1501&limit=50
+        headers:
+          authorization: Bearer test-token
+      connectorResponse: |
+        [{"id": "b-1501", "title": "One", "authorId": "a-1", "isbn": "978-0-00-001501", "priceCents": 1000, "currency": "EUR", "genres": ["essay"], "publishedAt": "2000-01-01", "stock": 1}]

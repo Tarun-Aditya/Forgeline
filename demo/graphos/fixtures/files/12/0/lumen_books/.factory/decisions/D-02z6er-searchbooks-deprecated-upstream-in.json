@@ -1,0 +1,33 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-02z6er",
+    "slug": "searchbooks-deprecated-upstream-in",
+    "title": "searchBooks deprecated upstream in favour of GET /books?q=",
+    "status": "open",
+    "date": "2026-10-21",
+    "amends": [
+      "D-jnm0uf"
+    ],
+    "phase": "select",
+    "question": "API 2.0.0 deprecates POST /books/search (Query.lumen_books_searchBooks, D-jnm0uf): 'use GET /books?q= instead', and GET /books gains an optional q parameter (free-text search over title and genre). What should the subgraph do?",
+    "affects": [
+      "post:/books/search",
+      "get:/books"
+    ],
+    "choices": [
+      {
+        "id": "deprecate",
+        "label": "Add q to lumen_books_books and mark lumen_books_searchBooks @deprecated pointing at it"
+      },
+      {
+        "id": "replace",
+        "label": "Add q to lumen_books_books and remove lumen_books_searchBooks now"
+      },
+      {
+        "id": "keep",
+        "label": "Keep lumen_books_searchBooks unchanged and do not add q yet"
+      }
+    ]
+  }
+}

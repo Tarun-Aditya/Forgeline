@@ -1,0 +1,325 @@
+{
+  "findings": [
+    {
+      "severity": "warn",
+      "rule": "link-key-drift",
+      "message": "Lumen_Books_Book.author resolves GET /authors/{$this.authorId} through a field-level connector while type Lumen_Books_Author resolves the same operation through @key and a type-level @connect (line 125); keep one form — the relationship field within this subgraph, the entity only when a decision records why",
+      "file": "lumen-books.graphql",
+      "line": 108,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "link-null-untested",
+      "message": "Lumen_Books_Book.author reads {$this.authorId} and authorId is nullable, but no e2e case answers the empty-segment GET /authors/ for a null-authorId parent; the field is not validated — add a mapping for that GET (\"urlPath\": \"/authors/\") serving a case that selects the field on a parent whose authorId is null (connectors-language.md § Relationship fields)",
+      "file": "lumen-books.graphql",
+      "line": 108,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "link-null-untested",
+      "message": "Lumen_Books_OrderItem.book reads {$this.bookId} and bookId is nullable, but no e2e case answers the empty-segment GET /books/ for a null-bookId parent; the field is not validated — add a mapping for that GET (\"urlPath\": \"/books/\") serving a case that selects the field on a parent whose bookId is null (connectors-language.md § Relationship fields)",
+      "file": "lumen-books.graphql",
+      "line": 174,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "read-root-on-write",
+      "message": "post:/books/search is a POST the inventory reads as a write but is selected as a Query — record why in decisions.json",
+      "file": "selection.yaml",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "missing-unit",
+      "message": "post:/orders has no `rover connector test` entry asserting the request shape of lumen_books_createOrder",
+      "file": "tests",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-02z6er and D-aaaada both decide post:/books/search and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-aaaada --after D-02z6er` (it presumes the other) or `--amends D-02z6er` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-02z6er and D-oqs0jf both decide post:/books/search and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-oqs0jf --after D-02z6er` (it presumes the other) or `--amends D-02z6er` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-02z6er and D-wnrxww both decide get:/books and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-wnrxww --after D-02z6er` (it presumes the other) or `--amends D-02z6er` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-02z6er and D-x1ekw6 both decide get:/books and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-x1ekw6 --after D-02z6er` (it presumes the other) or `--amends D-02z6er` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-3avp7m and D-ilif9j both decide post:/orders and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-ilif9j --after D-3avp7m` (it presumes the other) or `--amends D-3avp7m` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-3avp7m and D-x4ukx1 both decide patch:/orders/{orderId} and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-x4ukx1 --after D-3avp7m` (it presumes the other) or `--amends D-3avp7m` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-88ripv and D-8b2878 both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-8b2878 --after D-88ripv` (it presumes the other) or `--amends D-88ripv` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-88ripv and D-doncxi both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-doncxi --after D-88ripv` (it presumes the other) or `--amends D-88ripv` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-88ripv and D-q0zlfg both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-q0zlfg --after D-88ripv` (it presumes the other) or `--amends D-88ripv` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-88ripv and D-qbc6qk both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-qbc6qk --after D-88ripv` (it presumes the other) or `--amends D-88ripv` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-88ripv and D-wnrxww both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-wnrxww --after D-88ripv` (it presumes the other) or `--amends D-88ripv` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-88ripv and D-yqmrto both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-yqmrto --after D-88ripv` (it presumes the other) or `--amends D-88ripv` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-88ripv and D-zkxfd4 both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-zkxfd4 --after D-88ripv` (it presumes the other) or `--amends D-88ripv` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-8b2878 and D-doncxi both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-doncxi --after D-8b2878` (it presumes the other) or `--amends D-8b2878` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-8b2878 and D-q0zlfg both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-q0zlfg --after D-8b2878` (it presumes the other) or `--amends D-8b2878` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-8b2878 and D-qbc6qk both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-qbc6qk --after D-8b2878` (it presumes the other) or `--amends D-8b2878` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-8b2878 and D-wnrxww both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-wnrxww --after D-8b2878` (it presumes the other) or `--amends D-8b2878` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-8b2878 and D-yqmrto both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-yqmrto --after D-8b2878` (it presumes the other) or `--amends D-8b2878` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-8b2878 and D-zkxfd4 both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-zkxfd4 --after D-8b2878` (it presumes the other) or `--amends D-8b2878` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-aaaada and D-jnm0uf both decide post:/books/search and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-jnm0uf --after D-aaaada` (it presumes the other) or `--amends D-aaaada` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-aaaada and D-oqs0jf both decide get:/books and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-oqs0jf --after D-aaaada` (it presumes the other) or `--amends D-aaaada` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-aaaada and D-wnrxww both decide get:/books and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-wnrxww --after D-aaaada` (it presumes the other) or `--amends D-aaaada` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-aaaada and D-x1ekw6 both decide get:/books and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-x1ekw6 --after D-aaaada` (it presumes the other) or `--amends D-aaaada` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-doncxi and D-q0zlfg both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-q0zlfg --after D-doncxi` (it presumes the other) or `--amends D-doncxi` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-doncxi and D-zkxfd4 both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-zkxfd4 --after D-doncxi` (it presumes the other) or `--amends D-doncxi` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-ilif9j and D-qf95m2 both decide get:/orders and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-qf95m2 --after D-ilif9j` (it presumes the other) or `--amends D-ilif9j` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-ilif9j and D-xghnp0 both decide post:/orders and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-xghnp0 --after D-ilif9j` (it presumes the other) or `--amends D-ilif9j` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-q0zlfg and D-qbc6qk both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-qbc6qk --after D-q0zlfg` (it presumes the other) or `--amends D-q0zlfg` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-q0zlfg and D-wnrxww both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-wnrxww --after D-q0zlfg` (it presumes the other) or `--amends D-q0zlfg` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-q0zlfg and D-yqmrto both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-yqmrto --after D-q0zlfg` (it presumes the other) or `--amends D-q0zlfg` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-qbc6qk and D-zkxfd4 both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-zkxfd4 --after D-qbc6qk` (it presumes the other) or `--amends D-qbc6qk` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-wnrxww and D-zkxfd4 both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-zkxfd4 --after D-wnrxww` (it presumes the other) or `--amends D-wnrxww` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    },
+    {
+      "severity": "warn",
+      "rule": "decision-overlap",
+      "message": "D-yqmrto and D-zkxfd4 both decide lumen-books.graphql and neither names the other: added independently, they may disagree. Record how they relate on the newer one: `graphos-factory-core decisions link . --id D-zkxfd4 --after D-yqmrto` (it presumes the other) or `--amends D-yqmrto` (it changes the other's answer there)",
+      "file": ".factory/decisions",
+      "line": null,
+      "origin": "core"
+    }
+  ],
+  "errors": 0,
+  "warnings": 38,
+  "target": {
+    "name": "graphos-factory",
+    "rules": [
+      "foreign-type-without-key",
+      "foreign-type-key-field-missing",
+      "requires-on-foreign-type",
+      "foreign-type-not-object"
+    ],
+    "overrides": [
+      "multiple-sources",
+      "source-name-secondary",
+      "commented-source",
+      "type-prefix"
+    ]
+  }
+}

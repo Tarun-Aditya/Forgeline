@@ -1,0 +1,28 @@
+{
+  "contract_version": 2,
+  "decision": {
+    "id": "D-88ripv",
+    "slug": "integration-webhookurl",
+    "title": "Integration webhookUrl",
+    "status": "open",
+    "date": "2026-10-21",
+    "after": [
+      "D-wf0vvx"
+    ],
+    "phase": "select",
+    "question": "D-wf0vvx excluded Integration.apiKey and asked whether webhookUrl should go too, since a webhook URL may embed a token. Keep webhookUrl on Lumen_Books_Integration or leave it off?",
+    "affects": [
+      "lumen-books.graphql"
+    ],
+    "choices": [
+      {
+        "id": "keep",
+        "label": "Keep webhookUrl (current schema)"
+      },
+      {
+        "id": "omit",
+        "label": "Leave webhookUrl off get:/integrations/{integrationId}"
+      }
+    ]
+  }
+}
